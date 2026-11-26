@@ -538,6 +538,64 @@ body { position: fixed; inset: 0; width: 100%; }
 .relic-chip { font-size: 9px; font-weight: 900; background: #ffd77a; color: #1b0b3a; padding: 0 4px; vertical-align: 2px; }
 .small-link { padding: 4px 0; text-align: left; } .sound-hint { font-size: 10px; color: var(--muted); }
 
+/* ---------- Safehouse main menu: your room ---------- */
+.home {
+  position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column;
+  /* Full bleed: cancel #app's padding so the room fills the screen. */
+  margin: calc(-1 * max(10px, env(safe-area-inset-top))) -10px calc(-1 * max(10px, env(safe-area-inset-bottom)));
+  padding: max(14px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+.home-scene { position: absolute; left: 0; right: 0; top: 0; height: min(62%, 560px); }
+.home-scene svg { width: 100%; height: 100%; display: block; }
+.home-scene::before, .home-scene::after { content: ''; position: absolute; left: 0; right: 0; pointer-events: none; }
+.home-scene::before { top: 0; height: 110px; background: linear-gradient(#120626, rgba(18, 6, 38, 0)); z-index: 1; }
+.home-scene::after { bottom: -1px; height: 150px; background: linear-gradient(rgba(27, 11, 58, 0), #1b0b3a 80%); }
+.home-top { position: relative; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.home-title { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 0.12em; color: var(--yellow); text-shadow: 3px 3px 0 #ff2bd6; }
+.home-where { font-size: 11px; color: #e9dcff; }
+.home-top .sh-purse { font-size: 13px; }
+.home-menu { position: relative; z-index: 2; margin-top: auto; display: flex; flex-direction: column; gap: 14px; }
+.home-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.home-btn {
+  display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 12px 14px; text-align: left;
+  background: #fff4fd; color: #1b0b3a; border: 3px solid #1b0b3a; box-shadow: 5px 5px 0 #ff2bd6;
+}
+.home-btn.hot { background: var(--yellow); min-height: 76px; }
+.home-btn:active { transform: translate(2px, 2px); box-shadow: 3px 3px 0 #ff2bd6; }
+.home-icon { display: flex; flex: none; }
+.home-icon svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.home-label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.home-label b { font-size: 17px; font-weight: 900; letter-spacing: 0.08em; }
+.home-label small { font-size: 11px; font-weight: 700; line-height: 1.3; color: #7a1650; }
+.home-menu .sh-stats { margin: 0; }
+.home-menu .link { align-self: center; margin-top: -6px; }
+@media (max-height: 700px) {
+  .home-btn { min-height: 60px; padding: 8px 12px; }
+  .home-btn.hot { min-height: 64px; }
+  .home-menu, .home-grid { gap: 10px; }
+}
+
+/* Wide portrait cards used by the Jobs and Market menus. */
+.people { display: flex; flex-direction: column; gap: 16px; }
+.person {
+  display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; padding: 10px; text-align: left;
+  background: #fff4fd; color: #1b0b3a; border: 3px solid #1b0b3a; box-shadow: 5px 5px 0 #ff2bd6;
+}
+button.person:active { transform: translate(2px, 2px); box-shadow: 3px 3px 0 #ff2bd6; }
+.person.hot { background: var(--yellow); }
+.person.locked { background: #3b1d7a; color: #b9a6e6; box-shadow: 5px 5px 0 #120626; }
+.person-portrait { width: 96px; aspect-ratio: 5 / 6; border: 3px solid #1b0b3a; background: #2a1458; overflow: hidden; }
+.person-portrait svg { width: 100%; height: 100%; display: block; }
+.person-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.person-kicker { font-size: 10px; font-weight: 800; letter-spacing: 0.16em; color: #7a1650; }
+.person-name { font-size: 18px; font-weight: 900; line-height: 1.1; }
+.person-text { font-size: 11px; line-height: 1.4; }
+.person-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.person-rate { font-size: 13px; font-weight: 900; }
+.person-foot { margin-top: auto; font-size: 12px; font-weight: 800; color: #7a1650; }
+.person.locked .person-kicker, .person.locked .person-foot { color: #b9a6e6; }
+
 </style>
 </head>
 <body>
@@ -3748,6 +3806,170 @@ function portrait(id) {
 
 __m["ui/portraits"] = { PORTRAITS, portrait };
 })();
+// ---- ui/scenes ----
+(() => {
+// Safehouse background: the player's rented room, drawn in code in the same
+// rough comic style as the portraits. 390 x 520, scales to any width.
+const INK = '#1b0b3a';
+/** Deterministic pseudo-random numbers so the scene draws the same every time. */
+function rand(seed) {
+    let s = seed;
+    return () => {
+        s = (s * 16807) % 2147483647;
+        return (s - 1) / 2147483646;
+    };
+}
+function city() {
+    const r = rand(7);
+    let far = '', near = '', lights = '';
+    // Far skyline
+    for (let x = 20; x < 290; x += 14 + r() * 14) {
+        const h = 80 + r() * 110;
+        far += `<rect x="${x.toFixed(1)}" y="${(290 - h).toFixed(1)}" width="${(16 + r() * 14).toFixed(1)}" height="${h.toFixed(1)}" fill="#2a0f52"/>`;
+    }
+    // Near towers with lit windows
+    for (let x = 16; x < 290; x += 26 + r() * 22) {
+        const w = 22 + r() * 18, h = 60 + r() * 120, y = 290 - h;
+        near += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#160733"/>`;
+        for (let wy = y + 6; wy < 286; wy += 7) {
+            for (let wx = x + 3; wx < x + w - 3; wx += 5) {
+                if (r() < 0.22)
+                    lights += `<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="2.2" height="3" fill="${r() < 0.6 ? '#ffe83b' : r() < 0.5 ? '#29e0ff' : '#ff2bd6'}" opacity="${(0.5 + r() * 0.5).toFixed(2)}"/>`;
+            }
+        }
+    }
+    return far + near + lights;
+}
+function rain() {
+    const r = rand(21);
+    let out = '';
+    for (let i = 0; i < 70; i++) {
+        const x = 20 + r() * 270, y = 40 + r() * 250, len = 8 + r() * 10;
+        out += `<path d="M${x.toFixed(1)} ${y.toFixed(1)} l-3 ${len.toFixed(1)}" stroke="#cfe9ff" stroke-width="0.9" opacity="${(0.15 + r() * 0.3).toFixed(2)}"/>`;
+    }
+    return out;
+}
+function apartmentScene() {
+    return `<svg viewBox="0 0 390 520" role="img" aria-label="Your rented room: a netrunner at a desk by a rain-streaked window, neon city outside" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="apt-dots" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx="3.5" cy="3.5" r="1.4" fill="#33175f"/></pattern>
+    <pattern id="apt-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><path d="M0 0 V5" stroke="${INK}" stroke-width="1.1" opacity="0.5"/></pattern>
+    <linearGradient id="apt-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12052b"/><stop offset="0.65" stop-color="#3a0f55"/><stop offset="1" stop-color="#7a1a6a"/></linearGradient>
+    <radialGradient id="apt-monitor" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#29e0ff" stop-opacity="0.45"/><stop offset="1" stop-color="#29e0ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="apt-vig" cx="45%" cy="45%" r="75%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#07020f" stop-opacity="0.8"/></radialGradient>
+    <clipPath id="apt-window"><rect x="25" y="43" width="256" height="244"/></clipPath>
+    <filter id="apt-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="apt-rough" x="-3%" y="-3%" width="106%" height="106%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.2"/></filter>
+    <filter id="apt-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="9" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0.06  0 0 0 0 0.02  0 0 0 0 0.14  0 0 0 1.5 -0.6"/></filter>
+  </defs>
+
+  <!-- Wall -->
+  <rect width="390" height="520" fill="#241048"/>
+  <rect width="390" height="520" fill="url(#apt-dots)"/>
+  <ellipse cx="225" cy="330" rx="150" ry="110" fill="url(#apt-monitor)"/>
+
+  <g filter="url(#apt-rough)">
+    <!-- Window: the city at night, in the rain -->
+    <g clip-path="url(#apt-window)">
+      <rect x="25" y="43" width="256" height="244" fill="url(#apt-sky)"/>
+      ${city()}
+      <g filter="url(#apt-glow)">
+        <rect x="196" y="74" width="24" height="112" fill="#120626" stroke="#ff2bd6" stroke-width="2.5"/>
+        <text x="208" y="96" text-anchor="middle" font-size="15" font-weight="900" fill="#ffe83b" font-family="sans-serif">ラ</text>
+        <text x="208" y="120" text-anchor="middle" font-size="15" font-weight="900" fill="#ffe83b" font-family="sans-serif">ー</text>
+        <text x="208" y="146" text-anchor="middle" font-size="15" font-weight="900" fill="#ffe83b" font-family="sans-serif">メ</text>
+        <text x="208" y="172" text-anchor="middle" font-size="15" font-weight="900" fill="#ffe83b" font-family="sans-serif">ン</text>
+        <rect x="48" y="190" width="64" height="22" fill="#0a0418" stroke="#29e0ff" stroke-width="2"/>
+        <text x="80" y="206" text-anchor="middle" font-size="13" font-weight="900" fill="#29e0ff" font-family="monospace">24H</text>
+        <path d="M240 112 l26 -6" stroke="#ff3b5c" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M70 92 l18 -3" stroke="#ffe83b" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      ${rain()}
+      <path d="M25 46 H281 M25 54 H281 M25 62 H281" stroke="#3b1d7a" stroke-width="5"/>
+    </g>
+    <rect x="22" y="40" width="262" height="250" fill="none" stroke="${INK}" stroke-width="7"/>
+    <path d="M153 40 V290 M22 165 H284" stroke="${INK}" stroke-width="5"/>
+    <rect x="14" y="288" width="280" height="12" fill="#3b1d7a" stroke="${INK}" stroke-width="3"/>
+
+    <!-- On the sill: a plant and a sleeping cat -->
+    <path d="M36 288 L40 268 L60 268 L64 288 Z" fill="#ff2bd6" stroke="${INK}" stroke-width="2.5"/>
+    <path d="M50 268 C42 250 34 246 30 236 M50 268 C52 248 58 240 66 232 M50 268 C48 254 50 246 48 238" fill="none" stroke="#1fa89a" stroke-width="4" stroke-linecap="round"/>
+    <g stroke="#ff2bd6" stroke-width="1.6" stroke-linejoin="round">
+      <path d="M226 287 C226 273 240 267 256 269 C268 270 274 277 272 287 Z" fill="#0d0520"/>
+      <path d="M260 268 L262 257 L268 265 L272 265 L277 257 L278 270 C280 280 274 286 268 286 C262 286 258 280 260 268 Z" fill="#0d0520"/>
+      <path d="M226 285 C213 285 211 274 220 272" fill="none" stroke-width="4" stroke-linecap="round" stroke="#0d0520"/>
+      <path d="M226 285 C213 285 211 274 220 272" fill="none" stroke-width="1.4"/>
+    </g>
+    <path d="M264 276 l3.5 0 M271 276 l3.5 0" stroke="#ffe83b" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Door: the way out to the street, the market and the clinic -->
+    <rect x="300" y="74" width="92" height="402" fill="#160733" stroke="${INK}" stroke-width="5"/>
+    <rect x="312" y="96" width="70" height="168" fill="none" stroke="#2a1458" stroke-width="3"/>
+    <rect x="312" y="282" width="70" height="168" fill="none" stroke="#2a1458" stroke-width="3"/>
+    <rect x="318" y="120" width="44" height="58" fill="#ffe83b" stroke="${INK}" stroke-width="2.5" transform="rotate(-4 340 149)"/>
+    <path d="M326 168 L340 128 L354 168 Z" fill="#ff2bd6" transform="rotate(-4 340 149)"/>
+    <circle cx="316" cy="282" r="4" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/>
+    <path d="M302 472 H390" stroke="#ffe83b" stroke-width="3" opacity="0.8" filter="url(#apt-glow)"/>
+    <rect x="318" y="52" width="56" height="16" fill="#120626" stroke="#ff2bd6" stroke-width="2" filter="url(#apt-glow)"/>
+    <text x="346" y="64" text-anchor="middle" font-size="11" font-weight="900" fill="#ff2bd6" font-family="monospace">OUT</text>
+
+    <!-- Floor and a wash of neon from the window -->
+    <rect x="0" y="472" width="390" height="48" fill="#13062b"/>
+    <path d="M0 472 H390" stroke="${INK}" stroke-width="3"/>
+    <path d="M22 290 L284 290 L330 520 L0 520 Z" fill="#ff2bd6" opacity="0.07"/>
+
+    <!-- Desk -->
+    <path d="M16 396 L298 396 L298 410 L16 410 Z" fill="#3b1d7a" stroke="${INK}" stroke-width="3"/>
+    <path d="M26 410 V474 M288 410 V474" stroke="${INK}" stroke-width="7"/>
+    <rect x="214" y="412" width="70" height="30" fill="#2a1458" stroke="${INK}" stroke-width="3"/>
+    <path d="M240 427 H258" stroke="#c9ccd6" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Monitors -->
+    <rect x="160" y="300" width="112" height="76" rx="3" fill="#06141a" stroke="${INK}" stroke-width="4"/>
+    <g opacity="0.95">
+      <path d="M170 314 H214 M170 322 H246 M170 330 H200 M206 330 H236 M170 338 H226 M170 346 H190 M170 354 H240 M170 362 H214" stroke="#29e0ff" stroke-width="2.2"/>
+      <rect x="226" y="310" width="38" height="28" fill="none" stroke="#39ff88" stroke-width="1.6"/>
+      <path d="M231 330 L238 320 L245 326 L252 316 L259 324" fill="none" stroke="#39ff88" stroke-width="1.6"/>
+    </g>
+    <path d="M208 376 L204 394 L228 394 L224 376" fill="#2a1458" stroke="${INK}" stroke-width="3"/>
+    <rect x="252" y="330" width="40" height="44" rx="2" fill="#0a0418" stroke="${INK}" stroke-width="3" transform="rotate(8 272 352)"/>
+    <path d="M258 340 h22 M258 347 h16 M258 354 h24 M258 361 h12" stroke="#ff2bd6" stroke-width="1.8" transform="rotate(8 272 352)"/>
+
+    <!-- On the desk: deck, keyboard, noodles, a can -->
+    <rect x="52" y="380" width="86" height="16" rx="3" fill="#06100a" stroke="${INK}" stroke-width="3"/>
+    <rect x="52" y="380" width="86" height="4" fill="#39ff88" opacity="0.8"/>
+    <g fill="#39ff88"><circle cx="64" cy="390" r="2"/><circle cx="76" cy="390" r="2"/><circle cx="88" cy="390" r="2"/><circle cx="100" cy="390" r="2"/><circle cx="112" cy="390" r="2"/></g>
+    <rect x="168" y="390" width="62" height="6" rx="1" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/>
+    <path d="M272 372 L294 372 L290 396 L276 396 Z" fill="#fff4fd" stroke="${INK}" stroke-width="2.5"/>
+    <path d="M278 380 L288 380" stroke="#ff3b5c" stroke-width="3"/>
+    <path d="M281 372 L276 352 M285 372 L284 350" stroke="#e8c27a" stroke-width="2.2"/>
+    <rect x="144" y="378" width="12" height="18" rx="2" fill="#ff2bd6" stroke="${INK}" stroke-width="2"/>
+
+    <!-- The runner: hood up, jacked in, lit cyan by the screens and magenta by the window -->
+    <path d="M86 336 C84 326 96 320 110 322 L132 324 C142 326 144 334 142 344 L136 452 L92 452 Z" fill="#0d0520" stroke="${INK}" stroke-width="3"/>
+    <path d="M88 452 L140 452 L138 462 L90 462 Z" fill="#120626"/>
+    <path d="M114 462 V476 M94 480 H134" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+    <path d="M118 336 C108 344 102 372 106 400 L112 446 L168 446 L172 404 C176 384 196 384 206 390 L212 398 L222 394 L214 380 C200 364 184 352 170 342 C160 336 140 330 118 336 Z" fill="#0d0520"/>
+    <path d="M144 262 C122 266 112 286 116 306 C118 322 128 334 142 340 L170 340 C180 332 188 318 188 302 C188 286 180 272 168 266 C160 262 152 260 144 262 Z" fill="#0d0520"/>
+    <path d="M144 262 C122 266 112 286 116 306 C118 322 128 334 142 340" fill="none" stroke="#ff2bd6" stroke-width="2.2" opacity="0.9"/>
+    <path d="M136 268 C128 288 130 316 146 338" fill="none" stroke="#2a1458" stroke-width="2"/>
+    <path d="M176 280 C186 290 188 312 180 326 C176 318 172 300 176 280 Z" fill="#050210"/>
+    <path d="M181 294 C184 300 184 308 181 314" fill="none" stroke="#29e0ff" stroke-width="3" stroke-linecap="round" filter="url(#apt-glow)"/>
+    <path d="M170 340 C180 332 188 318 188 302 C188 288 182 276 170 268" fill="none" stroke="#29e0ff" stroke-width="2.4" filter="url(#apt-glow)"/>
+    <path d="M170 342 C184 352 200 364 214 380 L222 394" fill="none" stroke="#29e0ff" stroke-width="2.2" filter="url(#apt-glow)"/>
+    <path d="M118 336 C108 344 102 372 106 400" fill="none" stroke="#ff2bd6" stroke-width="2" opacity="0.8"/>
+    <path d="M126 300 C108 312 96 336 92 360 C88 378 96 386 104 384" fill="none" stroke="#120626" stroke-width="4.5"/>
+    <path d="M126 300 C108 312 96 336 92 360 C88 378 96 386 104 384" fill="none" stroke="#39ff88" stroke-width="1" stroke-dasharray="2 7"/>
+    <path d="M140 340 C150 360 170 372 200 388" fill="url(#apt-hatch)" stroke="none"/>
+  </g>
+
+  <rect width="390" height="520" fill="url(#apt-vig)"/>
+  <rect width="390" height="520" filter="url(#apt-grain)" opacity="0.5"/>
+</svg>`;
+}
+
+__m["ui/scenes"] = { apartmentScene };
+})();
 // ---- engine/profile ----
 (() => {
 // The player's profile: everything that lasts between runs. Pure functions
@@ -4065,12 +4287,14 @@ __m["engine/profile"] = { PROFILE_VERSION, newProfile, migrate, activeDeck, tota
 })();
 // ---- ui/safehouse ----
 (() => {
-// Safehouse screens (meatspace): hub, fixers, fence, dealer, ripperdoc, deck.
+// Safehouse screens (meatspace): the main menu in your room, then jobs
+// (fixers), the market (dealer, fence), the clinic, your deck and skills.
 // Everything here reads from the profile and the content tables, so new
 // fixers, contracts, programs and cyberware show up without UI changes.
 const { BRANCHES, CONTRACTS, CYBERWARE_SLOTS, FIXERS, MODIFIERS, NPCS, PROGRAMS, SECTORS, SKILLS } = __m["engine/content"];
 const { programDef } = __m["engine/programs"];
 const { portrait } = __m["ui/portraits"];
+const { apartmentScene } = __m["ui/scenes"];
 const { activeDeck, canLearn, contractBoard, dealerStock, deckStock, fenceRate, fixerUnlocked, levelInfo, repWith, ripperdocStock, totalRep, upgradeLevel, workshop } = __m["engine/profile"];
 const { esc, moduleHtml } = __m["ui/view"];
 /** A character's portrait with their name and line, at the top of their screen. */
@@ -4081,73 +4305,107 @@ function who(id, name, role, line) {
       <div class="who-text"><div class="who-role">${esc(role)}</div><div class="who-name">${esc(name)}</div><p class="who-line">${esc(line)}</p></div>
     </div>`;
 }
-function header(p, title, back = true) {
+const BACK_LABEL = { hub: 'SAFEHOUSE', jobs: 'JOBS', market: 'MARKET' };
+function header(p, title, back = 'hub') {
     return `
     <header class="sh-header">
-      ${back ? '<button class="sh-back" data-sh="hub" aria-label="Back to the safehouse">‹ BACK</button>' : '<span></span>'}
+      ${back === null ? '<span></span>' : `<button class="sh-back" data-sh="${back}" aria-label="Back to ${BACK_LABEL[back]?.toLowerCase() ?? 'the safehouse'}">‹ ${BACK_LABEL[back] ?? 'BACK'}</button>`}
       <h2 class="sh-title">${title}</h2>
       <div class="sh-purse"><span>¤ ${p.credits}</span><span>▤ ${p.data}</span></div>
     </header>`;
 }
-// ---------- Hub ----------
+// ---------- Main menu (your room) ----------
+const ICONS = {
+    jobs: '<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="1"/><path d="M8 7V4h8v3M3 12h18"/></svg>',
+    market: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9l2-5h12l2 5M4 9v11h16V9M4 9h16M9 20v-6h6v6"/></svg>',
+    clinic: '<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 3h4v7h7v4h-7v7h-4v-7H3v-4h7z"/></svg>',
+    deck: '<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="1"/><path d="M7 11h1M11 11h1M15 11h1M7 7V4M17 7V4"/></svg>',
+    skills: '<svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 6v11M12 10l-7 7M12 10l7 7"/></svg>',
+};
+function menuButton(view, icon, label, sub, hot = false) {
+    return `
+    <button class="home-btn ${hot ? 'hot' : ''}" data-sh="${view}">
+      <span class="home-icon">${icon}</span>
+      <span class="home-label"><b>${label}</b><small>${esc(sub)}</small></span>
+    </button>`;
+}
+/** Jobs on offer across every fixer you've met. */
+function openJobs(p) {
+    return Object.values(FIXERS).filter((f) => fixerUnlocked(p, f.id)).reduce((n, f) => n + contractBoard(p, f.id).length, 0);
+}
 function renderHub(p) {
-    const fixers = Object.values(FIXERS)
+    const lv = levelInfo(p);
+    const deck = activeDeck(p);
+    const ware = p.cyberware;
+    const jobs = openJobs(p);
+    return `
+    <div class="home">
+      <div class="home-scene">${apartmentScene()}</div>
+      <header class="home-top">
+        <div><h1 class="home-title">SAFEHOUSE</h1><span class="home-where">Room 14B, above the noodle bar</span></div>
+        <div class="sh-purse"><span>¤ ${p.credits}</span><span>▤ ${p.data}</span></div>
+      </header>
+      <nav class="home-menu" aria-label="Safehouse">
+        ${menuButton('jobs', ICONS.jobs, 'JOBS', `Fixers · ${jobs} job${jobs === 1 ? '' : 's'} on offer`, true)}
+        <div class="home-grid">
+          ${menuButton('market', ICONS.market, 'MARKET', `${NPCS.kit.name} · ${NPCS.mags.name}`)}
+          ${menuButton('ripperdoc', ICONS.clinic, 'CLINIC', `${NPCS.okafor.name} · ${ware.installed.length}/${ware.slots}`)}
+          ${menuButton('deck', ICONS.deck, 'DECK', `${deck.name} · ${p.deck.length}/${deck.slots}`)}
+          ${menuButton('skills', ICONS.skills, 'SKILLS', `LV ${lv.level}${lv.points ? ` · ${lv.points} point${lv.points > 1 ? 's' : ''}` : ''}`)}
+        </div>
+        <p class="sh-stats">${p.contractsDone} contracts · ${p.extractions}/${p.runs} runs survived · rep ${totalRep(p)}</p>
+        <button class="link" data-action="title">Title screen</button>
+      </nav>
+    </div>`;
+}
+// ---------- Jobs (fixers) ----------
+/** A wide card: portrait on the left, details on the right. */
+function personCard(o) {
+    const tag = o.view ? 'button' : 'div';
+    return `
+    <${tag} class="person ${o.tone ?? ''}" ${o.view ? `data-sh="${o.view}"` : ''}>
+      <div class="person-portrait">${portrait(o.id)}</div>
+      <div class="person-body">
+        <span class="person-kicker">${o.kicker}</span>
+        <span class="person-name">${esc(o.name)}</span>
+        <span class="person-text">${o.text}</span>
+        ${o.extra ?? ''}
+        <span class="person-foot">${o.foot}</span>
+      </div>
+    </${tag}>`;
+}
+function renderJobs(p) {
+    const cards = Object.values(FIXERS)
         .map((f) => {
-        const open = fixerUnlocked(p, f.id);
-        if (!open) {
+        if (!fixerUnlocked(p, f.id)) {
             const u = f.unlock;
-            return `<div class="sh-card locked"><div class="sh-thumb">${portrait('')}</div><div class="sh-card-kicker">FIXER</div><div class="sh-card-name">???</div><div class="sh-card-text">Earn ${u.rep} reputation with ${esc(FIXERS[u.fixer].name)} to meet them.</div></div>`;
+            return personCard({ id: '', kicker: 'FIXER', name: '???', text: `Earn ${u.rep} reputation with ${esc(FIXERS[u.fixer].name)} to meet them.`, foot: 'Locked', tone: 'locked' });
         }
-        const jobs = contractBoard(p, f.id).length;
-        return `
-        <button class="sh-card fixer" data-sh="fixer:${f.id}">
-          <div class="sh-thumb">${portrait(f.id)}</div>
-          <div class="sh-card-kicker">FIXER · REP ${repWith(p, f.id)}</div>
-          <div class="sh-card-name">${esc(f.name)}</div>
-          <div class="sh-card-text">${esc(f.tagline)}</div>
-          <div class="sh-card-foot">${jobs} job${jobs === 1 ? '' : 's'} on offer ›</div>
-        </button>`;
+        const n = contractBoard(p, f.id).length;
+        return personCard({ view: `fixer:${f.id}`, id: f.id, kicker: `FIXER · REP ${repWith(p, f.id)}`, name: f.name, text: esc(f.tagline), foot: `${n} job${n === 1 ? '' : 's'} on offer ›`, tone: 'hot' });
     })
         .join('');
-    const ware = p.cyberware;
     return `
-    ${header(p, 'SAFEHOUSE', false)}
+    ${header(p, 'JOBS')}
     <section class="sh-body">
-      <p class="sh-intro">A rented room above a noodle bar. Four walls, one window, a deck on the table.</p>
-      ${runnerCard(p)}
-      <div class="sh-grid">
-        ${fixers}
-        <button class="sh-card" data-sh="deck">
-          <div class="sh-thumb deck-thumb">${deckArt(activeDeck(p))}</div>
-          <div class="sh-card-kicker">YOUR DECK</div>
-          <div class="sh-card-name">${esc(activeDeck(p).name)}</div>
-          <div class="sh-card-text">${p.deck.length}/${activeDeck(p).slots} programs installed, ${p.ownedPrograms.length} owned. ${p.decks.owned.length} deck${p.decks.owned.length > 1 ? 's' : ''}.</div>
-          <div class="sh-card-foot">Decks & loadout ›</div>
-        </button>
-        <button class="sh-card" data-sh="fence">
-          <div class="sh-thumb">${portrait('mags')}</div>
-          <div class="sh-card-kicker">${esc(NPCS.mags.role.toUpperCase())}</div>
-          <div class="sh-card-name">${esc(NPCS.mags.name)}</div>
-          <div class="sh-card-text">Buys stolen data. Today: ¤ ${fenceRate(p)} per data.</div>
-          <div class="sh-card-foot">Sell data ›</div>
-        </button>
-        <button class="sh-card" data-sh="dealer">
-          <div class="sh-thumb">${portrait('kit')}</div>
-          <div class="sh-card-kicker">${esc(NPCS.kit.role.toUpperCase())}</div>
-          <div class="sh-card-name">${esc(NPCS.kit.name)}</div>
-          <div class="sh-card-text">Software you keep for good.</div>
-          <div class="sh-card-foot">Browse ›</div>
-        </button>
-        <button class="sh-card" data-sh="ripperdoc">
-          <div class="sh-thumb">${portrait('okafor')}</div>
-          <div class="sh-card-kicker">${esc(NPCS.okafor.role.toUpperCase())}</div>
-          <div class="sh-card-name">${esc(NPCS.okafor.name)}</div>
-          <div class="sh-card-text">Cyberware: ${ware.installed.length}/${ware.slots} slots in use.</div>
-          <div class="sh-card-foot">See the doctor ›</div>
-        </button>
+      <p class="sh-intro">Fixers with work for you. Each posts a few contracts; the boards change after every run.</p>
+      <div class="people">${cards}</div>
+      <p class="sh-hint">New fixers turn up as you build a name.</p>
+    </section>`;
+}
+// ---------- Market (the street) ----------
+function renderMarket(p) {
+    const ware = p.cyberware;
+    const chips = ['PROGRAMS', 'CYBERDECKS', 'WORKSHOP'].map((c) => `<span class="tag">${c}</span>`).join('');
+    return `
+    ${header(p, 'MARKET')}
+    <section class="sh-body">
+      <p class="sh-intro">The street below your window. Rain, steam from the noodle bar, and people who sell things.</p>
+      <div class="people">
+        ${personCard({ view: 'dealer', id: 'kit', kicker: esc(NPCS.kit.role.toUpperCase()), name: NPCS.kit.name, text: 'Software you keep for good, plus upgrades in the back.', extra: `<span class="person-chips">${chips}</span>`, foot: 'Browse ›' })}
+        ${personCard({ view: 'fence', id: 'mags', kicker: esc(NPCS.mags.role.toUpperCase()), name: NPCS.mags.name, text: 'Buys stolen data. The rate changes every run.', extra: `<span class="person-rate">Today: ¤ ${fenceRate(p)} per data</span>`, foot: 'Sell data ›', tone: 'hot' })}
+        ${personCard({ view: 'ripperdoc', id: 'okafor', kicker: `${esc(NPCS.okafor.role.toUpperCase())} · DOWNSTAIRS`, name: NPCS.okafor.name, text: `Cyberware clinic. ${ware.installed.length}/${ware.slots} implant slots in use.`, foot: 'Visit the clinic ›' })}
       </div>
-      <p class="sh-stats">${p.contractsDone} contracts done · ${p.extractions}/${p.runs} runs survived · total rep ${totalRep(p)}</p>
-      <button class="link" data-action="title">Title screen</button>
     </section>`;
 }
 // ---------- Fixer board ----------
@@ -4173,7 +4431,7 @@ function renderFixer(p, fixerId) {
       </article>`)
         .join('');
     return `
-    ${header(p, esc(f.name.toUpperCase()))}
+    ${header(p, esc(f.name.toUpperCase()), 'jobs')}
     <section class="sh-body">
       ${who(fixerId, f.name, `Fixer · reputation ${repWith(p, fixerId)}`, `“${f.tagline}”`)}
       <div class="contracts">${jobs || '<p class="sh-intro">No work right now.</p>'}</div>
@@ -4186,7 +4444,7 @@ function renderFence(p) {
     const rate = fenceRate(p);
     const half = Math.floor(p.data / 2);
     return `
-    ${header(p, 'THE FENCE')}
+    ${header(p, 'THE FENCE', 'market')}
     <section class="sh-body narrow">
       ${who('mags', NPCS.mags.name, NPCS.mags.role, '“Rate changes every time you go out. Don\u2019t ask why.”')}
       <div class="fence-rate"><span>TODAY</span><b>¤ ${rate}</b><span>per data</span></div>
@@ -4209,7 +4467,7 @@ function renderDealer(p) {
     })
         .join('');
     return `
-    ${header(p, 'PROGRAM DEALER')}
+    ${header(p, 'PROGRAM DEALER', 'market')}
     <section class="sh-body">
       ${who('kit', NPCS.kit.name, NPCS.kit.role, `“Buy once, run it forever. Better stuff when your name gets around.” Your total reputation: ${rep}.`)}
       <div class="shop-grid">${items}</div>
@@ -4259,7 +4517,7 @@ function renderRipperdoc(p) {
         .join('');
     const canSlot = ware.slots < CYBERWARE_SLOTS.max;
     return `
-    ${header(p, 'RIPPERDOC')}
+    ${header(p, 'CLINIC')}
     <section class="sh-body">
       ${who('okafor', NPCS.okafor.name, NPCS.okafor.role, `“Installed cyberware works on every run.” ${ware.installed.length}/${ware.slots} implant slots in use.`)}
       <div class="wares">${items}</div>
@@ -4386,7 +4644,7 @@ function renderSkills(p) {
 function renderReport(p, outcome, report) {
     const titles = { won: 'JOB DONE', extracted: 'JACKED OUT', lost: 'FLATLINED' };
     return `
-    ${header(p, titles[outcome.kind], false)}
+    ${header(p, titles[outcome.kind], null)}
     <section class="sh-body narrow">
       <p class="sh-intro">${outcome.kind === 'lost' ? 'You come to on the floor of your room, deck smoking. Whatever you were carrying is gone.' : 'You pull the jack and the room swims back into focus.'}</p>
       <div class="report">${report.lines.map((l) => `<p>${esc(l)}</p>`).join('')}</div>
@@ -4394,7 +4652,7 @@ function renderReport(p, outcome, report) {
     </section>`;
 }
 
-__m["ui/safehouse"] = { renderHub, renderFixer, renderFence, renderDealer, renderRipperdoc, deckArt, renderDeck, renderSkills, renderReport };
+__m["ui/safehouse"] = { renderHub, renderJobs, renderMarket, renderFixer, renderFence, renderDealer, renderRipperdoc, deckArt, renderDeck, renderSkills, renderReport };
 })();
 // ---- ui/main ----
 (() => {
@@ -4411,7 +4669,7 @@ const { buzz, installAudioUnlock, onAudioReady, setSound, sfx, unlockAudio } = _
 const { renderSong, setMusicEnabled, update: updateMusic } = __m["ui/music"];
 const { runBlock, runExploit } = __m["ui/timing"];
 const { renderEnd, renderEvent, renderJackout, renderMap, renderNotice, renderRest, renderSectorClear, renderShop, runHud } = __m["ui/screens"];
-const { renderDealer, renderDeck, renderFence, renderFixer, renderHub, renderReport, renderRipperdoc, renderSkills } = __m["ui/safehouse"];
+const { renderDealer, renderDeck, renderFence, renderFixer, renderHub, renderJobs, renderMarket, renderReport, renderRipperdoc, renderSkills } = __m["ui/safehouse"];
 const { applyOutcome, buyCyberware, buyCyberwareSlot, buyDeck, buyProgram, deckAdd, deckRemove, learnSkill, migrate, runSetup, sellData, toggleCyberware, upgradeProgram, useDeck } = __m["engine/profile"];
 const { EFF_LABEL, esc, LAYER_ICON, modHtml, moduleHtml, show } = __m["ui/view"];
 const app = document.getElementById('app');
@@ -4712,6 +4970,10 @@ function renderRun() {
 function renderSafehouse() {
     if (safeView === 'hub')
         return renderHub(profile);
+    if (safeView === 'jobs')
+        return renderJobs(profile);
+    if (safeView === 'market')
+        return renderMarket(profile);
     if (safeView === 'fence')
         return renderFence(profile);
     if (safeView === 'dealer')
