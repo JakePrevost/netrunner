@@ -107,7 +107,7 @@ button:disabled { cursor: default; }
 .glyph { position: relative; }
 .eff-badge {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); white-space: nowrap; z-index: 2;
-  font-size: 11px; font-weight: 900; letter-spacing: 0.06em; padding: 3px 6px; background: #000; border: 1px solid currentColor;
+  font-size: 13px; font-weight: 900; letter-spacing: 0.06em; padding: 3px 6px; background: #000; border: 1px solid currentColor;
   box-shadow: 0 0 12px currentColor; animation: pop-in 0.18s ease-out;
 }
 @keyframes pop-in { from { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
@@ -115,7 +115,7 @@ button:disabled { cursor: default; }
 .eff-resist { color: var(--brute); }
 .eff-neutral { color: var(--text); }
 .eff-pierce { color: #fff; }
-.m-eff { font-size: 10px; font-weight: 900; margin-left: auto; margin-right: 6px; }
+.m-eff { font-size: 10px; font-weight: 900; margin-left: auto; margin-right: 6px; padding: 0 4px; border: 1px solid currentColor; border-radius: 2px; }
 .float.eff-pop { font-size: 13px; letter-spacing: 0.12em; }
 .float.eff-pop.weak { color: #7dff6b; }
 .float.eff-pop.resist { color: var(--brute); }
@@ -167,7 +167,7 @@ button:disabled { cursor: default; }
   transition: transform 0.12s, box-shadow 0.12s, opacity 0.2s;
 }
 .module:active:not(:disabled) { transform: scale(0.96); }
-.module.selected { box-shadow: 0 0 0 1px var(--c), 0 0 16px var(--c); transform: translateY(-3px); }
+.module.selected { box-shadow: 0 0 0 2px var(--c), 0 0 18px var(--c); transform: translateY(-4px); background: linear-gradient(90deg, var(--c) 0 3px, rgba(255, 255, 255, 0.1) 3px); }
 .module:disabled { opacity: 0.5; }
 .module.cooling { opacity: 1; }
 .module.cooling > :not(.m-cd) { opacity: 0.25; }
@@ -3458,7 +3458,9 @@ function enemyHtml(e, targeting, sel) {
 }
 function renderCombat(s) {
     const sel = selected !== null ? programOf(s.slots[selected]) : null;
-    const targeting = !!sel && needsTarget(sel);
+    // Attacks always go through a targeting step, so the enemy's ×2 / ×½ badge
+    // is visible before firing, even when there's only one enemy.
+    const targeting = !!sel && (needsTarget(sel) || !!sel.aoe);
     const traceCls = s.trace >= 75 ? 'danger' : s.trace >= 50 ? 'warn' : '';
     const ramPips = Array.from({ length: Math.max(s.ramMax, s.ram) }, (_, i) => `<i class="${i < s.ram ? 'on' : ''}"></i>`).join('');
     // With one enemy left, tag each attack with how it fares against that enemy.
@@ -3480,7 +3482,7 @@ function renderCombat(s) {
         else
             i++;
     }
-    const prompt = targeting ? 'SELECT A TARGET' : s.phase === 'enemy' ? 'ENEMY TURN' : '';
+    const prompt = targeting ? (sel?.aoe ? 'TAP ANY ENEMY · HITS ALL' : 'TAP AN ENEMY TO RUN IT') : s.phase === 'enemy' ? 'ENEMY TURN' : '';
     return `
     <header class="hud">
       <div class="trace ${traceCls}">
@@ -3895,18 +3897,18 @@ function onSlot(index) {
         return;
     }
     const p = programOf(combat.slots[index]);
-    const alive = living(combat);
-    if (needsTarget(p) && alive.length > 1) {
+    if (needsTarget(p) || p.aoe) {
         selected = index;
         render();
         return;
     }
-    void playCard(index, needsTarget(p) ? alive[0].uid : null);
+    void playCard(index, null);
 }
 function onEnemy(uid) {
     if (!combat || busy || selected === null)
         return;
-    void playCard(selected, uid);
+    const p = programOf(combat.slots[selected]);
+    void playCard(selected, p.aoe ? null : uid);
 }
 app.addEventListener('click', (ev) => {
     const t = ev.target;
