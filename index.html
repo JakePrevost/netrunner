@@ -175,7 +175,7 @@ button:disabled { cursor: default; }
 .module:disabled .m-led { background: #333; box-shadow: none; }
 .m-head { display: flex; align-items: baseline; gap: 4px; padding-right: 8px; }
 .m-icon { color: var(--c); font-size: 11px; }
-.m-name { font-size: 11px; font-weight: 700; color: var(--c); line-height: 1.15; overflow-wrap: anywhere; }
+.m-name { font-size: 11px; font-weight: 700; color: var(--c); line-height: 1.15; overflow-wrap: break-word; }
 .m-text { font-size: 10px; line-height: 1.25; color: var(--text); flex: 1; }
 .m-foot { display: flex; justify-content: space-between; font-size: 9px; color: var(--crypto); letter-spacing: 0.05em; }
 .m-cdbase { color: var(--muted); }
@@ -454,6 +454,90 @@ body.meatspace .secondary { border-color: var(--yellow); color: var(--yellow); b
 body.meatspace .link { color: #b9a6e6; }
 .primary:disabled { opacity: 0.4; box-shadow: none; }
 
+/* ---------- Cyberdecks ---------- */
+.deck-thumb svg { margin-top: 0; }
+.deck-hero { display: flex; gap: 12px; align-items: center; }
+.deck-hero-art { width: 150px; flex: none; border: 3px solid #1b0b3a; box-shadow: 4px 4px 0 #ff2bd6; }
+.deck-hero-art svg, .deck-row-art svg { width: 100%; height: auto; display: block; }
+.deck-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.deck-chips span { font-size: 10px; font-weight: 800; padding: 1px 5px; border: 2px solid currentColor; }
+.deck-perk { margin-top: 5px; font-size: 11px; font-weight: 800; color: #1fa89a; }
+.deck-hero .deck-perk { color: #39ff88; }
+.deck-perk.bad, .deck-hero .deck-perk.bad { color: #ff3b5c; }
+.deck-list { display: flex; flex-direction: column; gap: 10px; }
+.deck-row { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; padding: 10px; background: #fff4fd; color: #1b0b3a; border: 3px solid #1b0b3a; }
+.deck-row.active { background: #c8ffe0; box-shadow: 4px 4px 0 #1fa89a; }
+.deck-row.locked { opacity: 0.55; }
+.deck-row-art { border: 2px solid #1b0b3a; align-self: start; }
+.deck-row-action { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+.deck-active { font-size: 11px; font-weight: 900; letter-spacing: 0.15em; color: #0f7a6e; }
+.slots.cols-4 .m-name { font-size: 9px; letter-spacing: -0.03em; overflow-wrap: break-word; word-break: normal; }
+.slots.cols-4 .m-text { font-size: 9px; }
+.slots.cols-4 .module { padding: 5px 4px 4px 7px; }
+.deck-row .secondary { border-color: #1b0b3a; color: #1b0b3a; background: transparent; }
+.slots.cols-4 .m-foot { font-size: 8.5px; white-space: nowrap; gap: 2px; } .slots.cols-4 .m-eff { margin-right: 3px; padding: 0 2px; }
+
+/* ---------- Rogue AIs & relics ---------- */
+.mlabel.rogue { fill: #ff2850; font-weight: 800; }
+.rogue-sigil { animation: rogue-flicker 1.8s steps(1) infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes rogue-flicker { 0%, 86% { transform: none; opacity: 1; } 88% { transform: rotate(18deg) scale(1.1); opacity: 0.6; } 92% { transform: rotate(-8deg); opacity: 1; } }
+.enemy.rogue { border-color: #ff2850; box-shadow: 0 0 0 1px #ff2850, 0 0 22px rgba(255, 40, 80, 0.45); animation: rogue-pulse 2.2s ease-in-out infinite; }
+@keyframes rogue-pulse { 50% { box-shadow: 0 0 0 1px #ff2850, 0 0 8px rgba(255, 40, 80, 0.2); } }
+.enemy.rogue .ename { color: #ff2850; text-shadow: 0 0 8px #ff2850; }
+.intent.drain { color: #ff2850; animation: blink 0.9s infinite; }
+body.rogue-fight #rain { opacity: 0.55; }
+body.rogue-fight #app { animation: rogue-glitch 5s steps(1) infinite; }
+@keyframes rogue-glitch {
+  0%, 93%, 100% { transform: none; filter: none; }
+  94% { transform: translateX(-3px) skewX(-1deg); filter: hue-rotate(-30deg) saturate(1.6); }
+  96% { transform: translateX(4px); filter: hue-rotate(20deg); }
+  98% { transform: translateX(-1px); filter: none; }
+}
+.module.relic { --c: #ffd77a; background: linear-gradient(90deg, #ffd77a 0 3px, rgba(40, 26, 4, 0.95) 3px); border-color: rgba(255, 215, 122, 0.5); box-shadow: 0 0 12px rgba(255, 215, 122, 0.25); }
+.m-relic { position: absolute; top: -7px; right: 8px; font-size: 8px; font-weight: 900; letter-spacing: 0.14em; color: #1b0b3a; background: #ffd77a; padding: 1px 4px; }
+@media (prefers-reduced-motion: reduce) { body.rogue-fight #app { animation: none; } }
+
+/* ---------- Never scroll the page itself (iOS keeps stale scroll offsets for taps) ---------- */
+html, body { overscroll-behavior: none; }
+body { position: fixed; inset: 0; width: 100%; }
+#app { overflow: hidden; }
+.panel-screen, .node-panel, .loadout-screen, .sh-body, .title-screen { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+/* Centre panel content without clipping its top when it's taller than the screen. */
+.panel-screen, .node-panel { justify-content: flex-start; }
+.panel-screen > :first-child, .node-panel > :first-child { margin-top: auto; }
+.panel-screen > :last-child, .node-panel > :last-child { margin-bottom: auto; }
+
+/* ---------- Runner level, skill tree, workshop ---------- */
+.runner-card { display: flex; flex-direction: column; gap: 6px; padding: 12px; text-align: left; background: #1b0b3a; color: #fff4fd; border: 3px solid var(--yellow); box-shadow: 5px 5px 0 #ff2bd6; }
+.runner-card:disabled { opacity: 1; }
+.runner-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.runner-level { font-size: 22px; font-weight: 900; color: var(--yellow); }
+.runner-name { font-size: 11px; font-weight: 800; letter-spacing: 0.16em; color: var(--crypto); }
+.runner-points { margin-left: auto; font-size: 10px; font-weight: 900; color: #1b0b3a; background: #39ff88; padding: 2px 6px; animation: blink 1.2s infinite; }
+.runner-xp { height: 10px; border: 2px solid var(--yellow); background: #120626; position: relative; }
+.runner-xp i { position: absolute; inset: 0 auto 0 0; background: var(--yellow); }
+.runner-foot { font-size: 11px; color: #e9dcff; }
+.branch { border: 3px solid #1b0b3a; background: #120626; padding: 12px; box-shadow: 5px 5px 0 var(--b); }
+.branch-name { margin: 0; font-size: 16px; font-weight: 900; letter-spacing: 0.18em; color: var(--b); }
+.branch-tag { margin: 2px 0 10px; font-size: 11px; color: #b9a6e6; }
+.branch-nodes { display: flex; flex-direction: column; align-items: stretch; }
+.skill { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px; text-align: left; background: #1b0b3a; color: #fff4fd; border: 2px solid #3b1d7a; }
+.skill.owned { border-color: var(--b); background: color-mix(in srgb, var(--b) 18%, #1b0b3a); }
+.skill.available { border-color: var(--yellow); box-shadow: 0 0 12px rgba(255, 232, 59, 0.35); }
+.skill.locked { opacity: 0.45; }
+.skill:disabled { cursor: default; }
+.skill-tier { width: 26px; height: 26px; display: grid; place-items: center; font-weight: 900; font-size: 12px; color: #1b0b3a; background: var(--b); }
+.skill.locked .skill-tier { background: #3b1d7a; color: #b9a6e6; }
+.skill-body { display: flex; flex-direction: column; gap: 2px; }
+.skill-name { font-size: 13px; font-weight: 900; }
+.skill-text { font-size: 11px; line-height: 1.35; color: #e9dcff; }
+.skill-state { font-size: 11px; font-weight: 900; color: var(--yellow); }
+.skill.owned .skill-state { color: var(--b); font-size: 16px; }
+.skill-link { display: block; width: 3px; height: 10px; margin-left: 22px; background: var(--b); opacity: 0.5; }
+.ware-text.up { color: #0f7a6e; font-weight: 800; }
+.relic-chip { font-size: 9px; font-weight: 900; background: #ffd77a; color: #1b0b3a; padding: 0 4px; vertical-align: 2px; }
+.small-link { padding: 4px 0; text-align: left; } .sound-hint { font-size: 10px; color: var(--muted); }
+
 </style>
 </head>
 <body>
@@ -481,7 +565,20 @@ const PROGRAMS = {
     doppel: { id: 'doppel', name: 'Doppelganger', cost: 2, cooldown: 2, kind: 'attack', layer: 'spoof', damage: 8, weak: 2, text: '8 spoof dmg, Weak 2' },
     splice: { id: 'splice', name: 'Splice', cost: 1, cooldown: 0, kind: 'attack', layer: 'spoof', damage: 4, text: '4 spoof damage' },
 };
-const MAX_SLOTS = 7;
+/** Most program slots any deck can reach (with Expansion Ports). */
+const MAX_SLOTS = 8;
+// --- Relics: rogue AI tech. Never sold or found as normal loot. Beat a rogue AI
+// to take one; get out alive and it's yours for good. ---
+const RELICS = {
+    blacksun: { id: 'blacksun', name: 'Black Sun', cost: 3, cooldown: 3, kind: 'attack', damage: 18, pierce: true, relic: true, text: '18 dmg, ignores layers' },
+    lazarus: { id: 'lazarus', name: 'Lazarus.sys', cost: 2, cooldown: 3, kind: 'shield', block: 10, heal: 8, relic: true, text: 'Block 10, repair 8' },
+    echo: { id: 'echo', name: 'Echo Chamber', cost: 2, cooldown: 1, kind: 'attack', damage: 6, aoe: true, relic: true, text: '6 dmg to ALL, any layer' },
+    siphon: { id: 'siphon', name: 'Siphon', cost: 2, cooldown: 1, kind: 'attack', layer: 'crypto', damage: 8, heal: 4, relic: true, text: '8 crypto dmg, repair 4' },
+    ghostwalk: { id: 'ghostwalk', name: 'Ghostwalk', cost: 1, cooldown: 4, kind: 'cloak', trace: -30, relic: true, text: 'Trace -30%' },
+    overmind: { id: 'overmind', name: 'Overmind', cost: 0, cooldown: 3, kind: 'utility', ram: 3, relic: true, text: '+3 RAM, no cost' },
+};
+Object.assign(PROGRAMS, RELICS);
+const RELIC_PROGRAMS = Object.keys(RELICS);
 const STARTER_LOADOUT = {
     chassis: 'Kestrel Mk1',
     slots: 5,
@@ -492,7 +589,7 @@ const STARTER_LOADOUT = {
 };
 const LOOT_PROGRAMS = ['bruteforce', 'cipherstorm', 'backdoor', 'rot', 'overclock', 'phase', 'mirrorwall', 'doppel', 'splice'];
 
-__m["content/programs"] = { PROGRAMS, MAX_SLOTS, STARTER_LOADOUT, LOOT_PROGRAMS };
+__m["content/programs"] = { PROGRAMS, MAX_SLOTS, RELICS, RELIC_PROGRAMS, STARTER_LOADOUT, LOOT_PROGRAMS };
 })();
 // ---- content/mods ----
 (() => {
@@ -607,12 +704,13 @@ const ENEMIES = {
         window: 0.14,
         sweepMs: 760,
         packetMs: 700,
-        blurb: 'A shard of a rogue AI. Copies itself if left alive.',
+        blurb: 'A corporate security AI split into copies. Copies itself if left alive.',
     },
     archon: {
         id: 'archon',
         name: 'The Archon',
         faction: 'ai',
+        rogue: true,
         core: 48,
         layers: [{ type: 'crypto', hp: 7 }, { type: 'brute', hp: 7 }],
         // Rewrites itself twice: at 32 and 16 core it grows a fresh pair of layers.
@@ -632,6 +730,30 @@ const ENEMIES = {
         packetMs: 600,
         blurb: 'The rogue AI at the bottom of the deep net. Rewrites itself and your deck.',
     },
+    // --- Rogue AIs: locked-away tech that got loose. Rare, optional, brutal; they guard relics. ---
+    corruptor: {
+        id: 'corruptor',
+        name: 'The Corruptor',
+        faction: 'ai',
+        rogue: true,
+        core: 56,
+        layers: [{ type: 'crypto', hp: 10 }, { type: 'spoof', hp: 10 }],
+        phases: [
+            { at: 38, layers: [{ type: 'crypto', hp: 10 }, { type: 'brute', hp: 10 }] },
+            { at: 19, layers: [{ type: 'brute', hp: 11 }, { type: 'spoof', hp: 11 }] },
+        ],
+        pattern: [
+            { kind: 'attack', value: 11 },
+            { kind: 'drain', value: 2 },
+            { kind: 'attack', value: 7, hits: 2 },
+            { kind: 'scramble', value: 2 },
+            { kind: 'attack', value: 19 },
+        ],
+        window: 0.12,
+        sweepMs: 720,
+        packetMs: 560,
+        blurb: 'Quarantined decades ago. Something let it out. It eats RAM and rewrites everything it touches.',
+    },
 };
 
 __m["content/enemies"] = { ENEMIES };
@@ -649,6 +771,7 @@ const SECTORS = {
         fights: [['tracer', 'firewall'], ['sentry'], ['firewall', 'tracer'], ['sentry', 'tracer'], ['firewall', 'firewall']],
         elites: [['blackice', 'tracer']],
         boss: ['blackice', 'firewall'],
+        rogue: { chance: 0.2, encounters: [['corruptor']] },
     },
     relay: {
         id: 'relay',
@@ -657,6 +780,7 @@ const SECTORS = {
         fights: [['razor'], ['kiddie', 'kiddie', 'kiddie'], ['razor', 'kiddie'], ['kiddie', 'kiddie', 'tracer'], ['sentry', 'kiddie']],
         elites: [['razor', 'razor']],
         boss: ['razor', 'blackice', 'kiddie'],
+        rogue: { chance: 0.3, encounters: [['corruptor', 'kiddie']] },
     },
     vault: {
         id: 'vault',
@@ -665,6 +789,7 @@ const SECTORS = {
         fights: [['blackice'], ['sentry', 'firewall'], ['firewall', 'tracer'], ['hunter'], ['sentry', 'tracer']],
         elites: [['blackice', 'tracer']],
         boss: ['hunter', 'blackice'],
+        rogue: { chance: 0.45, encounters: [['corruptor']] },
     },
     deepnet: {
         id: 'deepnet',
@@ -673,6 +798,7 @@ const SECTORS = {
         fights: [['fragment'], ['fragment', 'kiddie'], ['fragment', 'sentry'], ['fragment', 'tracer', 'kiddie'], ['blackice', 'fragment']],
         elites: [['fragment', 'razor', 'fragment']],
         boss: ['archon'],
+        rogue: { chance: 0.6, encounters: [['corruptor', 'fragment']] },
     },
 };
 
@@ -738,6 +864,7 @@ const REWARDS = {
     fight: { credits: [10, 16], data: 0 },
     elite: { credits: [22, 30], data: 15 },
     boss: { credits: [35, 45], data: 35 },
+    rogue: { credits: [40, 55], data: 50 },
     winBonusData: 60,
 };
 
@@ -858,6 +985,207 @@ const NPCS = {
 
 __m["content/npcs"] = { NPCS };
 })();
+// ---- content/decks ----
+(() => {
+const DECKS = {
+    kestrel: {
+        id: 'kestrel', name: 'Kestrel Mk1', tagline: 'A reliable starter rig. Does everything, nothing special.',
+        slots: 5, ramPerTurn: 3, ramMax: 5, price: 0, rep: 0, color: '#39ff88',
+    },
+    scrapstack: {
+        id: 'scrapstack', name: 'Scrapstack', tagline: 'Seven slots soldered onto a salvaged board. Barely any room to bank RAM.',
+        slots: 7, ramPerTurn: 3, ramMax: 4, price: 150, rep: 0, color: '#ffe83b',
+    },
+    sable: {
+        id: 'sable', name: 'Sable Overdrive', tagline: 'Four slots, no RAM bank, a much hotter processor, and almost no shielding.',
+        slots: 4, ramPerTurn: 4, ramMax: 4, price: 320, rep: 3, color: '#ff3b5c',
+        perks: [{ kind: 'maxIntegrity', value: -8 }], perkText: 'Stripped casing: \u22128 max Integrity',
+    },
+    vantage: {
+        id: 'vantage', name: 'Vantage Pro', tagline: 'A professional rig: an extra slot and a deeper RAM bank.',
+        slots: 6, ramPerTurn: 3, ramMax: 7, price: 200, rep: 1, color: '#29e0ff',
+    },
+    magpie: {
+        id: 'magpie', name: 'Magpie Array', tagline: 'Eight slots: bring a program for every situation.',
+        slots: 8, ramPerTurn: 3, ramMax: 6, price: 300, rep: 2, color: '#ff2bd6',
+    },
+    lotus: {
+        id: 'lotus', name: 'Black Lotus', tagline: 'Military grade. Nobody asks where you got it.',
+        slots: 6, ramPerTurn: 4, ramMax: 7, price: 520, rep: 5, color: '#b38cff',
+        perks: [{ kind: 'traceTick', value: 3 }], perkText: 'Runs hot: Trace rises 3% faster per turn',
+    },
+};
+const STARTER_DECK = 'kestrel';
+
+__m["content/decks"] = { DECKS, STARTER_DECK };
+})();
+// ---- content/upgrades ----
+(() => {
+// Program upgrades, bought from Kit with data. One rule set covers every
+// program: numbers scale up, and Mk III also shortens cooldowns and adds a
+// point of Weak / RAM where a program has them.
+// To tune: change the levels here. To exempt a program, add it to NO_UPGRADE.
+/** Index 0 is the base program (Mk I). */
+const UPGRADE_LEVELS = [
+    { suffix: '', cost: 0, scale: 1, cooldown: 0, extra: 0 },
+    { suffix: 'Mk II', cost: 40, scale: 1.4, cooldown: 0, extra: 0 },
+    { suffix: 'Mk III', cost: 90, scale: 1.8, cooldown: -1, extra: 1 },
+];
+/** Relics are rarer tech: upgrading them costs this much more. */
+const RELIC_UPGRADE_COST = 2;
+const NO_UPGRADE = [];
+
+__m["content/upgrades"] = { UPGRADE_LEVELS, RELIC_UPGRADE_COST, NO_UPGRADE };
+})();
+// ---- content/skills ----
+(() => {
+const BRANCHES = {
+    breaker: { name: 'Breaker', tagline: 'Hit harder, crack faster.', color: '#ff3b5c' },
+    ghost: { name: 'Ghost', tagline: 'Stay unseen, steal more.', color: '#29e0ff' },
+    wetware: { name: 'Wetware', tagline: 'Take the hit and keep going.', color: '#39ff88' },
+};
+const SKILLS = {
+    // Breaker: offense
+    payloads: { id: 'payloads', branch: 'breaker', tier: 1, name: 'Hardened Payloads', text: '+1 damage on every attack', perk: { kind: 'damageBonus', value: 1 } },
+    opener: { id: 'opener', branch: 'breaker', tier: 2, name: 'Opening Strike', text: '+1 RAM on the first turn of every fight', perk: { kind: 'ramTurn1', value: 1 } },
+    pattern: { id: 'pattern', branch: 'breaker', tier: 3, name: 'Pattern Match', text: 'Matching layer types take ×2.5 instead of ×2', perk: { kind: 'matchBonus', value: 0.5 } },
+    precision: { id: 'precision', branch: 'breaker', tier: 4, name: 'Precision', text: 'Exploit weak points 20% wider', perk: { kind: 'exploitWindow', value: 1.2 } },
+    overclocked: { id: 'overclocked', branch: 'breaker', tier: 5, name: 'Overclocked Core', text: '+1 max RAM on any deck', perk: { kind: 'ramMax', value: 1 } },
+    // Ghost: Trace and stealth
+    quiet: { id: 'quiet', branch: 'ghost', tier: 1, name: 'Quiet Steps', text: 'Trace rises 1% slower per turn', perk: { kind: 'traceTick', value: -1 } },
+    cleanhands: { id: 'cleanhands', branch: 'ghost', tier: 2, name: 'Clean Hands', text: 'Data caches are never trapped', perk: { kind: 'cacheSafe', value: 1 } },
+    slowburn: { id: 'slowburn', branch: 'ghost', tier: 3, name: 'Slow Burn', text: 'After a countermeasure, Trace drops to 20% instead of 40%', perk: { kind: 'countermeasureReset', value: -20 } },
+    datahound: { id: 'datahound', branch: 'ghost', tier: 4, name: 'Data Hound', text: '+25% data from every source', perk: { kind: 'dataBonus', value: 0.25 } },
+    phantom: { id: 'phantom', branch: 'ghost', tier: 5, name: 'Phantom', text: 'Trace drops 10% after every fight you win', perk: { kind: 'traceAfterFight', value: -10 } },
+    // Wetware: survival
+    skull: { id: 'skull', branch: 'wetware', tier: 1, name: 'Thick Skull', text: '+5 max Integrity', perk: { kind: 'maxIntegrity', value: 5 } },
+    fieldrepair: { id: 'fieldrepair', branch: 'wetware', tier: 2, name: 'Field Repair', text: '+3 Integrity repaired after every fight', perk: { kind: 'repairAfterFight', value: 3 } },
+    reflexbuffer: { id: 'reflexbuffer', branch: 'wetware', tier: 3, name: 'Reflex Buffer', text: 'Block timing window 20% wider', perk: { kind: 'blockWindow', value: 1.2 } },
+    shielded: { id: 'shielded', branch: 'wetware', tier: 4, name: 'Shielded Core', text: '+2 block on every shield program', perk: { kind: 'blockBonus', value: 2 } },
+    secondwind: { id: 'secondwind', branch: 'wetware', tier: 5, name: 'Second Wind', text: 'Once per run, survive a killing blow at 8 Integrity', perk: { kind: 'revive', value: 8 } },
+};
+/** XP to go from level n to n+1 is XP_BASE + XP_STEP * (n - 1). */
+const XP = { base: 60, step: 30 };
+/** XP per run: earned in full when you get out, halved when you flatline. */
+const XP_REWARDS = { perFight: 8, perSectorCleared: 20, contractBonus: 40, lostMultiplier: 0.5 };
+
+__m["content/skills"] = { BRANCHES, SKILLS, XP, XP_REWARDS };
+})();
+// ---- content/music ----
+(() => {
+// The soundtrack, as data. A song is a loop of bars: a chord per bar, step
+// patterns for drums and bass (16 steps per bar), a pad on the chords, an
+// arpeggio, and a lead melody written in eighth notes. ui/music.ts plays it
+// with synthesizers, so there are no audio files.
+//
+// Patterns: 16 characters per bar.
+//   drums: 'x' hit, 'a' accent, '.' rest
+//   bass:  'r' root, 'o' octave up, 'f' fifth, '.' rest
+//   stab:  'x' chord stab, '.' rest
+// Lead: 8 tokens per bar (eighth notes): a note like 'E5', '-' to hold, '.' rest.
+// Parts can have `minIntensity`: they only play once the game turns the
+// intensity up (0 = calm, 1 = in a fight, 2 = high Trace, rogue AI, boss).
+// To add a song: add it here, then pick it in ui/main.ts (musicFor()).
+const SONGS = {
+    safehouse: {
+        id: 'safehouse',
+        title: 'Neon Noodle Bar',
+        bpm: 88,
+        swing: 0.16,
+        chords: ['Am', 'F', 'C', 'G', 'Am', 'F', 'Dm', 'E', 'Am', 'F', 'C', 'G', 'Am', 'F', 'Dm', 'E'],
+        drums: {
+            kick: [{ pattern: 'a.....x...x.....' }],
+            snare: [{ pattern: '....x.......x...' }],
+            hat: [{ pattern: 'x.x.x.x.x.x.x.xx', volume: 0.6 }],
+        },
+        bass: { patterns: [{ pattern: 'r.....r.o...r.f.' }], wave: 'sawtooth', octave: 2, cutoff: 650, volume: 0.5 },
+        pad: { wave: 'sawtooth', octave: 3, cutoff: 1100, volume: 0.16 },
+        arp: { rate: 8, octave: 4, wave: 'triangle', volume: 0.12 },
+        lead: {
+            wave: 'square',
+            volume: 0.14,
+            bars: [
+                'E5 - D5 C5 - A4 - C5',
+                'D5 - C5 A4 - - F4 G4',
+                'E5 - G5 E5 - D5 - C5',
+                'D5 - - - . G4 A4 B4',
+                'C5 - B4 A4 - E5 - -',
+                'F5 - E5 D5 - C5 - A4',
+                'D5 - F5 - E5 - D5 C5',
+                'B4 - - - G#4 - E5 -',
+                'A5 - - G5 E5 - - -',
+                'F5 - E5 - C5 - - -',
+                'G5 - - E5 G5 - C6 -',
+                'B5 - - - G5 - D5 -',
+                'E5 - D5 C5 - A4 - C5',
+                'D5 - C5 A4 - - F4 G4',
+                'A4 - D5 - F5 - E5 D5',
+                'E5 - - - - - . .',
+            ],
+        },
+        leadStart: 4,
+    },
+    run: {
+        id: 'run',
+        title: 'Breach Protocol',
+        bpm: 132,
+        swing: 0,
+        chords: ['Em', 'Em', 'C', 'D', 'Em', 'Em', 'C', 'B'],
+        drums: {
+            kick: [{ pattern: 'a...x...a...x...' }],
+            snare: [{ pattern: '....x.......x...', minIntensity: 1 }, { pattern: '....x.......x.xx', minIntensity: 2, volume: 0.5 }],
+            hat: [{ pattern: '..x...x...x...x.' }, { pattern: 'x.x.x.x.x.x.x.x.', minIntensity: 1, volume: 0.4 }, { pattern: 'xxxxxxxxxxxxxxxx', minIntensity: 2, volume: 0.3 }],
+            open: [{ pattern: '..x...x...x...x.', minIntensity: 2, volume: 0.5 }],
+        },
+        bass: {
+            patterns: [{ pattern: 'r.r.r.r.r.r.o.r.' }, { pattern: 'rrrrrrrrrrrrorro', minIntensity: 1 }],
+            wave: 'sawtooth',
+            octave: 2,
+            cutoff: 900,
+            volume: 0.5,
+        },
+        stab: { pattern: 'x.....x...x.....', wave: 'sawtooth', octave: 4, cutoff: 2400, volume: 0.13, minIntensity: 1 },
+        pad: { wave: 'sawtooth', octave: 3, cutoff: 700, volume: 0.1 },
+        arp: { rate: 16, octave: 4, wave: 'square', volume: 0.07, minIntensity: 1 },
+        lead: {
+            wave: 'sawtooth',
+            volume: 0.13,
+            minIntensity: 1,
+            octaveUpAt: 2,
+            bars: [
+                'E5 - G5 - A5 - B5 -',
+                'A5 G5 E5 - D5 - E5 -',
+                'G5 - E5 - C5 - E5 G5',
+                'F#5 - - - D5 - F#5 A5',
+                'B5 - A5 G5 - E5 - G5',
+                'A5 - B5 - G5 - E5 -',
+                'E5 G5 C6 - B5 - G5 E5',
+                'D#5 - F#5 - B5 - - -',
+            ],
+        },
+        leadStart: 8,
+    },
+};
+// ---------- Music theory helpers (shared by the player and the content test) ----------
+const SEMITONES = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
+/** 'E5' -> MIDI note number, or null if it isn't a note. */
+function noteToMidi(note) {
+    const m = /^([A-G][#b]?)(-?\d)$/.exec(note);
+    if (!m || SEMITONES[m[1]] === undefined)
+        return null;
+    return 12 * (Number(m[2]) + 1) + SEMITONES[m[1]];
+}
+/** 'Am' -> { root: semitone 0-11, tones: semitone offsets }, or null. */
+function parseChord(chord) {
+    const m = /^([A-G][#b]?)(m|dim|sus4|sus2)?$/.exec(chord);
+    if (!m || SEMITONES[m[1]] === undefined)
+        return null;
+    const tones = { m: [0, 3, 7], dim: [0, 3, 6], sus4: [0, 5, 7], sus2: [0, 2, 7] }[m[2] ?? ''] ?? [0, 4, 7];
+    return { root: SEMITONES[m[1]], tones };
+}
+
+__m["content/music"] = { SONGS, noteToMidi, parseChord };
+})();
 // ---- content/index ----
 (() => {
 // All game content in one place. Each file is plain data; see the comment at
@@ -873,7 +1201,11 @@ __m["content/npcs"] = { NPCS };
 
 
 
-__m["content/index"] = { ...__m["content/programs"], ...__m["content/mods"], ...__m["content/enemies"], ...__m["content/sectors"], ...__m["content/events"], ...__m["content/economy"], ...__m["content/fixers"], ...__m["content/cyberware"], ...__m["content/dealer"], ...__m["content/npcs"] };
+
+
+
+
+__m["content/index"] = { ...__m["content/programs"], ...__m["content/mods"], ...__m["content/enemies"], ...__m["content/sectors"], ...__m["content/events"], ...__m["content/economy"], ...__m["content/fixers"], ...__m["content/cyberware"], ...__m["content/dealer"], ...__m["content/npcs"], ...__m["content/decks"], ...__m["content/upgrades"], ...__m["content/skills"], ...__m["content/music"] };
 })();
 // ---- engine/content ----
 (() => {
@@ -882,6 +1214,72 @@ __m["content/index"] = { ...__m["content/programs"], ...__m["content/mods"], ...
 
 
 __m["engine/content"] = { ...__m["content/index"] };
+})();
+// ---- engine/programs ----
+(() => {
+// Upgraded program definitions. Everything that shows or runs a program goes
+// through programDef(id, level), so upgrades apply everywhere at once.
+const { PROGRAMS, RELIC_UPGRADE_COST, UPGRADE_LEVELS, NO_UPGRADE } = __m["engine/content"];
+const MAX_UPGRADE = UPGRADE_LEVELS.length - 1;
+const cache = new Map();
+function programDef(id, level = 0) {
+    const base = PROGRAMS[id];
+    if (!base)
+        throw new Error(`Unknown program ${id}`);
+    const lv = Math.max(0, Math.min(MAX_UPGRADE, level));
+    if (lv === 0)
+        return base;
+    const key = `${id}@${lv}`;
+    const hit = cache.get(key);
+    if (hit)
+        return hit;
+    const u = UPGRADE_LEVELS[lv];
+    const up = (n) => (n === undefined ? undefined : Math.round(n * u.scale));
+    const p = {
+        ...base,
+        name: `${base.name} ${u.suffix}`,
+        cooldown: Math.max(0, base.cooldown + u.cooldown),
+        damage: up(base.damage),
+        block: up(base.block),
+        heal: up(base.heal),
+        // Only Trace reduction scales; a Trace cost (like Overclock's) stays the same.
+        trace: base.trace !== undefined && base.trace < 0 ? up(base.trace) : base.trace,
+        weak: base.weak !== undefined ? base.weak + u.extra : undefined,
+        ram: base.ram !== undefined ? base.ram + u.extra : undefined,
+        worm: base.worm ? { dmg: Math.round(base.worm.dmg * u.scale), turns: base.worm.turns } : undefined,
+    };
+    p.text = describe(p);
+    cache.set(key, p);
+    return p;
+}
+/** Data needed to take a program from `level` to the next one, or null at max. */
+function upgradeCost(id, level) {
+    if (NO_UPGRADE.includes(id) || level >= MAX_UPGRADE)
+        return null;
+    const cost = UPGRADE_LEVELS[level + 1].cost;
+    return PROGRAMS[id]?.relic ? cost * RELIC_UPGRADE_COST : cost;
+}
+/** Plain-words effect line built from a program's numbers. */
+function describe(p) {
+    const parts = [];
+    if (p.damage)
+        parts.push(`${p.damage} ${p.layer ?? ''} dmg${p.aoe ? ' to ALL' : ''}${p.pierce ? ', ignores layers' : ''}`.replace('  ', ' '));
+    if (p.weak)
+        parts.push(`Weak ${p.weak}`);
+    if (p.worm)
+        parts.push(`Worm ${p.worm.dmg}/turn ×${p.worm.turns}`);
+    if (p.block)
+        parts.push(`Block ${p.block}`);
+    if (p.heal)
+        parts.push(`repair ${p.heal}`);
+    if (p.ram)
+        parts.push(`+${p.ram} RAM`);
+    if (p.trace)
+        parts.push(`Trace ${p.trace > 0 ? '+' : ''}${p.trace}%`);
+    return parts.join(', ');
+}
+
+__m["engine/programs"] = { MAX_UPGRADE, programDef, upgradeCost, describe };
 })();
 // ---- engine/rng ----
 (() => {
@@ -929,7 +1327,8 @@ __m["engine/rng"] = { nextRandom, Rng };
 // banked up to the deck's max. Every function takes a state and returns a NEW state plus a list
 // of events for the UI to animate. Timing results (perfect/good/miss) are inputs:
 // the UI measures the tap, the engine never touches timers.
-const { ENEMIES, PROGRAMS } = __m["engine/content"];
+const { ENEMIES } = __m["engine/content"];
+const { programDef } = __m["engine/programs"];
 const { Rng } = __m["engine/rng"];
 const TUNING = {
     exploit: { perfect: 1.5, good: 1, miss: 0.75, perfectTraceBonus: -3 },
@@ -959,9 +1358,11 @@ function createCombat(setup) {
         trace: setup.trace ?? 0,
         traceTick: Math.max(1, TUNING.traceTick + (setup.traceTickDelta ?? 0)),
         ramTurn1Bonus: setup.ramTurn1Bonus ?? 0,
+        ramDrain: 0,
+        bonus: { damage: setup.damageBonus ?? 0, match: setup.matchBonus ?? 0, block: setup.blockBonus ?? 0, cmReset: setup.countermeasureReset ?? 0 },
         revive: setup.revive ?? 0,
         reviveUsed: false,
-        slots: setup.programs.map((defId) => ({ defId, cooldown: 0 })),
+        slots: setup.programs.map((defId) => ({ defId, cooldown: 0, level: setup.upgrades?.[defId] ?? 0 })),
         enemies: [],
         enemyQueue: [],
         nextUid: 1,
@@ -993,7 +1394,7 @@ function spawnEnemy(s, defId, patternIndex) {
     };
 }
 // ---------- Queries the UI uses ----------
-const programOf = (slot) => PROGRAMS[slot.defId];
+const programOf = (slot) => programDef(slot.defId, slot.level ?? 0);
 const living = (s) => s.enemies.filter((e) => e.core > 0);
 function canPlay(s, slotIndex) {
     const slot = s.slots[slotIndex];
@@ -1044,7 +1445,7 @@ function playProgram(prev, slotIndex, targetUid, timing = 'good') {
         target = alive[0] ?? null;
     if (p.kind === 'attack' && p.damage) {
         const mult = TUNING.exploit[timing];
-        const dmg = Math.max(1, Math.round(p.damage * mult));
+        const dmg = Math.max(1, Math.round((p.damage + s.bonus.damage) * mult));
         const targets = p.aoe ? alive : target ? [target] : [];
         for (const t of targets) {
             damageEnemy(s, t, dmg, p.pierce ? 'pierce' : p.layer ?? null, events);
@@ -1060,9 +1461,16 @@ function playProgram(prev, slotIndex, targetUid, timing = 'good') {
             : { ...p.worm };
         events.push({ kind: 'log', text: `${target.name} infected` });
     }
+    if (p.heal) {
+        const before = s.integrity;
+        s.integrity = Math.min(s.integrityMax, s.integrity + p.heal);
+        if (s.integrity > before)
+            events.push({ kind: 'heal', amount: s.integrity - before });
+    }
     if (p.block) {
-        s.block += p.block;
-        events.push({ kind: 'shield', amount: p.block });
+        const block = p.block + s.bonus.block;
+        s.block += block;
+        events.push({ kind: 'shield', amount: block });
     }
     if (p.trace)
         changeTrace(s, p.trace, events);
@@ -1155,6 +1563,11 @@ function resolveEnemyAction(prev, timing = 'miss') {
             case 'charge':
                 events.push({ kind: 'log', text: `${e.name} is charging...` });
                 break;
+            case 'drain':
+                s.ramDrain += intent.value;
+                events.push({ kind: 'drain', amount: intent.value });
+                events.push({ kind: 'log', text: `${e.name} drains ${intent.value} RAM from your next turn` });
+                break;
             case 'scramble': {
                 // Locks random ready programs: they sit out the player's next turn.
                 const rng = new Rng(s);
@@ -1163,7 +1576,7 @@ function resolveEnemyAction(prev, timing = 'miss') {
                 for (const slot of hit)
                     slot.cooldown = 2;
                 if (hit.length)
-                    events.push({ kind: 'log', text: `${e.name} scrambles ${hit.map((x) => PROGRAMS[x.defId].name).join(', ')}` });
+                    events.push({ kind: 'log', text: `${e.name} scrambles ${hit.map((x) => programOf(x).name).join(', ')}` });
                 break;
             }
         }
@@ -1195,7 +1608,7 @@ function damageEnemy(s, e, base, type, events) {
     if (type !== 'pierce') {
         while (remaining > 0 && e.layers.length > 0) {
             const layer = e.layers[e.layers.length - 1];
-            const mult = type === null ? 1 : type === layer.type ? TUNING.layerMatch : TUNING.layerMismatch;
+            const mult = type === null ? 1 : type === layer.type ? TUNING.layerMatch + s.bonus.match : TUNING.layerMismatch;
             const effective = remaining * mult;
             if (effective >= layer.hp) {
                 dealt += layer.hp;
@@ -1252,6 +1665,10 @@ function startPlayerTurn(s, events) {
     s.block = 0;
     // RAM refills; unspent RAM is banked up to the deck's max.
     s.ram = s.turn === 1 ? s.ramPerTurn + s.ramTurn1Bonus : Math.min(Math.max(s.ramMax, s.ramPerTurn), s.ram + s.ramPerTurn);
+    if (s.ramDrain > 0) {
+        s.ram = Math.max(0, s.ram - s.ramDrain);
+        s.ramDrain = 0;
+    }
     for (const slot of s.slots)
         if (slot.cooldown > 0)
             slot.cooldown -= 1;
@@ -1289,7 +1706,7 @@ function checkEnd(s, events) {
  * fight if there's room; otherwise it strikes once. Trace then drops back.
  */
 function countermeasure(s, events) {
-    s.trace = TUNING.traceAfterCountermeasure;
+    s.trace = Math.max(0, TUNING.traceAfterCountermeasure + s.bonus.cmReset);
     const alive = living(s);
     if (alive.length < TUNING.maxEnemies) {
         const hunter = spawnEnemy(s, 'hunter', 0);
@@ -1403,6 +1820,15 @@ function generateSector(holder, sectorId, index) {
             delete swap.encounter;
         }
     }
+    // Sometimes a rogue AI lurks on the map: optional, deadly, guarding a relic.
+    if (def.rogue && rng.next() < def.rogue.chance) {
+        const spots = rows.slice(2, MIDDLE_ROWS + 1).flat().filter((n) => n.type === 'fight' || n.type === 'event' || n.type === 'cache');
+        if (spots.length) {
+            const spot = rng.pick(spots);
+            spot.type = 'rogue';
+            spot.encounter = rng.pick(def.rogue.encounters);
+        }
+    }
     rows.push([make(MIDDLE_ROWS + 1, 0.5, 'boss')]);
     // Paths: each node links to the nearest node below, sometimes a neighbour too.
     for (let r = 0; r < rows.length - 1; r++) {
@@ -1434,18 +1860,27 @@ __m["engine/map"] = { MIDDLE_ROWS, findNode, generateSector };
 (() => {
 // A run: three sector maps, walked node by node. Fights, shops, events, caches,
 // safe nodes and jack-out points. Pure logic, like combat.
-const { CONTRACTS, CYBERWARE, EVENTS, LOOT_MODS, LOOT_PROGRAMS, MAX_SLOTS, MODS, PRICES, PROGRAMS, REWARDS, STARTER_LOADOUT } = __m["engine/content"];
+const { CONTRACTS, CYBERWARE, DECKS, ENEMIES, SKILLS, EVENTS, RELIC_PROGRAMS, LOOT_MODS, LOOT_PROGRAMS, MAX_SLOTS, MODS, PRICES, PROGRAMS, REWARDS, STARTER_LOADOUT } = __m["engine/content"];
 const { createCombat, TUNING } = __m["engine/combat"];
 const { findNode, generateSector } = __m["engine/map"];
 const { Rng } = __m["engine/rng"];
-function perksFrom(cyberware) {
-    const p = { ramTurn1: 0, blockWindow: 1, exploitWindow: 1, revive: 0, traceTick: 0, maxIntegrity: 0, startCredits: 0 };
-    for (const id of cyberware) {
-        const perk = CYBERWARE[id]?.perk;
+function perksFrom(cyberware, deckId, skills = []) {
+    const p = {
+        ramTurn1: 0, blockWindow: 1, exploitWindow: 1, revive: 0, traceTick: 0, maxIntegrity: 0, startCredits: 0,
+        damageBonus: 0, matchBonus: 0, ramMax: 0, cacheSafe: 0, countermeasureReset: 0, dataBonus: 0, traceAfterFight: 0, repairAfterFight: 0, blockBonus: 0,
+    };
+    const all = [
+        ...cyberware.map((id) => CYBERWARE[id]?.perk),
+        ...(deckId ? DECKS[deckId]?.perks ?? [] : []),
+        ...skills.map((id) => SKILLS[id]?.perk),
+    ];
+    for (const perk of all) {
         if (!perk)
             continue;
         if (perk.kind === 'blockWindow' || perk.kind === 'exploitWindow')
             p[perk.kind] *= perk.value;
+        else if (perk.kind === 'revive')
+            p.revive = Math.max(p.revive, perk.value); // the best revive, not a sum
         else
             p[perk.kind] += perk.value;
     }
@@ -1460,8 +1895,9 @@ const DEFAULT_SETUP = () => ({
     cyberware: [],
 });
 function newRun(seed, setup = DEFAULT_SETUP()) {
-    const perks = perksFrom(setup.cyberware);
-    const loadout = structuredClone(STARTER_LOADOUT);
+    const deck = DECKS[setup.deck ?? ''] ?? DECKS.kestrel;
+    const perks = perksFrom(setup.cyberware, deck.id, setup.skills ?? []);
+    const loadout = { chassis: deck.name, slots: deck.slots, ramPerTurn: deck.ramPerTurn, ramMax: deck.ramMax + perks.ramMax, equipped: [], stash: [] };
     loadout.equipped = setup.programs.slice(0, loadout.slots);
     loadout.stash = setup.programs.slice(loadout.slots);
     const run = {
@@ -1491,6 +1927,10 @@ function newRun(seed, setup = DEFAULT_SETUP()) {
         reviveUsed: false,
         highAlert: setup.contract.modifiers.includes('highAlert'),
         traceTickBonus: setup.contract.modifiers.includes('rush') ? 2 : 0,
+        relics: [],
+        known: [...(setup.owned ?? setup.programs)],
+        upgrades: { ...(setup.upgrades ?? {}) },
+        sectorsCleared: 0,
     };
     enterSector(run, 0);
     return run;
@@ -1503,8 +1943,12 @@ function enterSector(run, sector) {
     run.trace = run.highAlert ? 20 : 0;
     run.phase = 'map';
 }
+/** Data after skill bonuses (Data Hound). */
+function gainData(run, n) {
+    return Math.round(n * (1 + run.perks.dataBonus));
+}
 function outcomeOf(run, kind) {
-    return { kind, credits: run.credits, data: run.data, sector: run.sector, integrityLeft: run.integrity / run.integrityMax };
+    return { kind, credits: run.credits, data: run.data, sector: run.sector, integrityLeft: run.integrity / run.integrityMax, relics: [...run.relics], fightsWon: run.fightsWon, sectorsCleared: run.sectorsCleared };
 }
 // ---------- Queries ----------
 const currentNode = (run) => findNode(run.map, run.at);
@@ -1524,18 +1968,19 @@ function moveTo(prev, nodeId) {
         case 'fight':
         case 'elite':
         case 'boss':
+        case 'rogue':
             run.phase = 'combat';
             break;
         case 'cache': {
-            if (rng.next() < 0.3) {
-                const data = 6 + rng.int(6);
+            if (!run.perks.cacheSafe && rng.next() < 0.3) {
+                const data = gainData(run, 6 + rng.int(6));
                 run.data += data;
                 const lines = [`+${data} data`, 'It was a trap: Trace +22%'];
                 addTrace(run, 22, lines);
                 run.notice = { title: 'Data cache', lines };
             }
             else {
-                const data = 12 + rng.int(14), credits = 4 + rng.int(8);
+                const data = gainData(run, 12 + rng.int(14)), credits = 4 + rng.int(8);
                 run.data += data;
                 run.credits += credits;
                 run.notice = { title: 'Data cache', lines: [`+${data} data`, `+${credits} credits`] };
@@ -1567,7 +2012,7 @@ function moveTo(prev, nodeId) {
 function addTrace(run, delta, lines) {
     run.trace = Math.max(0, Math.min(100, run.trace + delta));
     if (run.trace >= 100) {
-        run.trace = TUNING.traceAfterCountermeasure;
+        run.trace = Math.max(0, TUNING.traceAfterCountermeasure + run.perks.countermeasureReset);
         run.alert = true;
         lines.push('TRACE COMPLETE: a Hunter-Killer will join your next fight');
     }
@@ -1585,6 +2030,11 @@ function startFight(run) {
         seed: Math.floor(rng.next() * 2 ** 31),
         encounter: currentNode(run).encounter ?? ['tracer'],
         programs: run.loadout.equipped,
+        upgrades: run.upgrades,
+        damageBonus: run.perks.damageBonus,
+        matchBonus: run.perks.matchBonus,
+        blockBonus: run.perks.blockBonus,
+        countermeasureReset: run.perks.countermeasureReset,
         ramPerTurn: run.loadout.ramPerTurn,
         ramMax: run.loadout.ramMax,
         integrity: run.integrity,
@@ -1609,16 +2059,30 @@ function finishFight(prev, combat) {
         return run;
     }
     run.fightsWon += 1;
-    run.integrity = Math.min(run.integrityMax, combat.integrity + REPAIR_AFTER_FIGHT);
+    run.integrity = Math.min(run.integrityMax, combat.integrity + REPAIR_AFTER_FIGHT + run.perks.repairAfterFight);
+    if (run.perks.traceAfterFight)
+        run.trace = Math.max(0, run.trace + run.perks.traceAfterFight);
     const node = currentNode(run);
     const rng = new Rng(run);
-    const kind = node.type === 'boss' ? 'boss' : node.type === 'elite' ? 'elite' : 'fight';
+    const kind = node.type === 'boss' ? 'boss' : node.type === 'elite' ? 'elite' : node.type === 'rogue' ? 'rogue' : 'fight';
     run.credits += range(rng, REWARDS[kind].credits);
-    run.data += REWARDS[kind].data;
-    run.loot = kind === 'elite' ? rollPrograms(run, 3) : rollLoot(run);
+    run.data += gainData(run, REWARDS[kind].data);
+    const rogueBeaten = (node.encounter ?? []).some((id) => ENEMIES[id]?.rogue);
+    run.loot = rogueBeaten ? rollRelics(run, 2) : kind === 'elite' ? rollPrograms(run, 3) : rollLoot(run);
+    if (rogueBeaten && !run.loot.length)
+        run.loot = rollLoot(run);
     if (node.type === 'boss') {
+        run.sectorsCleared += 1;
         if (run.sector >= run.sectorIds.length - 1) {
-            run.data += REWARDS.winBonusData;
+            run.data += gainData(run, REWARDS.winBonusData);
+            // A rogue final boss leaves its relic behind automatically.
+            if (rogueBeaten) {
+                const [relic] = rollRelics(run, 1);
+                if (relic) {
+                    addProgram(run, relic.id);
+                    run.relics.push(relic.id);
+                }
+            }
             run.outcome = outcomeOf(run, 'won');
             run.afterLoot = 'over';
         }
@@ -1633,6 +2097,10 @@ function finishFight(prev, combat) {
 function rollPrograms(run, n) {
     const have = owned(run.loadout);
     return new Rng(run).shuffle(LOOT_PROGRAMS.filter((id) => !have.has(id))).slice(0, n).map((id) => ({ kind: 'program', id }));
+}
+function rollRelics(run, n) {
+    const have = new Set([...owned(run.loadout), ...run.known]);
+    return new Rng(run).shuffle(RELIC_PROGRAMS.filter((id) => !have.has(id))).slice(0, n).map((id) => ({ kind: 'program', id }));
 }
 function availableMods(run) {
     return LOOT_MODS.filter((id) => !(MODS[id].kind === 'slot' && run.loadout.slots >= MAX_SLOTS));
@@ -1684,8 +2152,11 @@ function applyMod(run, id) {
 function takeLoot(prev, index) {
     const run = structuredClone(prev);
     const item = index === null ? null : run.loot[index];
-    if (item?.kind === 'program')
+    if (item?.kind === 'program') {
         addProgram(run, item.id);
+        if (PROGRAMS[item.id]?.relic)
+            run.relics.push(item.id);
+    }
     else if (item?.kind === 'mod')
         applyMod(run, item.id);
     run.loot = [];
@@ -1784,8 +2255,8 @@ function applyEffect(run, fx, lines) {
             lines.push(`+${fx.value} credits`);
             break;
         case 'data':
-            run.data += fx.value;
-            lines.push(`+${fx.value} data`);
+            run.data += gainData(run, fx.value);
+            lines.push(`+${gainData(run, fx.value)} data`);
             break;
         case 'trace':
             lines.push(`Trace ${fx.value > 0 ? '+' : ''}${fx.value}%`);
@@ -2283,26 +2754,97 @@ __m["ui/rain"] = { startRain };
 // ---- ui/sfx ----
 (() => {
 // Tiny synthesized sound effects with Web Audio: no files, works offline.
-// iOS only allows audio after a user tap, so call unlockAudio() from a tap handler.
+// Mobile browsers only allow audio after a tap, so unlockAudio() runs on the
+// first touch anywhere (see installAudioUnlock) and again on every tap.
 let ctx = null;
+let master = null;
+let out = null;
+const readyListeners = [];
 let enabled = true;
+let silentLoop = null;
+/** Overall loudness. Individual sounds are mixed relative to this. */
+const VOLUME = 3.2;
+// A short silent clip, looped while the game is open. Playing a media element
+// moves iOS into the "playback" audio category, so sound isn't silenced by the
+// ring/silent switch on older iOS versions.
+const SILENCE = 'data:audio/wav;base64,UklGRvQHAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YdAHAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
 function setSound(on) {
     enabled = on;
+    if (!on)
+        silentLoop?.pause();
+    else if (silentLoop)
+        void silentLoop.play().catch(() => { });
 }
 function unlockAudio() {
+    if (!enabled)
+        return;
     try {
-        if (!ctx)
-            ctx = new AudioContext();
-        if (ctx.state === 'suspended')
+        // iOS 17+: ask for the playback session so the silent switch doesn't mute us.
+        const session = navigator.audioSession;
+        if (session && session.type !== 'playback')
+            session.type = 'playback';
+        if (!ctx) {
+            const AC = window.AudioContext ?? window.webkitAudioContext;
+            ctx = new AC();
+            // Master gain into a compressor: louder overall without harsh clipping.
+            const comp = ctx.createDynamicsCompressor();
+            comp.threshold.value = -14;
+            comp.ratio.value = 4;
+            master = ctx.createGain();
+            master.gain.value = 0.9;
+            master.connect(comp).connect(ctx.destination);
+            out = comp;
+            // Older iOS needs a sound started inside the tap to fully unlock.
+            const buf = ctx.createBuffer(1, 1, 22050);
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            src.connect(ctx.destination);
+            src.start(0);
+        }
+        if (ctx.state !== 'running')
             void ctx.resume();
+        if (!silentLoop) {
+            silentLoop = new Audio(SILENCE);
+            silentLoop.loop = true;
+            silentLoop.setAttribute('playsinline', '');
+            silentLoop.volume = 0.01;
+        }
+        if (silentLoop.paused)
+            void silentLoop.play().catch(() => { });
+        for (const fn of readyListeners)
+            fn();
     }
     catch {
-        ctx = null;
+        /* audio unavailable: the game plays silently */
     }
 }
+/** Unlock on the very first touch or click anywhere, before any game handler. */
+function installAudioUnlock() {
+    const once = () => unlockAudio();
+    for (const type of ['pointerdown', 'touchend', 'click', 'keydown'])
+        document.addEventListener(type, once, { capture: true, passive: true });
+    // Coming back to the app (iOS suspends audio in the background).
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && ctx && ctx.state !== 'running')
+            void ctx.resume();
+    });
+}
+/** The audio context and the shared output (after the first tap), for music. */
+function audioOut() {
+    return ctx && out ? { ctx, out } : null;
+}
+/** Run something whenever audio becomes available (first tap, every tap after). */
+function onAudioReady(fn) {
+    readyListeners.push(fn);
+}
+function audioState() {
+    return ctx ? ctx.state : 'not started';
+}
 function tone(freq, dur = 0.08, type = 'square', vol = 0.04, slideTo, delay = 0) {
-    if (!enabled || !ctx)
+    if (!enabled || !ctx || !master)
         return;
+    if (ctx.state !== 'running')
+        void ctx.resume();
     const t = ctx.currentTime + delay;
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -2310,9 +2852,9 @@ function tone(freq, dur = 0.08, type = 'square', vol = 0.04, slideTo, delay = 0)
     osc.frequency.setValueAtTime(freq, t);
     if (slideTo)
         osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
-    gain.gain.setValueAtTime(vol, t);
+    gain.gain.setValueAtTime(Math.min(0.5, vol * VOLUME), t);
     gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    osc.connect(gain).connect(ctx.destination);
+    osc.connect(gain).connect(master);
     osc.start(t);
     osc.stop(t + dur + 0.02);
 }
@@ -2340,7 +2882,287 @@ function buzz(pattern) {
     }
 }
 
-__m["ui/sfx"] = { setSound, unlockAudio, sfx, buzz };
+__m["ui/sfx"] = { setSound, unlockAudio, installAudioUnlock, audioOut, onAudioReady, audioState, sfx, buzz };
+})();
+// ---- ui/music ----
+(() => {
+// Plays the soundtrack (content/music.ts) with Web Audio synthesizers: a step
+// sequencer schedules notes slightly ahead of time, so playback stays tight
+// even when the page is busy. Tracks crossfade; intensity adds layers live.
+const { noteToMidi, parseChord, SONGS } = __m["engine/content"];
+const { audioOut } = __m["ui/sfx"];
+const LOOKAHEAD = 0.15; // seconds scheduled ahead
+const TICK_MS = 25;
+const MUSIC_VOLUME = 0.5;
+let enabled = true;
+let wantedSong = null;
+let intensity = 0;
+let current = null;
+let bus = null;
+let noise = null;
+let timer = null;
+const freq = (midi) => 440 * Math.pow(2, (midi - 69) / 12);
+function setMusicEnabled(on) {
+    enabled = on;
+    if (!on)
+        stopCurrent(0.6);
+    else
+        update(wantedSong, intensity);
+}
+/** Tell the player what should be playing. Safe to call on every render. */
+function update(songId, level) {
+    wantedSong = songId;
+    intensity = level;
+    const audio = audioOut();
+    if (!audio || !enabled)
+        return;
+    const { ctx, out } = audio;
+    if (!bus) {
+        bus = ctx.createGain();
+        bus.gain.value = MUSIC_VOLUME;
+        bus.connect(out);
+        const len = ctx.sampleRate;
+        noise = ctx.createBuffer(1, len, ctx.sampleRate);
+        const data = noise.getChannelData(0);
+        for (let i = 0; i < len; i++)
+            data[i] = Math.random() * 2 - 1;
+    }
+    if (!songId || !SONGS[songId])
+        return stopCurrent(1.2);
+    if (current?.song.id === songId)
+        return;
+    stopCurrent(1.5);
+    current = startTrack(ctx, SONGS[songId]);
+    if (timer === null)
+        timer = window.setInterval(tick, TICK_MS);
+}
+function startTrack(ctx, song, dest = bus) {
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(1, ctx.currentTime + 1.5);
+    gain.connect(dest);
+    // Echo for the lead and arp: dotted eighth, a few repeats.
+    const beat = 60 / song.bpm;
+    const delay = ctx.createDelay(2);
+    delay.delayTime.value = beat * 0.75;
+    const feedback = ctx.createGain();
+    feedback.gain.value = 0.32;
+    const wet = ctx.createGain();
+    wet.gain.value = 0.28;
+    const delayIn = ctx.createGain();
+    delayIn.connect(delay);
+    delay.connect(feedback).connect(delay);
+    delay.connect(wet).connect(gain);
+    return { song, gain, delayIn, step: 0, nextTime: ctx.currentTime + 0.08 };
+}
+function stopCurrent(fade) {
+    const audio = audioOut();
+    if (!current || !audio)
+        return;
+    const { ctx } = audio;
+    const old = current;
+    current = null;
+    old.gain.gain.cancelScheduledValues(ctx.currentTime);
+    old.gain.gain.setValueAtTime(Math.max(0.0001, old.gain.gain.value), ctx.currentTime);
+    old.gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + fade);
+    setTimeout(() => old.gain.disconnect(), fade * 1000 + 3000);
+}
+function tick() {
+    const audio = audioOut();
+    if (!audio || !current)
+        return;
+    const { ctx } = audio;
+    if (ctx.state !== 'running')
+        return;
+    const stepDur = 60 / current.song.bpm / 4;
+    // If we fell far behind (tab was hidden), skip ahead instead of bursting notes.
+    if (current.nextTime < ctx.currentTime - 0.5)
+        current.nextTime = ctx.currentTime + 0.05;
+    while (current.nextTime < ctx.currentTime + LOOKAHEAD) {
+        playStep(ctx, current, current.step, current.nextTime, stepDur);
+        current.step += 1;
+        current.nextTime += stepDur;
+    }
+}
+function playStep(ctx, tr, step, time, stepDur) {
+    const song = tr.song;
+    const s = step % 16;
+    const songBar = Math.floor(step / 16);
+    const bar = songBar % song.chords.length;
+    const t = s % 2 ? time + song.swing * stepDur : time;
+    const chord = parseChord(song.chords[bar]) ?? { root: 9, tones: [0, 3, 7] };
+    const on = (p) => (p.minIntensity ?? 0) <= intensity;
+    // Drums
+    for (const [kind, parts] of Object.entries(song.drums)) {
+        for (const part of parts ?? []) {
+            const c = part.pattern[s];
+            if (!on(part) || (c !== 'x' && c !== 'a'))
+                continue;
+            drum(ctx, tr.gain, kind, t, (part.volume ?? 1) * (c === 'a' ? 1.2 : 1));
+        }
+    }
+    // Bass: the most intense pattern that's unlocked.
+    const bassPattern = [...song.bass.patterns].filter(on).sort((a, b) => (b.minIntensity ?? 0) - (a.minIntensity ?? 0))[0];
+    const bc = bassPattern?.pattern[s];
+    if (bc && bc !== '.') {
+        const offset = bc === 'o' ? 12 : bc === 'f' ? 7 : 0;
+        const midi = 12 * (song.bass.octave + 1) + chord.root + offset;
+        synth(ctx, tr.gain, song.bass.wave, freq(midi), t, stepDur * 1.7, song.bass.cutoff * (1 + 0.35 * intensity), song.bass.volume, 0.004);
+    }
+    // Pad: the bar's chord, held.
+    if (song.pad && on(song.pad) && s === 0) {
+        for (const tone of chord.tones) {
+            const f = freq(12 * (song.pad.octave + 1) + chord.root + tone);
+            for (const detune of [-8, 8])
+                synth(ctx, tr.gain, song.pad.wave, f, t, stepDur * 15.5, song.pad.cutoff, song.pad.volume / 3, 0.35, detune);
+        }
+    }
+    // Chord stabs
+    if (song.stab && on(song.stab) && song.stab.pattern[s] === 'x') {
+        for (const tone of chord.tones)
+            synth(ctx, tr.gain, song.stab.wave, freq(12 * (song.stab.octave + 1) + chord.root + tone), t, stepDur * 1.2, song.stab.cutoff, song.stab.volume / 3, 0.003);
+    }
+    // Arpeggio over the chord, two octaves up and down.
+    if (song.arp && on(song.arp) && (song.arp.rate === 16 || s % 2 === 0)) {
+        const seq = [...chord.tones, ...chord.tones.map((x) => x + 12), 19, ...chord.tones.map((x) => x + 12).reverse().slice(1)];
+        const i = (song.arp.rate === 16 ? s : s / 2) % seq.length;
+        const f = freq(12 * (song.arp.octave + 1) + chord.root + seq[i]);
+        synth(ctx, tr.gain, song.arp.wave, f, t, stepDur * 0.9, 3000, song.arp.volume, 0.003, 0, tr.delayIn);
+    }
+    // Lead melody, after the intro bars.
+    const lead = song.lead;
+    if (on(lead) && songBar >= song.leadStart && s % 2 === 0) {
+        const tokens = lead.bars[(songBar - song.leadStart) % lead.bars.length].split(/\s+/);
+        const tok = tokens[s / 2];
+        const midi = tok ? noteToMidi(tok) : null;
+        if (midi !== null) {
+            let holds = 0;
+            for (let k = s / 2 + 1; k < tokens.length && tokens[k] === '-'; k++)
+                holds++;
+            const dur = (1 + holds) * stepDur * 2 * 0.92;
+            synth(ctx, tr.gain, lead.wave, freq(midi), t, dur, 2600, lead.volume, 0.01, 6, tr.delayIn, true);
+            if (lead.octaveUpAt !== undefined && intensity >= lead.octaveUpAt)
+                synth(ctx, tr.gain, 'square', freq(midi + 12), t, dur, 3200, lead.volume * 0.45, 0.01, -6, tr.delayIn);
+        }
+    }
+}
+/** One synth note: oscillator -> lowpass -> envelope -> track (and optional echo send). */
+function synth(ctx, dest, wave, f, t, dur, cutoff, vol, attack, detune = 0, send, vibrato = false) {
+    const osc = ctx.createOscillator();
+    osc.type = wave;
+    osc.frequency.setValueAtTime(f, t);
+    osc.detune.value = detune;
+    if (vibrato && dur > 0.25) {
+        const lfo = ctx.createOscillator();
+        const depth = ctx.createGain();
+        lfo.frequency.value = 5.5;
+        depth.gain.setValueAtTime(0, t);
+        depth.gain.linearRampToValueAtTime(f * 0.006, t + Math.min(dur, 0.4));
+        lfo.connect(depth).connect(osc.frequency);
+        lfo.start(t);
+        lfo.stop(t + dur + 0.1);
+    }
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(cutoff * 1.6, t);
+    filter.frequency.exponentialRampToValueAtTime(Math.max(120, cutoff * 0.6), t + Math.max(0.05, dur));
+    const env = ctx.createGain();
+    const release = Math.min(0.25, dur * 0.4);
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.linearRampToValueAtTime(vol, t + attack);
+    env.gain.setValueAtTime(vol, t + Math.max(attack, dur - release));
+    env.gain.exponentialRampToValueAtTime(0.0001, t + dur + release);
+    osc.connect(filter).connect(env).connect(dest);
+    if (send)
+        env.connect(send);
+    osc.start(t);
+    osc.stop(t + dur + release + 0.05);
+}
+function drum(ctx, dest, kind, t, vol) {
+    if (kind === 'kick') {
+        const osc = ctx.createOscillator();
+        const env = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(150, t);
+        osc.frequency.exponentialRampToValueAtTime(42, t + 0.13);
+        env.gain.setValueAtTime(0.95 * vol, t);
+        env.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+        osc.connect(env).connect(dest);
+        osc.start(t);
+        osc.stop(t + 0.35);
+        return;
+    }
+    if (!noise)
+        return;
+    const src = ctx.createBufferSource();
+    src.buffer = noise;
+    const filter = ctx.createBiquadFilter();
+    const env = ctx.createGain();
+    let decay = 0.05, level = 0.2;
+    if (kind === 'snare') {
+        filter.type = 'bandpass';
+        filter.frequency.value = 1800;
+        filter.Q.value = 0.8;
+        decay = 0.18;
+        level = 0.55;
+        const body = ctx.createOscillator();
+        const benv = ctx.createGain();
+        body.type = 'triangle';
+        body.frequency.setValueAtTime(200, t);
+        body.frequency.exponentialRampToValueAtTime(140, t + 0.08);
+        benv.gain.setValueAtTime(0.3 * vol, t);
+        benv.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+        body.connect(benv).connect(dest);
+        body.start(t);
+        body.stop(t + 0.12);
+    }
+    else {
+        filter.type = 'highpass';
+        filter.frequency.value = kind === 'open' ? 6500 : 7500;
+        decay = kind === 'open' ? 0.28 : 0.045;
+        level = kind === 'open' ? 0.16 : 0.14;
+    }
+    env.gain.setValueAtTime(level * vol, t);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + decay);
+    src.connect(filter).connect(env).connect(dest);
+    src.start(t, Math.random() * 0.5);
+    src.stop(t + decay + 0.02);
+}
+/**
+ * Render a song to an AudioBuffer without playing it (for previews and tests).
+ * `level` is the intensity, or a list of [bar, level] changes to show the build-up.
+ */
+async function renderSong(songId, bars, level) {
+    const song = SONGS[songId];
+    const stepDur = 60 / song.bpm / 4;
+    const seconds = bars * 16 * stepDur + 2.5;
+    const ctx = new OfflineAudioContext(2, Math.ceil(seconds * 44100), 44100);
+    const len = ctx.sampleRate;
+    noise = ctx.createBuffer(1, len, ctx.sampleRate);
+    const data = noise.getChannelData(0);
+    for (let i = 0; i < len; i++)
+        data[i] = Math.random() * 2 - 1;
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -14;
+    comp.ratio.value = 4;
+    const master = ctx.createGain();
+    master.gain.value = MUSIC_VOLUME * 0.9;
+    master.connect(comp).connect(ctx.destination);
+    const tr = startTrack(ctx, song, master);
+    tr.gain.gain.cancelScheduledValues(0);
+    tr.gain.gain.setValueAtTime(1, 0);
+    const saved = intensity;
+    const changes = typeof level === 'number' ? [[0, level]] : level;
+    for (let step = 0; step < bars * 16; step++) {
+        const bar = Math.floor(step / 16);
+        intensity = [...changes].reverse().find(([b]) => b <= bar)?.[1] ?? 0;
+        playStep(ctx, tr, step, 0.05 + step * stepDur, stepDur);
+    }
+    intensity = saved;
+    return ctx.startRendering();
+}
+
+__m["ui/music"] = { setMusicEnabled, update, renderSong };
 })();
 // ---- ui/timing ----
 (() => {
@@ -2475,7 +3297,8 @@ function runBlock(opts) {
         };
         const stop = waitForTap(el, (t) => {
             const d = Math.abs(radiusAt(t) - R);
-            finish(d <= 7 ? 'perfect' : d <= 19 ? 'good' : 'miss');
+            const k = opts.windowScale ?? 1;
+            finish(d <= 7 * k ? 'perfect' : d <= 19 * k ? 'good' : 'miss');
         });
         const tick = (now) => {
             if (done)
@@ -2515,8 +3338,9 @@ function moduleHtml(p, attrs, extra = '', slot, eff = 'none') {
     const cooling = slot && slot.cooldown > 0;
     const status = cooling ? `<span class="m-cd">↻ ${slot.cooldown === 1 ? 'NEXT TURN' : `${slot.cooldown} TURNS`}</span>` : '';
     return `
-    <button class="module ${typeClass(p)} ${cooling ? 'cooling' : ''} ${extra}" ${attrs}>
+    <button class="module ${typeClass(p)} ${cooling ? 'cooling' : ''} ${p.relic ? 'relic' : ''} ${extra}" ${attrs}>
       <span class="m-led"></span>
+      ${p.relic ? '<span class="m-relic">RELIC</span>' : ''}
       <span class="m-head"><span class="m-icon">${KIND_ICON[type] ?? '•'}</span><span class="m-name">${esc(p.name)}</span></span>
       <span class="m-text">${esc(p.text)}</span>
       <span class="m-foot"><span class="m-ram">${p.cost} RAM</span>${EFF_SHORT[eff] ? `<span class="m-eff eff-${eff}">${EFF_SHORT[eff]}</span>` : ''}${p.cooldown ? `<span class="m-cdbase">CD ${p.cooldown}</span>` : ''}</span>
@@ -2541,7 +3365,7 @@ const { EVENTS, MODS, PRICES, PROGRAMS, SECTORS } = __m["engine/content"];
 const { currentNode, REST_REPAIR, REST_SCRUB, reachable } = __m["engine/run"];
 const { esc, modHtml, moduleHtml } = __m["ui/view"];
 const NODE_LABEL = {
-    start: 'Entry', fight: 'Fight', elite: 'Elite', cache: 'Cache', shop: 'Shop', safe: 'Safe node', event: 'Event', jackout: 'Jack out', boss: 'Boss',
+    start: 'Entry', fight: 'Fight', elite: 'Elite', cache: 'Cache', shop: 'Shop', safe: 'Safe node', event: 'Event', jackout: 'Jack out', boss: 'Boss', rogue: 'Rogue AI',
 };
 // ---------- HUD shared by map and node screens ----------
 function runHud(run) {
@@ -2564,7 +3388,7 @@ function runHud(run) {
 }
 // ---------- Map ----------
 const COLOR = {
-    start: '#39ff88', fight: '#ff3b5c', elite: '#ff3b5c', cache: '#29e0ff', shop: '#ffe83b', safe: '#39ff88', event: '#ff2bd6', jackout: '#ffffff', boss: '#b38cff',
+    start: '#39ff88', fight: '#ff3b5c', elite: '#ff3b5c', cache: '#29e0ff', shop: '#ffe83b', safe: '#39ff88', event: '#ff2bd6', jackout: '#ffffff', boss: '#b38cff', rogue: '#ff2850',
 };
 function nodeShape(n, x, y) {
     const c = COLOR[n.type];
@@ -2578,6 +3402,14 @@ function nodeShape(n, x, y) {
         case 'safe': return `<circle cx="${x}" cy="${y}" r="13" ${common}/><path d="M${x - 6} ${y}H${x + 6}M${x} ${y - 6}V${y + 6}" stroke="${c}" stroke-width="2.5"/>`;
         case 'event': return `<circle cx="${x}" cy="${y}" r="13" ${common}/><text x="${x}" y="${y + 5}" text-anchor="middle" font-size="15" font-weight="800" fill="${c}">?</text>`;
         case 'jackout': return `<circle cx="${x}" cy="${y}" r="13" ${common} stroke-dasharray="4 3"/><path d="M${x} ${y + 6}V${y - 6}M${x - 5} ${y - 1}L${x} ${y - 6}L${x + 5} ${y - 1}" stroke="${c}" stroke-width="2.5" fill="none"/>`;
+        case 'rogue': {
+            // A jagged, broken sigil with one eye: something that shouldn't be here.
+            const spikes = Array.from({ length: 10 }, (_, i) => {
+                const a = (Math.PI / 5) * i, r = i % 2 ? 11 : 19;
+                return `${(x + r * Math.cos(a)).toFixed(1)},${(y + r * Math.sin(a)).toFixed(1)}`;
+            }).join(' ');
+            return `<polygon points="${spikes}" fill="#1a0006" stroke="${c}" stroke-width="2" class="rogue-sigil"/><ellipse cx="${x}" cy="${y}" rx="7" ry="4" fill="#000" stroke="${c}" stroke-width="1.5"/><circle cx="${x}" cy="${y}" r="2.4" fill="#fff"/>`;
+        }
         case 'boss': {
             const r = 20, pts = Array.from({ length: 8 }, (_, i) => {
                 const a = (Math.PI / 8) * (2 * i + 1);
@@ -2610,12 +3442,13 @@ function renderMap(run) {
             }
             const state = n.id === here ? 'here' : next.has(n.id) ? 'reachable' : visited.has(n.id) ? 'visited' : n.row < currentNode(run).row ? 'passed' : 'ahead';
             const label = n.type === 'boss' ? 'BOSS' : NODE_LABEL[n.type].toUpperCase();
+            const labelY = n.type === 'boss' || n.type === 'rogue' ? 36 : 30;
             nodes += `
         <g class="mnode ${state} t-${n.type}" ${state === 'reachable' ? `data-node="${n.id}" role="button" tabindex="0" aria-label="Go to ${NODE_LABEL[n.type]}"` : ''}>
           ${state === 'reachable' ? `<circle class="pulse" cx="${a.x}" cy="${a.y}" r="22" fill="none" stroke="${COLOR[n.type]}"/>` : ''}
           ${n.id === here ? `<circle cx="${a.x}" cy="${a.y}" r="24" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="3 4" class="here-ring"/>` : ''}
           ${nodeShape(n, a.x, a.y)}
-          <text x="${a.x}" y="${a.y + (n.type === 'boss' ? 36 : 30)}" text-anchor="middle" class="mlabel">${label}</text>
+          <text x="${a.x}" y="${a.y + labelY}" text-anchor="middle" class="mlabel ${n.type === 'rogue' ? 'rogue' : ''}">${label}</text>
           ${state === 'reachable' ? `<circle cx="${a.x}" cy="${a.y}" r="28" fill="transparent"/>` : ''}
         </g>`;
         }
@@ -2919,7 +3752,8 @@ __m["ui/portraits"] = { PORTRAITS, portrait };
 (() => {
 // The player's profile: everything that lasts between runs. Pure functions
 // like the rest of the engine; the UI saves it to the device.
-const { CONTRACTS, CYBERWARE, CYBERWARE_SLOTS, DEALER_STOCK, FENCE, FIXERS, MODIFIERS, PROGRAMS, STARTER_LOADOUT } = __m["engine/content"];
+const { CONTRACTS, CYBERWARE, CYBERWARE_SLOTS, DEALER_STOCK, DECKS, FENCE, FIXERS, MODIFIERS, PROGRAMS, SKILLS, STARTER_DECK, STARTER_LOADOUT, XP, XP_REWARDS } = __m["engine/content"];
+const { MAX_UPGRADE, programDef, upgradeCost } = __m["engine/programs"];
 const { Rng } = __m["engine/rng"];
 const PROFILE_VERSION = 1;
 function newProfile() {
@@ -2931,6 +3765,10 @@ function newProfile() {
         ownedPrograms: [...new Set(STARTER_LOADOUT.equipped)],
         deck: [...STARTER_LOADOUT.equipped],
         cyberware: { owned: [], installed: [], slots: CYBERWARE_SLOTS.start },
+        decks: { owned: [STARTER_DECK], active: STARTER_DECK },
+        upgrades: {},
+        xp: 0,
+        skills: [],
         runs: 0,
         extractions: 0,
         contractsDone: 0,
@@ -2948,11 +3786,17 @@ function migrate(raw) {
         ...r,
         rep: { ...(r.rep ?? {}) },
         cyberware: { ...base.cyberware, ...(r.cyberware ?? {}) },
+        decks: { ...base.decks, ...(r.decks ?? {}) },
+        upgrades: { ...(r.upgrades ?? {}) },
+        skills: [...(r.skills ?? [])].filter((id) => SKILLS[id]),
         version: PROFILE_VERSION,
     };
+    p.decks.owned = [...new Set([STARTER_DECK, ...p.decks.owned.filter((id) => DECKS[id])])];
+    if (!p.decks.owned.includes(p.decks.active))
+        p.decks.active = STARTER_DECK;
     // Drop anything that no longer exists in the content.
     p.ownedPrograms = [...new Set([...base.ownedPrograms, ...p.ownedPrograms.filter((id) => PROGRAMS[id])])];
-    p.deck = p.deck.filter((id) => p.ownedPrograms.includes(id)).slice(0, STARTER_LOADOUT.slots);
+    p.deck = p.deck.filter((id) => p.ownedPrograms.includes(id)).slice(0, activeDeck(p).slots);
     if (!p.deck.length)
         p.deck = [...base.deck];
     p.cyberware.owned = p.cyberware.owned.filter((id) => CYBERWARE[id]);
@@ -2960,6 +3804,7 @@ function migrate(raw) {
     return p;
 }
 const clone = (p) => structuredClone(p);
+const activeDeck = (p) => DECKS[p.decks.active] ?? DECKS[STARTER_DECK];
 const totalRep = (p) => Object.values(p.rep).reduce((a, b) => a + b, 0);
 const repWith = (p, fixer) => p.rep[fixer] ?? 0;
 // ---------- Fixers & contracts ----------
@@ -2983,7 +3828,7 @@ function runSetup(p, contractId) {
     const contract = CONTRACTS.find((c) => c.id === contractId);
     if (!contract)
         return null;
-    return { contract, programs: [...p.deck], cyberware: [...p.cyberware.installed] };
+    return { contract, programs: [...p.deck], cyberware: [...p.cyberware.installed], deck: activeDeck(p).id, owned: [...p.ownedPrograms], upgrades: { ...p.upgrades }, skills: [...p.skills] };
 }
 /** Bank a finished run into the profile. */
 function applyOutcome(prev, contractId, outcome) {
@@ -2993,10 +3838,27 @@ function applyOutcome(prev, contractId, outcome) {
     let payout = 0, repGained = 0;
     p.runs += 1;
     p.cycle += 1;
+    // XP for every run: full if you got out, half if you flatlined.
+    const before = levelInfo(p);
+    let xp = (outcome.fightsWon ?? 0) * XP_REWARDS.perFight + (outcome.sectorsCleared ?? 0) * XP_REWARDS.perSectorCleared;
+    if (outcome.kind === 'won')
+        xp += XP_REWARDS.contractBonus;
+    if (outcome.kind === 'lost')
+        xp = Math.floor(xp * XP_REWARDS.lostMultiplier);
+    p.xp += xp;
+    const after = levelInfo(p);
+    const relics = outcome.relics ?? [];
     if (outcome.kind === 'lost') {
         lines.push(`Lost: ¤ ${outcome.credits} and ▤ ${outcome.data} data`);
+        for (const id of relics)
+            lines.push(`Relic lost: ${PROGRAMS[id]?.name ?? id}`);
     }
     else {
+        for (const id of relics) {
+            if (!p.ownedPrograms.includes(id))
+                p.ownedPrograms.push(id);
+            lines.push(`Relic recovered: ${PROGRAMS[id]?.name ?? id}. Yours to keep.`);
+        }
         p.extractions += 1;
         p.credits += outcome.credits;
         p.data += outcome.data;
@@ -3026,6 +3888,9 @@ function applyOutcome(prev, contractId, outcome) {
             lines.push('Jacked out early: no contract payout');
         }
     }
+    lines.push(`+${xp} XP${outcome.kind === 'lost' ? ' (half, for flatlining)' : ''}`);
+    if (after.level > before.level)
+        lines.push(`LEVEL UP: you're level ${after.level}. ${after.points} skill point${after.points === 1 ? '' : 's'} to spend.`);
     return { profile: p, report: { lines, payout, repGained } };
 }
 // ---------- Fence ----------
@@ -3054,13 +3919,13 @@ function buyProgram(prev, programId) {
     const p = clone(prev);
     p.credits -= item.price;
     p.ownedPrograms.push(programId);
-    if (p.deck.length < STARTER_LOADOUT.slots)
+    if (p.deck.length < activeDeck(p).slots)
         p.deck.push(programId);
     return p;
 }
 // ---------- Deck (pre-run loadout) ----------
 function deckAdd(prev, programId) {
-    if (!prev.ownedPrograms.includes(programId) || prev.deck.includes(programId) || prev.deck.length >= STARTER_LOADOUT.slots)
+    if (!prev.ownedPrograms.includes(programId) || prev.deck.includes(programId) || prev.deck.length >= activeDeck(prev).slots)
         return prev;
     const p = clone(prev);
     p.deck.push(programId);
@@ -3115,17 +3980,98 @@ function buyCyberwareSlot(prev) {
     p.cyberware.slots += 1;
     return p;
 }
+// ---------- Cyberdecks ----------
+function deckStock(p) {
+    const rep = totalRep(p);
+    return Object.values(DECKS).map((d) => ({
+        ...d,
+        owned: p.decks.owned.includes(d.id),
+        active: p.decks.active === d.id,
+        locked: d.rep > rep,
+    }));
+}
+function buyDeck(prev, id) {
+    const d = DECKS[id];
+    if (!d || prev.decks.owned.includes(id) || d.rep > totalRep(prev) || prev.credits < d.price)
+        return prev;
+    const p = clone(prev);
+    p.credits -= d.price;
+    p.decks.owned.push(id);
+    return useDeck(p, id);
+}
+/** Switch decks. Programs that no longer fit go back to your collection; free slots are filled from it. */
+function useDeck(prev, id) {
+    if (!prev.decks.owned.includes(id) || !DECKS[id])
+        return prev;
+    const p = clone(prev);
+    p.decks.active = id;
+    const slots = DECKS[id].slots;
+    p.deck = p.deck.slice(0, slots);
+    for (const prog of p.ownedPrograms)
+        if (p.deck.length < slots && !p.deck.includes(prog))
+            p.deck.push(prog);
+    return p;
+}
+// ---------- Runner level & skills ----------
+const MAX_LEVEL = Object.keys(SKILLS).length + 1;
+const xpToNext = (level) => XP.base + XP.step * (level - 1);
+function levelInfo(p) {
+    let level = 1, rest = p.xp;
+    while (level < MAX_LEVEL && rest >= xpToNext(level)) {
+        rest -= xpToNext(level);
+        level += 1;
+    }
+    const maxed = level >= MAX_LEVEL;
+    return { level, xpInto: maxed ? 0 : rest, xpNeeded: maxed ? 0 : xpToNext(level), points: level - 1 - p.skills.length, maxed };
+}
+/** A skill can be bought if you have a point and own the one before it in its branch. */
+function canLearn(p, id) {
+    const s = SKILLS[id];
+    if (!s || p.skills.includes(id) || levelInfo(p).points < 1)
+        return false;
+    if (s.tier === 1)
+        return true;
+    return Object.values(SKILLS).some((o) => o.branch === s.branch && o.tier === s.tier - 1 && p.skills.includes(o.id));
+}
+function learnSkill(prev, id) {
+    if (!canLearn(prev, id))
+        return prev;
+    const p = clone(prev);
+    p.skills.push(id);
+    return p;
+}
+// ---------- Program upgrades (Kit's workshop, paid in data) ----------
+const upgradeLevel = (p, id) => p.upgrades[id] ?? 0;
+function workshop(p) {
+    return p.ownedPrograms.map((id) => {
+        const level = upgradeLevel(p, id);
+        const cost = upgradeCost(id, level);
+        return { id, level, current: programDef(id, level), next: cost === null ? null : programDef(id, level + 1), cost, maxed: level >= MAX_UPGRADE };
+    });
+}
+function upgradeProgram(prev, id) {
+    if (!prev.ownedPrograms.includes(id))
+        return prev;
+    const cost = upgradeCost(id, upgradeLevel(prev, id));
+    if (cost === null || prev.data < cost)
+        return prev;
+    const p = clone(prev);
+    p.data -= cost;
+    p.upgrades[id] = upgradeLevel(prev, id) + 1;
+    return p;
+}
 
-__m["engine/profile"] = { PROFILE_VERSION, newProfile, migrate, totalRep, repWith, fixerUnlocked, contractBoard, runSetup, applyOutcome, fenceRate, sellData, dealerStock, buyProgram, deckAdd, deckRemove, ripperdocStock, buyCyberware, toggleCyberware, buyCyberwareSlot };
+__m["engine/profile"] = { PROFILE_VERSION, newProfile, migrate, activeDeck, totalRep, repWith, fixerUnlocked, contractBoard, runSetup, applyOutcome, fenceRate, sellData, dealerStock, buyProgram, deckAdd, deckRemove, ripperdocStock, buyCyberware, toggleCyberware, buyCyberwareSlot, deckStock, buyDeck, useDeck, MAX_LEVEL, xpToNext, levelInfo, canLearn, learnSkill, upgradeLevel, workshop, upgradeProgram };
 })();
 // ---- ui/safehouse ----
 (() => {
 // Safehouse screens (meatspace): hub, fixers, fence, dealer, ripperdoc, deck.
 // Everything here reads from the profile and the content tables, so new
 // fixers, contracts, programs and cyberware show up without UI changes.
-const { CONTRACTS, CYBERWARE_SLOTS, FIXERS, MODIFIERS, NPCS, PROGRAMS, SECTORS, STARTER_LOADOUT } = __m["engine/content"];
+const { BRANCHES, CONTRACTS, CYBERWARE_SLOTS, FIXERS, MODIFIERS, NPCS, PROGRAMS, SECTORS, SKILLS } = __m["engine/content"];
+const { programDef } = __m["engine/programs"];
 const { portrait } = __m["ui/portraits"];
-const { contractBoard, dealerStock, fenceRate, fixerUnlocked, repWith, ripperdocStock, totalRep } = __m["engine/profile"];
+const { activeDeck, canLearn, contractBoard, dealerStock, deckStock, fenceRate, fixerUnlocked, levelInfo, repWith, ripperdocStock, totalRep, upgradeLevel, workshop } = __m["engine/profile"];
 const { esc, moduleHtml } = __m["ui/view"];
 /** A character's portrait with their name and line, at the top of their screen. */
 function who(id, name, role, line) {
@@ -3168,13 +4114,15 @@ function renderHub(p) {
     ${header(p, 'SAFEHOUSE', false)}
     <section class="sh-body">
       <p class="sh-intro">A rented room above a noodle bar. Four walls, one window, a deck on the table.</p>
+      ${runnerCard(p)}
       <div class="sh-grid">
         ${fixers}
         <button class="sh-card" data-sh="deck">
+          <div class="sh-thumb deck-thumb">${deckArt(activeDeck(p))}</div>
           <div class="sh-card-kicker">YOUR DECK</div>
-          <div class="sh-card-name">${esc(STARTER_LOADOUT.chassis)}</div>
-          <div class="sh-card-text">${p.deck.length}/${STARTER_LOADOUT.slots} programs installed, ${p.ownedPrograms.length} owned.</div>
-          <div class="sh-card-foot">Set loadout ›</div>
+          <div class="sh-card-name">${esc(activeDeck(p).name)}</div>
+          <div class="sh-card-text">${p.deck.length}/${activeDeck(p).slots} programs installed, ${p.ownedPrograms.length} owned. ${p.decks.owned.length} deck${p.decks.owned.length > 1 ? 's' : ''}.</div>
+          <div class="sh-card-foot">Decks & loadout ›</div>
         </button>
         <button class="sh-card" data-sh="fence">
           <div class="sh-thumb">${portrait('mags')}</div>
@@ -3265,7 +4213,28 @@ function renderDealer(p) {
     <section class="sh-body">
       ${who('kit', NPCS.kit.name, NPCS.kit.role, `“Buy once, run it forever. Better stuff when your name gets around.” Your total reputation: ${rep}.`)}
       <div class="shop-grid">${items}</div>
+      <h3 class="sh-sub">WORKSHOP · UPGRADE WITH DATA</h3>
+      <p class="sh-hint">Kit tunes programs you own. Mk II boosts the numbers; Mk III boosts them more and cuts the cooldown. Relics cost double.</p>
+      <div class="wares">${workshopRows(p)}</div>
     </section>`;
+}
+function workshopRows(p) {
+    return workshop(p)
+        .map((w) => {
+        const action = w.maxed
+            ? '<span class="deck-active">MAXED</span>'
+            : `<button class="primary small" data-upgrade="${w.id}" ${p.data >= (w.cost ?? 0) ? '' : 'disabled'}>▤ ${w.cost}</button>`;
+        return `
+        <div class="ware ${w.maxed ? 'installed' : ''}">
+          <div class="ware-info">
+            <div class="ware-name">${esc(w.current.name)}${w.current.relic ? ' <span class="relic-chip">RELIC</span>' : ''}</div>
+            <div class="ware-text">Now: ${esc(w.current.text)}${w.current.cooldown ? ` · CD ${w.current.cooldown}` : ''}</div>
+            ${w.next ? `<div class="ware-text up">→ ${esc(w.next.text)}${w.next.cooldown !== w.current.cooldown ? ` · CD ${w.next.cooldown}` : ''}</div>` : ''}
+          </div>
+          ${action}
+        </div>`;
+    })
+        .join('');
 }
 // ---------- Ripperdoc ----------
 function renderRipperdoc(p) {
@@ -3298,18 +4267,119 @@ function renderRipperdoc(p) {
     </section>`;
 }
 // ---------- Deck ----------
+/** A cyberdeck drawn as hardware: one light per slot, bars for RAM per turn / max RAM. */
+function deckArt(d) {
+    const W = 200, H = 120;
+    const slotW = 156 / d.slots;
+    const slots = Array.from({ length: d.slots }, (_, i) => `<rect x="${22 + i * slotW + 2}" y="38" width="${slotW - 4}" height="22" rx="2" fill="#0a1a10" stroke="${d.color}" stroke-width="1.5"/><circle cx="${22 + i * slotW + slotW / 2}" cy="49" r="3" fill="${d.color}"/>`).join('');
+    const ram = Array.from({ length: d.ramMax }, (_, i) => `<rect x="${22 + i * 19}" y="76" width="14" height="12" fill="${i < d.ramPerTurn ? '#29e0ff' : 'none'}" stroke="#29e0ff" stroke-width="1.5" transform="skewX(-15)"/>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">
+    <rect width="${W}" height="${H}" fill="#120626"/>
+    <rect x="10" y="22" width="180" height="78" rx="6" fill="#06100a" stroke="#1b0b3a" stroke-width="4"/>
+    <rect x="10" y="22" width="180" height="78" rx="6" fill="none" stroke="${d.color}" stroke-width="1.5" opacity="0.8"/>
+    <rect x="10" y="22" width="180" height="8" rx="3" fill="${d.color}" opacity="0.85"/>
+    ${slots}${ram}
+    <path d="M172 82 h10 M172 88 h10 M172 94 h10" stroke="${d.color}" stroke-width="1.5" opacity="0.6"/>
+    <path d="M60 100 v10 M100 100 v12 M140 100 v10" stroke="#3b1d7a" stroke-width="4"/>
+  </svg>`;
+}
+function deckStats(d) {
+    return `<div class="deck-chips"><span>${d.slots} slots</span><span>+${d.ramPerTurn} RAM/turn</span><span>${d.ramMax} max RAM</span></div>${d.perkText ? `<div class="deck-perk ${d.perks?.some((x) => (x.kind === 'traceTick' ? x.value > 0 : x.value < 0)) ? 'bad' : ''}">${esc(d.perkText)}</div>` : ''}`;
+}
 function renderDeck(p) {
-    const installed = p.deck.map((id) => moduleHtml(PROGRAMS[id], `data-deckout="${id}"`)).join('');
-    const empty = Array.from({ length: STARTER_LOADOUT.slots - p.deck.length }, () => `<div class="module empty">EMPTY SLOT</div>`).join('');
+    const d = activeDeck(p);
+    const installed = p.deck.map((id) => moduleHtml(programDef(id, upgradeLevel(p, id)), `data-deckout="${id}"`)).join('');
+    const empty = Array.from({ length: Math.max(0, d.slots - p.deck.length) }, () => `<div class="module empty">EMPTY SLOT</div>`).join('');
     const spare = p.ownedPrograms.filter((id) => !p.deck.includes(id));
+    const decks = deckStock(p)
+        .map((x) => {
+        let action;
+        if (x.active)
+            action = '<span class="deck-active">IN USE</span>';
+        else if (x.owned)
+            action = `<button class="secondary small" data-usedeck="${x.id}">USE</button>`;
+        else if (x.locked)
+            action = `<span class="ware-lock">Needs ${x.rep} rep</span>`;
+        else
+            action = `<button class="primary small" data-buydeck="${x.id}" ${p.credits >= x.price ? '' : 'disabled'}>BUY ¤ ${x.price}</button>`;
+        return `
+        <div class="deck-row ${x.active ? 'active' : ''} ${x.locked ? 'locked' : ''}">
+          <div class="deck-row-art">${deckArt(x)}</div>
+          <div class="deck-row-info">
+            <div class="ware-name">${esc(x.name)}</div>
+            <div class="ware-text">${esc(x.tagline)}</div>
+            ${deckStats(x)}
+          </div>
+          <div class="deck-row-action">${action}</div>
+        </div>`;
+    })
+        .join('');
     return `
     ${header(p, 'YOUR DECK')}
     <section class="sh-body">
-      <p class="sh-intro">${esc(STARTER_LOADOUT.chassis)}: ${STARTER_LOADOUT.slots} slots, +${STARTER_LOADOUT.ramPerTurn} RAM per turn, ${STARTER_LOADOUT.ramMax} max RAM. These programs go with you on your next run.</p>
-      <div class="slots cols-3">${installed}${empty}</div>
+      <div class="deck-hero">
+        <div class="deck-hero-art">${deckArt(d)}</div>
+        <div><div class="who-role">Cyberdeck in use</div><div class="who-name">${esc(d.name)}</div>${deckStats(d)}</div>
+      </div>
+      <h3 class="sh-sub">INSTALLED PROGRAMS (${p.deck.length}/${d.slots})</h3>
+      <div class="slots cols-${d.slots > 6 ? 4 : 3}">${installed}${empty}</div>
       <h3 class="sh-sub">OWNED, NOT INSTALLED</h3>
-      <div class="slots cols-3">${spare.length ? spare.map((id) => moduleHtml(PROGRAMS[id], `data-deckin="${id}"`, p.deck.length >= STARTER_LOADOUT.slots ? 'full' : '')).join('') : '<p class="sh-hint">Buy more from the dealer.</p>'}</div>
+      <div class="slots cols-3">${spare.length ? spare.map((id) => moduleHtml(programDef(id, upgradeLevel(p, id)), `data-deckin="${id}"`, p.deck.length >= d.slots ? 'full' : '')).join('') : '<p class="sh-hint">Buy more from the dealer.</p>'}</div>
       <p class="sh-hint">Tap an installed program to remove it, or a spare one to install it.</p>
+      <h3 class="sh-sub">CYBERDECKS</h3>
+      <p class="sh-hint">Kit can source other rigs. Switching keeps as many installed programs as fit.</p>
+      <div class="deck-list">${decks}</div>
+    </section>`;
+}
+// ---------- Runner level & skill tree ----------
+function runnerCard(p) {
+    const lv = levelInfo(p);
+    const pct = lv.maxed ? 100 : (lv.xpInto / lv.xpNeeded) * 100;
+    return `
+    <button class="runner-card" data-sh="skills">
+      <div class="runner-top">
+        <span class="runner-level">LV ${lv.level}</span>
+        <span class="runner-name">YOU · NETRUNNER</span>
+        ${lv.points > 0 ? `<span class="runner-points">${lv.points} SKILL POINT${lv.points > 1 ? 'S' : ''}</span>` : ''}
+      </div>
+      <div class="runner-xp"><i style="width:${pct}%"></i></div>
+      <div class="runner-foot">${lv.maxed ? 'Max level. Every skill is yours to take.' : `${lv.xpInto}/${lv.xpNeeded} XP to level ${lv.level + 1}`} · ${p.skills.length}/${Object.keys(SKILLS).length} skills · Skill tree ›</div>
+    </button>`;
+}
+function renderSkills(p) {
+    const lv = levelInfo(p);
+    const branches = Object.keys(BRANCHES)
+        .map((b) => {
+        const info = BRANCHES[b];
+        const nodes = Object.values(SKILLS)
+            .filter((s) => s.branch === b)
+            .sort((a, c) => a.tier - c.tier)
+            .map((s) => {
+            const owned = p.skills.includes(s.id);
+            const can = canLearn(p, s.id);
+            const state = owned ? 'owned' : can ? 'available' : 'locked';
+            return `
+            <button class="skill ${state}" style="--b:${info.color}" ${can ? `data-learn="${s.id}"` : 'disabled'}>
+              <span class="skill-tier">${s.tier}</span>
+              <span class="skill-body"><span class="skill-name">${esc(s.name)}</span><span class="skill-text">${esc(s.text)}</span></span>
+              <span class="skill-state">${owned ? '✓' : can ? 'LEARN' : ''}</span>
+            </button>`;
+        })
+            .join('<span class="skill-link" style="--b:' + info.color + '"></span>');
+        return `
+        <section class="branch" style="--b:${info.color}">
+          <h3 class="branch-name">${esc(info.name.toUpperCase())}</h3>
+          <p class="branch-tag">${esc(info.tagline)}</p>
+          <div class="branch-nodes">${nodes}</div>
+        </section>`;
+    })
+        .join('');
+    return `
+    ${header(p, 'SKILL TREE')}
+    <section class="sh-body">
+      ${runnerCard(p).replace('data-sh="skills"', 'disabled')}
+      <p class="sh-hint">${lv.points > 0 ? `You have ${lv.points} point${lv.points > 1 ? 's' : ''} to spend.` : 'Earn XP on every run (half if you flatline) to gain levels.'} Each branch unlocks top to bottom. Every skill can be learned in time.</p>
+      ${branches}
     </section>`;
 }
 // ---------- After a run ----------
@@ -3324,7 +4394,7 @@ function renderReport(p, outcome, report) {
     </section>`;
 }
 
-__m["ui/safehouse"] = { renderHub, renderFixer, renderFence, renderDealer, renderRipperdoc, renderDeck, renderReport };
+__m["ui/safehouse"] = { renderHub, renderFixer, renderFence, renderDealer, renderRipperdoc, deckArt, renderDeck, renderSkills, renderReport };
 })();
 // ---- ui/main ----
 (() => {
@@ -3332,15 +4402,17 @@ __m["ui/safehouse"] = { renderHub, renderFixer, renderFence, renderDealer, rende
 // Plain TypeScript + DOM for the prototype; the same engine will plug into Svelte later.
 const { canPlay, effectiveness, endTurn, living, needsExploit, needsTarget, pendingEnemyAction, playProgram, programOf, resolveEnemyAction, TUNING } = __m["engine/combat"];
 const { ENEMIES, MODS, PROGRAMS, SECTORS } = __m["engine/content"];
+const { programDef } = __m["engine/programs"];
 const { MIDDLE_ROWS } = __m["engine/map"];
 const { buy, chooseEvent, closeLoadout, currentNode, dismissNotice, equip, finishFight, goDeeper, jackOut, leaveShop, moveTo, newRun, openLoadout, rest, startFight, stay, takeLoot, unequip } = __m["engine/run"];
 const { AI_SHAPES, ICE, RUNNERS, rainFigure } = __m["ui/art"];
 const { startRain } = __m["ui/rain"];
-const { buzz, setSound, sfx, unlockAudio } = __m["ui/sfx"];
+const { buzz, installAudioUnlock, onAudioReady, setSound, sfx, unlockAudio } = __m["ui/sfx"];
+const { renderSong, setMusicEnabled, update: updateMusic } = __m["ui/music"];
 const { runBlock, runExploit } = __m["ui/timing"];
 const { renderEnd, renderEvent, renderJackout, renderMap, renderNotice, renderRest, renderSectorClear, renderShop, runHud } = __m["ui/screens"];
-const { renderDealer, renderDeck, renderFence, renderFixer, renderHub, renderReport, renderRipperdoc } = __m["ui/safehouse"];
-const { applyOutcome, buyCyberware, buyCyberwareSlot, buyProgram, deckAdd, deckRemove, migrate, runSetup, sellData, toggleCyberware } = __m["engine/profile"];
+const { renderDealer, renderDeck, renderFence, renderFixer, renderHub, renderReport, renderRipperdoc, renderSkills } = __m["ui/safehouse"];
+const { applyOutcome, buyCyberware, buyCyberwareSlot, buyDeck, buyProgram, deckAdd, deckRemove, learnSkill, migrate, runSetup, sellData, toggleCyberware, upgradeProgram, useDeck } = __m["engine/profile"];
 const { EFF_LABEL, esc, LAYER_ICON, modHtml, moduleHtml, show } = __m["ui/view"];
 const app = document.getElementById('app');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -3357,16 +4429,17 @@ let profile = loadProfile();
 let safeView = 'hub';
 let lastReport = null;
 setSound(settings.sound);
+setMusicEnabled(settings.music);
 function loadSettings() {
     try {
         const raw = localStorage.getItem('netrunner.settings');
         if (raw)
-            return { autoTiming: false, sound: true, ...JSON.parse(raw) };
+            return { autoTiming: false, sound: true, music: true, ...JSON.parse(raw) };
     }
     catch {
         /* storage may be unavailable */
     }
-    return { autoTiming: false, sound: true };
+    return { autoTiming: false, sound: true, music: true };
 }
 function loadProfile() {
     try {
@@ -3423,6 +4496,8 @@ function intentHtml(e) {
             return `<span class="intent replicate">⧉ copy</span>`;
         case 'scramble':
             return `<span class="intent scramble">⌁ scramble ${i.value}</span>`;
+        case 'drain':
+            return `<span class="intent drain">▼ drain ${i.value} RAM</span>`;
         case 'trace':
             return `<span class="intent trace">⌖ +${i.value}%</span>`;
         case 'shieldAlly':
@@ -3435,7 +4510,7 @@ function enemyHtml(e, targeting, sel) {
     const dead = e.core <= 0;
     const faction = ENEMIES[e.defId].faction;
     const artKey = faction === 'ice' ? `${e.defId}:${e.layers.map((l) => l.type).join(',')}` : e.defId;
-    const cls = ['enemy', `faction-${faction}`, dead ? 'dead' : '', targeting && !dead ? 'targetable' : '', actingUid === e.uid ? 'acting' : ''].join(' ');
+    const cls = ['enemy', `faction-${faction}`, ENEMIES[e.defId].rogue ? 'rogue' : '', dead ? 'dead' : '', targeting && !dead ? 'targetable' : '', actingUid === e.uid ? 'acting' : ''].join(' ');
     const layers = e.layers
         .map((l) => `<span class="layer ${l.type}">${show(l.hp)}</span>`)
         .reverse() // outermost first
@@ -3491,7 +4566,7 @@ function renderCombat(s) {
         <span class="val">${s.trace}%</span>
       </div>
       <div class="meta">
-        <span>SECTOR ${run.sector + 1}/3 · ${currentNode(run).type.toUpperCase()} · TURN ${s.turn}</span>
+        <span>SECTOR ${run.sector + 1}/${run.sectorIds.length} · ${currentNode(run).type.toUpperCase()} · TURN ${s.turn}</span>
         <button class="icon-btn" data-action="help" aria-label="How to play">?</button>
       </div>
     </header>
@@ -3528,13 +4603,16 @@ function renderTitle() {
       <button class="primary" data-action="safehouse">ENTER SAFEHOUSE</button>
       <div class="settings">
         <label><input type="checkbox" data-setting="autoTiming" ${settings.autoTiming ? 'checked' : ''}> Auto-timing (no tap challenges)</label>
-        <label><input type="checkbox" data-setting="sound" ${settings.sound ? 'checked' : ''}> Sound</label>
+        <label><input type="checkbox" data-setting="sound" ${settings.sound ? 'checked' : ''}> Sound effects</label>
+        <label><input type="checkbox" data-setting="music" ${settings.music ? 'checked' : ''}> Music</label>
+        <button class="link small-link" data-action="test-sound">Test sound</button>
+        <span class="sound-hint">No sound on iPhone? Check the silent switch and volume.</span>
       </div>
       <button class="link" data-action="help">How to play</button>
     </div>`;
 }
 function lootHtml(item, i) {
-    return item.kind === 'program' ? moduleHtml(PROGRAMS[item.id], `data-loot="${i}"`, 'big') : modHtml(MODS[item.id], `data-loot="${i}"`);
+    return item.kind === 'program' ? moduleHtml(programDef(item.id, run.upgrades[item.id] ?? 0), `data-loot="${i}"`, 'big') : modHtml(MODS[item.id], `data-loot="${i}"`);
 }
 function deckStats() {
     const l = run.loadout;
@@ -3544,12 +4622,13 @@ function deckStats() {
 }
 function renderLoot() {
     const node = currentNode(run);
-    const title = node.type === 'boss' ? 'SECTOR BOSS DELETED' : node.type === 'elite' ? 'ELITE DELETED' : 'NODE CLEARED';
+    const relicDrop = run.loot.some((l) => l.kind === 'program' && PROGRAMS[l.id]?.relic);
+    const title = relicDrop ? 'ROGUE AI CONTAINED' : node.type === 'boss' ? 'SECTOR BOSS DELETED' : node.type === 'elite' ? 'ELITE DELETED' : 'NODE CLEARED';
     return `
     ${runHud(run)}
     <div class="panel-screen">
       <h2>${title}</h2>
-      <p class="sub">${node.type === 'elite' ? 'It was guarding rare programs. Take one:' : 'Cache unlocked. Take one:'}</p>
+      <p class="sub">${relicDrop ? 'It was guarding something old and forbidden. Take one relic. Get out alive and it\u2019s yours for good.' : node.type === 'elite' ? 'It was guarding rare programs. Take one:' : 'Cache unlocked. Take one:'}</p>
       <div class="rewards">${run.loot.map(lootHtml).join('')}</div>
       <button class="link" data-action="skip">Leave it</button>
       ${deckStats()}
@@ -3557,10 +4636,10 @@ function renderLoot() {
 }
 function renderLoadout() {
     const l = run.loadout;
-    const installed = l.equipped.map((id) => moduleHtml(PROGRAMS[id], `data-unequip="${id}"`)).join('');
+    const installed = l.equipped.map((id) => moduleHtml(programDef(id, run.upgrades[id] ?? 0), `data-unequip="${id}"`)).join('');
     const empty = Array.from({ length: l.slots - l.equipped.length }, () => `<div class="module empty">EMPTY SLOT</div>`).join('');
     const stash = l.stash.length
-        ? l.stash.map((id) => moduleHtml(PROGRAMS[id], `data-equip="${id}"`, l.equipped.length >= l.slots ? 'full' : '')).join('')
+        ? l.stash.map((id) => moduleHtml(programDef(id, run.upgrades[id] ?? 0), `data-equip="${id}"`, l.equipped.length >= l.slots ? 'full' : '')).join('')
         : '<p class="sub">Nothing in storage.</p>';
     return `
     <div class="loadout-screen">
@@ -3588,10 +4667,32 @@ function renderHelp() {
         <p><b>Exploit:</b> when you attack, tap as the cursor crosses the weak point. Perfect = +50% damage and Trace −3.</p>
         <p><b>Block:</b> when you're attacked, tap as the packet hits your firewall ring. Perfect blocks 75% and reflects damage.</p>
         <p><b>Trace</b> rises every turn and carries over between nodes until you clear the sector. At 100% security sends a <b>Hunter-Killer</b> after you, then Trace drops back to 40%.</p>
+        <p><b>Rogue AIs</b> (red sigil on the map) are old tech that was locked away and got loose. They're optional and brutal: they drain your RAM and scramble your deck. Beat one and it drops a <b>relic</b>, a program you can't get anywhere else. Get out alive and the relic is yours for good.</p>
         <p><b>The map:</b> pick your route through each sector. Fights pay credits, caches hold data, shops sell programs and hardware, safe nodes let you repair or scrub Trace. <b>Jack out</b> at an exit or after a sector boss to keep your credits and data. If you flatline, you lose them.</p>
         <button class="primary small" data-action="close-help">GOT IT</button>
       </div>
     </div>`;
+}
+/**
+ * Which track plays where: the safehouse theme on the title and in the
+ * safehouse, the run theme in a run. Intensity: 0 on the map, 1 in a fight,
+ * 2 when Trace is high, against a rogue AI, or in a boss fight.
+ */
+function musicFor() {
+    if (screen !== 'run')
+        return { song: 'safehouse', intensity: 0 };
+    if (run.phase !== 'combat' || !combat)
+        return { song: 'run', intensity: 0 };
+    const hot = combat.trace >= 70 || rogueFight() || currentNode(run).type === 'boss';
+    return { song: 'run', intensity: hot ? 2 : 1 };
+}
+function syncMusic() {
+    const m = musicFor();
+    updateMusic(m.song, m.intensity);
+}
+/** True while fighting a rogue AI: the whole screen turns hostile. */
+function rogueFight() {
+    return screen === 'run' && run.phase === 'combat' && !!combat && combat.enemies.some((e) => e.core > 0 && ENEMIES[e.defId].rogue);
 }
 function renderRun() {
     switch (run.phase) {
@@ -3619,6 +4720,8 @@ function renderSafehouse() {
         return renderRipperdoc(profile);
     if (safeView === 'deck')
         return renderDeck(profile);
+    if (safeView === 'skills')
+        return renderSkills(profile);
     if (safeView === 'report' && run.outcome && lastReport)
         return renderReport(profile, run.outcome, lastReport);
     if (safeView.startsWith('fixer:'))
@@ -3627,8 +4730,19 @@ function renderSafehouse() {
 }
 function render() {
     const html = screen === 'title' ? renderTitle() : screen === 'safehouse' ? renderSafehouse() : renderRun();
-    app.className = `screen-${screen === 'run' ? run.phase : screen}`;
+    const cls = `screen-${screen === 'run' ? run.phase : screen}`;
+    const changed = app.className.split(' ')[0] !== cls;
+    app.className = cls;
+    // Keep the page itself pinned at the top; iOS otherwise keeps a stale offset
+    // from a taller screen and taps land in the wrong place.
+    if (window.scrollY || document.documentElement.scrollTop)
+        window.scrollTo(0, 0);
+    if (changed)
+        for (const el of app.querySelectorAll('.panel-screen, .node-panel, .loadout-screen, .sh-body'))
+            el.scrollTop = 0;
     document.body.classList.toggle('meatspace', screen === 'safehouse');
+    document.body.classList.toggle('rogue-fight', rogueFight());
+    syncMusic();
     app.innerHTML = html + (showHelp ? renderHelp() : '');
     mountArt();
 }
@@ -3742,6 +4856,17 @@ function apply(events) {
                 sfx.lose();
                 buzz([60, 40, 60]);
                 break;
+            case 'heal':
+                floatText(app.querySelector('[data-player]'), `+${ev.amount}`, 'good');
+                sfx.shield();
+                break;
+            case 'drain':
+                floatText(app.querySelector('.ram'), `−${ev.amount} RAM`, 'dmg');
+                sfx.trace();
+                break;
+            case 'revive':
+                banner("DEAD MAN'S SWITCH", 'Back from the edge');
+                break;
             case 'phase':
                 floatText(enemyEl(ev.uid), 'REWRITE', 'eff-pop pierce');
                 pulse(enemyEl(ev.uid), 'hit');
@@ -3785,6 +4910,8 @@ function go(nodeId) {
     run = moveTo(run, nodeId);
     if (run.phase === 'combat') {
         const type = currentNode(run).type;
+        if (type === 'rogue')
+            banner('ROGUE AI', 'Locked-away tech, loose in the net. Run if you can.');
         if (type === 'boss')
             banner('SECTOR BOSS', SECTORS[run.sectorIds[run.sector]].boss.map((id) => ENEMIES[id].name).join(' + '));
         startCombat();
@@ -3804,6 +4931,11 @@ function startRun(contractId) {
         run = goDeeper({ ...run, phase: 'sectorClear' });
     if (params.get('boss'))
         run = { ...run, at: run.map.rows[MIDDLE_ROWS][0].id };
+    if (params.get('rogue')) {
+        const n = run.map.rows[1][0];
+        n.type = 'rogue';
+        n.encounter = ['corruptor'];
+    }
     screen = 'run';
     banner(`SECTOR 1`, SECTORS[run.sectorIds[0]].name);
     render();
@@ -3839,7 +4971,8 @@ async function playCard(index, targetUid) {
         const defs = (p.aoe ? alive : [target]).map((e) => ENEMIES[e.defId]);
         const window = Math.min(...defs.map((d) => d.window));
         const sweepMs = Math.min(...defs.map((d) => d.sweepMs));
-        timing = await runExploit({ window, sweepMs, title: `${p.name} → ${p.aoe ? 'ALL' : target.name}` });
+        // Cyberware and skills widen the weak point (capped so it's never a free hit).
+        timing = await runExploit({ window: Math.min(0.45, window * run.perks.exploitWindow), sweepMs, title: `${p.name} → ${p.aoe ? 'ALL' : target.name}` });
     }
     const r = playProgram(combat, index, targetUid, timing);
     combat = r.state;
@@ -3867,7 +5000,7 @@ async function doEndTurn() {
             for (let h = 0; h < hits; h++) {
                 const title = `${e.name} attacks · ${dmg}${hits > 1 ? ` (${h + 1}/${hits})` : ''}`;
                 // Follow-up hits come in a little faster.
-                timing.push(settings.autoTiming ? 'good' : await runBlock({ packetMs: ENEMIES[e.defId].packetMs * (h > 0 ? 0.85 : 1), title }));
+                timing.push(settings.autoTiming ? 'good' : await runBlock({ packetMs: ENEMIES[e.defId].packetMs * (h > 0 ? 0.85 : 1), title, windowScale: run.perks.blockWindow }));
             }
         }
         r = resolveEnemyAction(combat, timing);
@@ -3912,7 +5045,7 @@ function onEnemy(uid) {
 }
 app.addEventListener('click', (ev) => {
     const t = ev.target;
-    const el = t.closest('[data-slot],[data-enemy],[data-action],[data-loot],[data-equip],[data-unequip],[data-node],[data-choice],[data-rest],[data-buy],[data-sh],[data-contract],[data-sell],[data-dealer],[data-ware],[data-buyware],[data-deckin],[data-deckout]');
+    const el = t.closest('[data-slot],[data-enemy],[data-action],[data-loot],[data-equip],[data-unequip],[data-node],[data-choice],[data-rest],[data-buy],[data-sh],[data-contract],[data-sell],[data-dealer],[data-ware],[data-buyware],[data-deckin],[data-deckout],[data-buydeck],[data-usedeck],[data-upgrade],[data-learn]');
     if (!el) {
         if (selected !== null) {
             selected = null;
@@ -4003,6 +5136,30 @@ app.addEventListener('click', (ev) => {
         saveProfile();
         return render();
     }
+    if (d.upgrade) {
+        profile = upgradeProgram(profile, d.upgrade);
+        sfx.crack();
+        saveProfile();
+        return render();
+    }
+    if (d.learn) {
+        profile = learnSkill(profile, d.learn);
+        sfx.win();
+        saveProfile();
+        return render();
+    }
+    if (d.buydeck) {
+        profile = buyDeck(profile, d.buydeck);
+        sfx.win();
+        saveProfile();
+        return render();
+    }
+    if (d.usedeck) {
+        profile = useDeck(profile, d.usedeck);
+        sfx.shield();
+        saveProfile();
+        return render();
+    }
     if (d.buy !== undefined) {
         const before = run.credits;
         run = buy(run, Number(d.buy));
@@ -4011,6 +5168,10 @@ app.addEventListener('click', (ev) => {
         return render();
     }
     switch (d.action) {
+        case 'test-sound':
+            unlockAudio();
+            sfx.win();
+            return;
         case 'safehouse':
             sfx.tap();
             screen = 'safehouse';
@@ -4081,10 +5242,20 @@ app.addEventListener('change', (ev) => {
         return;
     settings = { ...settings, [key]: input.checked };
     setSound(settings.sound);
+    setMusicEnabled(settings.music);
     saveSettings();
+    // Turning sound on plays a chime, so you can tell straight away if it works.
+    if (key === 'sound' && settings.sound) {
+        unlockAudio();
+        sfx.win();
+    }
 });
+installAudioUnlock();
+// For previews and tests: window.__renderSong(id, bars, level) returns an AudioBuffer.
+window.__renderSong = renderSong;
+onAudioReady(syncMusic);
 const rain = document.getElementById('rain');
-startRain(rain, () => (screen === 'run' ? (combat ? combat.trace : run.trace) / 100 : 0));
+startRain(rain, () => (rogueFight() ? 1 : screen === 'run' ? (combat ? combat.trace : run.trace) / 100 : 0));
 render();
 
 __m["ui/main"] = {  };
