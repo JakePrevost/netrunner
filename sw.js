@@ -1,5 +1,5 @@
 // Offline support. Bump happens automatically on every build.
-const CACHE = 'netrunner-0.11.0-mwy7o90p';
+const CACHE = 'netrunner-0.15.0-mwydcxf5';
 const ASSETS = ["./","./index.html","./manifest.webmanifest","./icons/icon-192.png","./icons/icon-512.png","./icons/maskable-512.png","./icons/apple-touch-icon.png"];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
