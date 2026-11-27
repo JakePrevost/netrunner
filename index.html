@@ -1163,31 +1163,31 @@ const BODY_SLOTS = {
 };
 const CYBERWARE = {
     // Head
-    buffer: { id: 'buffer', name: 'Neural Buffer', slot: 'head', world: 'net', text: '+1 RAM on your first turn of every net fight', price: 90, perks: [{ kind: 'ramTurn1', value: 1 }] },
-    synaptic: { id: 'synaptic', name: 'Synaptic Accelerator', slot: 'head', world: 'street', text: '+1 AP on your first turn of every street fight', price: 90, perks: [{ kind: 'ramTurn1', value: 1 }] },
-    coldblood: { id: 'coldblood', name: 'Cold Blood', slot: 'head', world: 'both', text: 'Block and dodge timing 30% wider', price: 80, perks: [{ kind: 'blockWindow', value: 1.3 }] },
-    seed: { id: 'seed', name: 'Burner ID Chip', slot: 'head', world: 'both', text: 'Start every run with 25 credits', price: 70, rep: 1, perks: [{ kind: 'startCredits', value: 25 }] },
-    tactical: { id: 'tactical', name: 'Tactical Co-Processor', slot: 'head', world: 'both', text: '+1 max RAM and AP', price: 240, rep: 3, streetRep: 2, perks: [{ kind: 'ramMax', value: 1 }] },
+    buffer: { id: 'buffer', name: 'Neural Buffer', slot: 'head', world: 'net', text: '+1 RAM on your first turn of every net fight', price: 180, perks: [{ kind: 'ramTurn1', value: 1 }] },
+    synaptic: { id: 'synaptic', name: 'Synaptic Accelerator', slot: 'head', world: 'street', text: '+1 AP on your first turn of every street fight', price: 180, perks: [{ kind: 'ramTurn1', value: 1 }] },
+    coldblood: { id: 'coldblood', name: 'Cold Blood', slot: 'head', world: 'both', text: 'Block and dodge timing 30% wider', price: 160, perks: [{ kind: 'blockWindow', value: 1.3 }] },
+    seed: { id: 'seed', name: 'Burner ID Chip', slot: 'head', world: 'both', text: 'Start every run with 25 credits', price: 140, rep: 2, perks: [{ kind: 'startCredits', value: 25 }] },
+    tactical: { id: 'tactical', name: 'Tactical Co-Processor', slot: 'head', world: 'both', text: '+1 max RAM and AP', price: 480, rep: 6, streetRep: 4, perks: [{ kind: 'ramMax', value: 1 }] },
     // Eyes
-    datalens: { id: 'datalens', name: 'Data Lens', slot: 'eyes', world: 'net', text: 'Exploit weak points 30% wider', price: 80, perks: [{ kind: 'exploitWindow', value: 1.3 }] },
-    targeting: { id: 'targeting', name: 'Targeting Optics', slot: 'eyes', world: 'street', text: 'Aim at weak spots 30% wider', price: 80, perks: [{ kind: 'exploitWindow', value: 1.3 }] },
-    lowlight: { id: 'lowlight', name: 'Low-light Optics', slot: 'eyes', world: 'street', text: 'Heat rises 1% slower per turn', price: 110, streetRep: 1, perks: [{ kind: 'traceTick', value: -1 }] },
-    threat: { id: 'threat', name: 'Threat Scanner', slot: 'eyes', world: 'both', text: 'Hits on a matching layer or armor take ×2.25', price: 190, rep: 2, streetRep: 1, perks: [{ kind: 'matchBonus', value: 0.25 }] },
+    datalens: { id: 'datalens', name: 'Data Lens', slot: 'eyes', world: 'net', text: 'Exploit weak points 30% wider', price: 160, perks: [{ kind: 'exploitWindow', value: 1.3 }] },
+    targeting: { id: 'targeting', name: 'Targeting Optics', slot: 'eyes', world: 'street', text: 'Aim at weak spots 30% wider', price: 160, perks: [{ kind: 'exploitWindow', value: 1.3 }] },
+    lowlight: { id: 'lowlight', name: 'Low-light Optics', slot: 'eyes', world: 'street', text: 'Heat rises 1% slower per turn', price: 220, streetRep: 2, perks: [{ kind: 'traceTick', value: -1 }] },
+    threat: { id: 'threat', name: 'Threat Scanner', slot: 'eyes', world: 'both', text: 'Hits on a matching layer or armor take ×2.25', price: 380, rep: 4, streetRep: 2, perks: [{ kind: 'matchBonus', value: 0.25 }] },
     // Arms
-    reflex: { id: 'reflex', name: 'Reflex Wire', slot: 'arms', world: 'both', text: 'Exploit and aim 20% wider', price: 120, perks: [{ kind: 'exploitWindow', value: 1.2 }] },
-    interface: { id: 'interface', name: 'Interface Gloves', slot: 'arms', world: 'net', text: '+1 damage on every net attack', price: 160, rep: 1, perks: [{ kind: 'damageBonus', value: 1 }] },
-    armblades: { id: 'armblades', name: 'Arm Blades', slot: 'arms', world: 'street', text: 'Hits on matching armor take ×2.5', price: 170, streetRep: 1, perks: [{ kind: 'matchBonus', value: 0.5 }] },
-    hydraulic: { id: 'hydraulic', name: 'Hydraulic Arms', slot: 'arms', world: 'street', text: '+2 damage on every street attack', price: 240, streetRep: 2, perks: [{ kind: 'damageBonus', value: 2 }] },
+    reflex: { id: 'reflex', name: 'Reflex Wire', slot: 'arms', world: 'both', text: 'Exploit and aim 20% wider', price: 240, perks: [{ kind: 'exploitWindow', value: 1.2 }] },
+    interface: { id: 'interface', name: 'Interface Gloves', slot: 'arms', world: 'net', text: '+1 damage on every net attack', price: 320, rep: 2, perks: [{ kind: 'damageBonus', value: 1 }] },
+    armblades: { id: 'armblades', name: 'Arm Blades', slot: 'arms', world: 'street', text: 'Hits on matching armor take ×2.5', price: 340, streetRep: 2, perks: [{ kind: 'matchBonus', value: 0.5 }] },
+    hydraulic: { id: 'hydraulic', name: 'Hydraulic Arms', slot: 'arms', world: 'street', text: '+2 damage on every street attack', price: 480, streetRep: 4, perks: [{ kind: 'damageBonus', value: 2 }] },
     // Torso
-    spine: { id: 'spine', name: 'Reinforced Spine', slot: 'torso', world: 'both', text: '+8 max Integrity and Health', price: 110, perks: [{ kind: 'maxIntegrity', value: 8 }] },
-    lungs: { id: 'lungs', name: 'Synthetic Lungs', slot: 'torso', world: 'street', text: '+3 Health back after every street fight', price: 120, perks: [{ kind: 'repairAfterFight', value: 3 }] },
-    ghost: { id: 'ghost', name: 'Ghost Tissue', slot: 'torso', world: 'net', text: 'Trace rises 1% slower per turn', price: 130, rep: 2, perks: [{ kind: 'traceTick', value: -1 }] },
-    subdermal: { id: 'subdermal', name: 'Subdermal Plating', slot: 'torso', world: 'street', text: '+2 block on shields, +4 max Health', price: 180, streetRep: 1, perks: [{ kind: 'blockBonus', value: 2 }, { kind: 'maxIntegrity', value: 4 }] },
-    deadman: { id: 'deadman', name: "Dead Man's Switch", slot: 'torso', world: 'both', text: 'Once per run, survive a killing blow at 10', price: 180, rep: 3, perks: [{ kind: 'revive', value: 10 }] },
+    spine: { id: 'spine', name: 'Reinforced Spine', slot: 'torso', world: 'both', text: '+8 max Integrity and Health', price: 220, perks: [{ kind: 'maxIntegrity', value: 8 }] },
+    lungs: { id: 'lungs', name: 'Synthetic Lungs', slot: 'torso', world: 'street', text: '+3 Health back after every street fight', price: 240, perks: [{ kind: 'repairAfterFight', value: 3 }] },
+    ghost: { id: 'ghost', name: 'Ghost Tissue', slot: 'torso', world: 'net', text: 'Trace rises 1% slower per turn', price: 260, rep: 4, perks: [{ kind: 'traceTick', value: -1 }] },
+    subdermal: { id: 'subdermal', name: 'Subdermal Plating', slot: 'torso', world: 'street', text: '+2 block on shields, +4 max Health', price: 360, streetRep: 2, perks: [{ kind: 'blockBonus', value: 2 }, { kind: 'maxIntegrity', value: 4 }] },
+    deadman: { id: 'deadman', name: "Dead Man's Switch", slot: 'torso', world: 'both', text: 'Once per run, survive a killing blow at 10', price: 360, rep: 6, perks: [{ kind: 'revive', value: 10 }] },
     // Legs
-    kinetic: { id: 'kinetic', name: 'Kinetic Legs', slot: 'legs', world: 'street', text: 'Dodge timing 30% wider', price: 110, perks: [{ kind: 'blockWindow', value: 1.3 }] },
-    pump: { id: 'pump', name: 'Circulatory Pump', slot: 'legs', world: 'both', text: '+2 back after every fight, net or street', price: 150, rep: 1, streetRep: 1, perks: [{ kind: 'repairAfterFight', value: 2 }] },
-    muscles: { id: 'muscles', name: 'Synthetic Muscles', slot: 'legs', world: 'street', text: '+1 AP every turn on street jobs', price: 400, streetRep: 4, perks: [{ kind: 'ramPerTurn', value: 1 }] },
+    kinetic: { id: 'kinetic', name: 'Kinetic Legs', slot: 'legs', world: 'street', text: 'Dodge timing 30% wider', price: 220, perks: [{ kind: 'blockWindow', value: 1.3 }] },
+    pump: { id: 'pump', name: 'Circulatory Pump', slot: 'legs', world: 'both', text: '+2 back after every fight, net or street', price: 300, rep: 2, streetRep: 2, perks: [{ kind: 'repairAfterFight', value: 2 }] },
+    muscles: { id: 'muscles', name: 'Synthetic Muscles', slot: 'legs', world: 'street', text: '+1 AP every turn on street jobs', price: 800, streetRep: 8, perks: [{ kind: 'ramPerTurn', value: 1 }] },
 };
 const COMPONENT_SLOTS = {
     cpu: { name: 'Processor' },
@@ -1195,21 +1195,21 @@ const COMPONENT_SLOTS = {
     cooling: { name: 'Cooling' },
 };
 const COMPONENTS = {
-    overclockcpu: { id: 'overclockcpu', name: 'Overclocked CPU', slot: 'cpu', text: '+1 RAM on your first turn', price: 120, perks: [{ kind: 'ramTurn1', value: 1 }] },
-    breakerchip: { id: 'breakerchip', name: 'Breaker Chip', slot: 'cpu', text: '+1 damage on every attack', price: 190, rep: 2, perks: [{ kind: 'damageBonus', value: 1 }] },
-    quantum: { id: 'quantum', name: 'Quantum Core', slot: 'cpu', text: '+1 RAM every turn; Trace rises 2% faster', price: 460, rep: 6, perks: [{ kind: 'ramPerTurn', value: 1 }, { kind: 'traceTick', value: 2 }] },
-    ramstick: { id: 'ramstick', name: 'RAM Stick', slot: 'memory', text: '+2 max RAM', price: 100, perks: [{ kind: 'ramMax', value: 2 }] },
-    cachecore: { id: 'cachecore', name: 'Cache Core', slot: 'memory', text: '+25% data', price: 150, rep: 1, perks: [{ kind: 'dataBonus', value: 0.25 }] },
-    expansion: { id: 'expansion', name: 'Expansion Bus', slot: 'memory', text: '+1 program slot', price: 240, rep: 3, perks: [{ kind: 'slots', value: 1 }] },
-    heatsink: { id: 'heatsink', name: 'Heatsink', slot: 'cooling', text: 'Trace rises 1% slower per turn', price: 110, perks: [{ kind: 'traceTick', value: -1 }] },
-    coolshield: { id: 'coolshield', name: 'Coolant Shield', slot: 'cooling', text: '+2 block on every shield program', price: 150, rep: 1, perks: [{ kind: 'blockBonus', value: 2 }] },
-    cryo: { id: 'cryo', name: 'Cryo Loop', slot: 'cooling', text: 'Trace 2% slower; after a countermeasure it drops 10% lower', price: 280, rep: 2, streetRep: 2, perks: [{ kind: 'traceTick', value: -2 }, { kind: 'countermeasureReset', value: -10 }] },
+    overclockcpu: { id: 'overclockcpu', name: 'Overclocked CPU', slot: 'cpu', text: '+1 RAM on your first turn', price: 240, perks: [{ kind: 'ramTurn1', value: 1 }] },
+    breakerchip: { id: 'breakerchip', name: 'Breaker Chip', slot: 'cpu', text: '+1 damage on every attack', price: 380, rep: 4, perks: [{ kind: 'damageBonus', value: 1 }] },
+    quantum: { id: 'quantum', name: 'Quantum Core', slot: 'cpu', text: '+1 RAM every turn; Trace rises 2% faster', price: 920, rep: 12, perks: [{ kind: 'ramPerTurn', value: 1 }, { kind: 'traceTick', value: 2 }] },
+    ramstick: { id: 'ramstick', name: 'RAM Stick', slot: 'memory', text: '+2 max RAM', price: 200, perks: [{ kind: 'ramMax', value: 2 }] },
+    cachecore: { id: 'cachecore', name: 'Cache Core', slot: 'memory', text: '+25% data', price: 300, rep: 2, perks: [{ kind: 'dataBonus', value: 0.25 }] },
+    expansion: { id: 'expansion', name: 'Expansion Bus', slot: 'memory', text: '+1 program slot', price: 480, rep: 6, perks: [{ kind: 'slots', value: 1 }] },
+    heatsink: { id: 'heatsink', name: 'Heatsink', slot: 'cooling', text: 'Trace rises 1% slower per turn', price: 220, perks: [{ kind: 'traceTick', value: -1 }] },
+    coolshield: { id: 'coolshield', name: 'Coolant Shield', slot: 'cooling', text: '+2 block on every shield program', price: 300, rep: 2, perks: [{ kind: 'blockBonus', value: 2 }] },
+    cryo: { id: 'cryo', name: 'Cryo Loop', slot: 'cooling', text: 'Trace 2% slower; after a countermeasure it drops 10% lower', price: 560, rep: 4, streetRep: 4, perks: [{ kind: 'traceTick', value: -2 }, { kind: 'countermeasureReset', value: -10 }] },
 };
 const ARMOR = {
-    jacket: { id: 'jacket', name: 'Armored Jacket', text: '+6 max Health', price: 90, perks: [{ kind: 'maxIntegrity', value: 6 }] },
-    coat: { id: 'coat', name: 'Ballistic Coat', text: '+10 max Health; bulky: Heat +1%/turn', price: 150, streetRep: 1, perks: [{ kind: 'maxIntegrity', value: 10 }, { kind: 'traceTick', value: 1 }] },
-    stealthsuit: { id: 'stealthsuit', name: 'Stealth Suit', text: '+3 max Health, Heat 2% slower, stashes never trapped', price: 230, streetRep: 2, perks: [{ kind: 'maxIntegrity', value: 3 }, { kind: 'traceTick', value: -2 }, { kind: 'cacheSafe', value: 1 }] },
-    rig: { id: 'rig', name: 'Plated Rig', text: '+12 max Health, +2 block; heavy: −1 max AP', price: 250, streetRep: 2, perks: [{ kind: 'maxIntegrity', value: 12 }, { kind: 'blockBonus', value: 2 }, { kind: 'ramMax', value: -1 }] },
+    jacket: { id: 'jacket', name: 'Armored Jacket', text: '+6 max Health', price: 180, perks: [{ kind: 'maxIntegrity', value: 6 }] },
+    coat: { id: 'coat', name: 'Ballistic Coat', text: '+10 max Health; bulky: Heat +1%/turn', price: 300, streetRep: 2, perks: [{ kind: 'maxIntegrity', value: 10 }, { kind: 'traceTick', value: 1 }] },
+    stealthsuit: { id: 'stealthsuit', name: 'Stealth Suit', text: '+3 max Health, Heat 2% slower, stashes never trapped', price: 460, streetRep: 4, perks: [{ kind: 'maxIntegrity', value: 3 }, { kind: 'traceTick', value: -2 }, { kind: 'cacheSafe', value: 1 }] },
+    rig: { id: 'rig', name: 'Plated Rig', text: '+12 max Health, +2 block; heavy: −1 max AP', price: 500, streetRep: 4, perks: [{ kind: 'maxIntegrity', value: 12 }, { kind: 'blockBonus', value: 2 }, { kind: 'ramMax', value: -1 }] },
 };
 
 __m["content/cyberware"] = { BODY_SLOTS, CYBERWARE, COMPONENT_SLOTS, COMPONENTS, ARMOR };
@@ -1219,15 +1219,15 @@ __m["content/cyberware"] = { BODY_SLOTS, CYBERWARE, COMPONENT_SLOTS, COMPONENTS,
 // The safehouse program dealer: permanent unlocks you can bring on any run.
 // `rep` = total reputation (all fixers) before it's in stock.
 const DEALER_STOCK = [
-    { program: 'splice', price: 60, rep: 0 },
-    { program: 'phase', price: 70, rep: 0 },
-    { program: 'backdoor', price: 90, rep: 0 },
-    { program: 'bruteforce', price: 110, rep: 1 },
-    { program: 'rot', price: 100, rep: 1 },
-    { program: 'cipherstorm', price: 120, rep: 2 },
-    { program: 'mirrorwall', price: 120, rep: 2 },
-    { program: 'overclock', price: 130, rep: 3 },
-    { program: 'doppel', price: 150, rep: 4 },
+    { program: 'splice', price: 120, rep: 0 },
+    { program: 'phase', price: 140, rep: 0 },
+    { program: 'backdoor', price: 180, rep: 0 },
+    { program: 'bruteforce', price: 220, rep: 2 },
+    { program: 'rot', price: 200, rep: 2 },
+    { program: 'cipherstorm', price: 240, rep: 4 },
+    { program: 'mirrorwall', price: 240, rep: 4 },
+    { program: 'overclock', price: 260, rep: 6 },
+    { program: 'doppel', price: 300, rep: 8 },
 ];
 /** The fence buys data. Its rate (credits per data) drifts between runs. */
 const FENCE = { minRate: 0.6, maxRate: 1.4 };
@@ -1253,49 +1253,49 @@ const DECKS = {
     },
     scrapstack: {
         id: 'scrapstack', name: 'Scrapstack', tagline: 'Seven slots soldered onto a salvaged board. Barely any room to bank RAM.',
-        slots: 7, ramPerTurn: 3, ramMax: 4, price: 150, rep: 0, color: '#ffe83b',
+        slots: 7, ramPerTurn: 3, ramMax: 4, price: 300, rep: 0, color: '#ffe83b',
     },
     sable: {
         id: 'sable', name: 'Sable Overdrive', tagline: 'Four slots, no RAM bank, a much hotter processor, and almost no shielding.',
-        slots: 4, ramPerTurn: 4, ramMax: 4, price: 320, rep: 3, color: '#ff3b5c',
+        slots: 4, ramPerTurn: 4, ramMax: 4, price: 640, rep: 6, color: '#ff3b5c',
         perks: [{ kind: 'maxIntegrity', value: -8 }], perkText: 'Stripped casing: \u22128 max Integrity',
     },
     vantage: {
         id: 'vantage', name: 'Vantage Pro', tagline: 'A professional rig: an extra slot and a deeper RAM bank.',
-        slots: 6, ramPerTurn: 3, ramMax: 7, price: 200, rep: 1, color: '#29e0ff',
+        slots: 6, ramPerTurn: 3, ramMax: 7, price: 400, rep: 2, color: '#29e0ff',
     },
     magpie: {
         id: 'magpie', name: 'Magpie Array', tagline: 'Eight slots: bring a program for every situation.',
-        slots: 8, ramPerTurn: 3, ramMax: 6, price: 300, rep: 2, color: '#ff2bd6',
+        slots: 8, ramPerTurn: 3, ramMax: 6, price: 600, rep: 4, color: '#ff2bd6',
     },
     lotus: {
         id: 'lotus', name: 'Black Lotus', tagline: 'Military grade. Nobody asks where you got it.',
-        slots: 6, ramPerTurn: 4, ramMax: 7, price: 520, rep: 5, color: '#b38cff',
+        slots: 6, ramPerTurn: 4, ramMax: 7, price: 1040, rep: 10, color: '#b38cff',
         perks: [{ kind: 'traceTick', value: 3 }], perkText: 'Runs hot: Trace rises 3% faster per turn',
     },
     leech: {
         id: 'leech', name: 'Leech-9', tagline: 'A scavenger’s rig. Siphons a little extra from everything it touches.',
-        slots: 5, ramPerTurn: 3, ramMax: 6, price: 220, rep: 1, color: '#9dff3b',
+        slots: 5, ramPerTurn: 3, ramMax: 6, price: 440, rep: 2, color: '#9dff3b',
         perks: [{ kind: 'dataBonus', value: 0.25 }, { kind: 'repairAfterFight', value: 2 }], perkText: '+25% data, +2 Integrity repaired after every fight',
     },
     wraith: {
         id: 'wraith', name: 'Wraith', tagline: 'Whisper-quiet. Security barely knows you’re there.',
-        slots: 5, ramPerTurn: 3, ramMax: 7, price: 260, rep: 2, color: '#e9dcff',
+        slots: 5, ramPerTurn: 3, ramMax: 7, price: 520, rep: 4, color: '#e9dcff',
         perks: [{ kind: 'traceTick', value: -2 }, { kind: 'cacheSafe', value: 1 }], perkText: 'Trace rises 2% slower per turn; data caches are never trapped',
     },
     bulwark: {
         id: 'bulwark', name: 'Bulwark', tagline: 'An armored chassis built to take a beating and keep running.',
-        slots: 6, ramPerTurn: 3, ramMax: 5, price: 280, rep: 3, color: '#5c8cff',
+        slots: 6, ramPerTurn: 3, ramMax: 5, price: 560, rep: 6, color: '#5c8cff',
         perks: [{ kind: 'blockBonus', value: 2 }, { kind: 'maxIntegrity', value: 6 }], perkText: '+2 block on every shield program, +6 max Integrity',
     },
     hammerhead: {
         id: 'hammerhead', name: 'Hammerhead', tagline: 'An ICE breaker’s rig. Hits like a truck, shields like paper.',
-        slots: 5, ramPerTurn: 3, ramMax: 5, price: 360, rep: 4, color: '#ff8a2b',
+        slots: 5, ramPerTurn: 3, ramMax: 5, price: 720, rep: 8, color: '#ff8a2b',
         perks: [{ kind: 'damageBonus', value: 1 }, { kind: 'matchBonus', value: 0.5 }, { kind: 'blockBonus', value: -2 }], perkText: '+1 damage, matching layers take ×2.5; −2 block on shield programs',
     },
     kitsune: {
         id: 'kitsune', name: 'Kitsune Twin-Core', tagline: 'Two prototype processors in one case. Unstable, beautiful, terrifying.',
-        slots: 7, ramPerTurn: 4, ramMax: 8, price: 760, rep: 10, streetRep: 3, color: '#ffb3ec',
+        slots: 7, ramPerTurn: 4, ramMax: 8, price: 1520, rep: 20, streetRep: 6, color: '#ffb3ec',
         perks: [{ kind: 'maxIntegrity', value: -6 }, { kind: 'traceTick', value: 1 }], perkText: 'Unstable: −6 max Integrity, Trace rises 1% faster per turn',
     },
 };
@@ -1312,8 +1312,8 @@ __m["content/decks"] = { DECKS, STARTER_DECK };
 /** Index 0 is the base program (Mk I). */
 const UPGRADE_LEVELS = [
     { suffix: '', cost: 0, scale: 1, cooldown: 0, extra: 0 },
-    { suffix: 'Mk II', cost: 40, scale: 1.4, cooldown: 0, extra: 0 },
-    { suffix: 'Mk III', cost: 90, scale: 1.8, cooldown: -1, extra: 1 },
+    { suffix: 'Mk II', cost: 80, scale: 1.4, cooldown: 0, extra: 0 },
+    { suffix: 'Mk III', cost: 180, scale: 1.8, cooldown: -1, extra: 1 },
 ];
 /** Relics are rarer tech: upgrading them costs this much more. */
 const RELIC_UPGRADE_COST = 2;
@@ -1532,18 +1532,18 @@ const STREET_BODY = { name: 'Street kit', slots: 5, ramPerTurn: 3, ramMax: 5 };
 const LOOT_GEAR = ['shotgun', 'smg', 'silenced', 'monoblade', 'baton', 'emp', 'incendiary', 'stim', 'riot', 'medkit'];
 /** Ivo's stock. `rep` = total street reputation before it's on the rack; `netRep` = net reputation also needed. */
 const ARMS_STOCK = [
-    { gear: 'baton', price: 60, rep: 0 },
-    { gear: 'medkit', price: 70, rep: 0 },
-    { gear: 'shotgun', price: 100, rep: 0 },
-    { gear: 'silenced', price: 110, rep: 1 },
-    { gear: 'riot', price: 110, rep: 1 },
-    { gear: 'smg', price: 130, rep: 2 },
-    { gear: 'emp', price: 130, rep: 2 },
-    { gear: 'monoblade', price: 150, rep: 3 },
-    { gear: 'stim', price: 120, rep: 3 },
-    { gear: 'incendiary', price: 120, rep: 4 },
+    { gear: 'baton', price: 120, rep: 0 },
+    { gear: 'medkit', price: 140, rep: 0 },
+    { gear: 'shotgun', price: 200, rep: 0 },
+    { gear: 'silenced', price: 220, rep: 2 },
+    { gear: 'riot', price: 220, rep: 2 },
+    { gear: 'smg', price: 260, rep: 4 },
+    { gear: 'emp', price: 260, rep: 4 },
+    { gear: 'monoblade', price: 300, rep: 6 },
+    { gear: 'stim', price: 240, rep: 6 },
+    { gear: 'incendiary', price: 240, rep: 8 },
     // A smart rifle needs a smartlink ID scrubbed from a corporate registry: net work first.
-    { gear: 'smartrifle', price: 190, rep: 2, netRep: 4 },
+    { gear: 'smartrifle', price: 380, rep: 4, netRep: 8 },
 ];
 // Run upgrades found on street jobs (the street version of deck mods).
 const STREET_MODS = {
@@ -2575,6 +2575,8 @@ function contractMods(contract) {
     const base = { startTrace: 0, traceTick: 0, enemyHp: tier?.enemy ?? 1, enemyDmg: tier?.enemy ?? 1, noRepair: false, maxIntegrity: 0, shopPrice: 1, hunter: false, nonlethal: false, reward: tier?.reward ?? 1 };
     return combineMods(base, contract.modifiers.map((id) => MODIFIERS[id].effects));
 }
+/** Integrity (net) / Health (street) every run starts with, before perks. */
+const START_INTEGRITY = 30;
 const REPAIR_AFTER_FIGHT = 3;
 /** Heat removed by cracking a security terminal. */
 const HACK_HEAT_DROP = 25;
@@ -2594,7 +2596,7 @@ function newRun(seed, setup = DEFAULT_SETUP()) {
     // Your deck for terminal hacks on street jobs: net implants and components apply, net skills don't.
     const netPerks = setup.net && netDeck ? perksFrom('net', { cyberware: setup.cyberware, deck: netDeck.id, components: setup.net.components }) : null;
     const mods = contractMods(setup.contract);
-    const integrityMax = Math.max(20, 40 + perks.maxIntegrity + mods.maxIntegrity);
+    const integrityMax = Math.max(15, START_INTEGRITY + perks.maxIntegrity + mods.maxIntegrity);
     const secret = setup.contract.secret && SECRET_MODIFIERS.length ? new Rng({ rng: seed ^ 0x5ec2e7 }).pick(SECRET_MODIFIERS) : null;
     const body = world === 'street' ? STREET_BODY : { name: deck.name, slots: deck.slots, ramPerTurn: deck.ramPerTurn, ramMax: deck.ramMax };
     const loadout = {
@@ -3109,7 +3111,7 @@ function goDeeper(prev) {
     return run;
 }
 
-__m["engine/run"] = { WORDS, perksFrom, combineMods, contractMods, REPAIR_AFTER_FIGHT, HACK_HEAT_DROP, REST_REPAIR, REST_SCRUB, newRun, currentNode, reachable, moveTo, dismissNotice, startFight, finishFight, takeLoot, openLoadout, closeLoadout, equip, unequip, buy, leaveShop, chooseEvent, hackTerminal, skipTerminal, rest, jackOut, stay, goDeeper };
+__m["engine/run"] = { WORDS, perksFrom, combineMods, contractMods, START_INTEGRITY, REPAIR_AFTER_FIGHT, HACK_HEAT_DROP, REST_REPAIR, REST_SCRUB, newRun, currentNode, reachable, moveTo, dismissNotice, startFight, finishFight, takeLoot, openLoadout, closeLoadout, equip, unequip, buy, leaveShop, chooseEvent, hackTerminal, skipTerminal, rest, jackOut, stay, goDeeper };
 })();
 // ---- ui/art ----
 (() => {
@@ -6343,7 +6345,7 @@ function renderTitle() {
     <div class="title-screen">
       <div class="title-art">
         <h1 class="logo" data-text="NETRUNNER">NETRUNNER</h1>
-        <div class="tagline">prototype · v0.15</div>
+        <div class="tagline">prototype · v0.15.1</div>
       </div>
       <p class="pitch">Jack in. Crack the ICE. Get out before they trace you.</p>
       ${profile.runs ? `<p class="stash-line">¤ ${profile.credits} · ▤ ${profile.data} · ${profile.contractsDone} contracts done</p>` : ''}
