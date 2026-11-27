@@ -678,6 +678,9 @@ body.street .timing-overlay, body.street .banner { --green: #ffb13b; }
 /* Secondary buttons on light cards need dark ink. */
 .ware .secondary, .deck-row .secondary { color: #1b0b3a; border-color: #1b0b3a; background: #fff4fd; box-shadow: 3px 3px 0 #29e0ff; }
 .street-hero .deck-stats { justify-content: flex-start; }
+.street-row { border-color: #ffb13b; }
+.street-row.active { box-shadow: 5px 5px 0 #ffb13b; }
+.slots > .sh-hint { grid-column: 1 / -1; }
 
 </style>
 </head>
@@ -1177,6 +1180,7 @@ const CYBERWARE = {
     reflex: { id: 'reflex', name: 'Reflex Wire', slot: 'arms', world: 'both', text: 'Exploit and aim 20% wider', price: 240, perks: [{ kind: 'exploitWindow', value: 1.2 }] },
     interface: { id: 'interface', name: 'Interface Gloves', slot: 'arms', world: 'net', text: '+1 damage on every net attack', price: 320, rep: 2, perks: [{ kind: 'damageBonus', value: 1 }] },
     armblades: { id: 'armblades', name: 'Arm Blades', slot: 'arms', world: 'street', text: 'Hits on matching armor take ×2.5', price: 340, streetRep: 2, perks: [{ kind: 'matchBonus', value: 0.5 }] },
+    compartment: { id: 'compartment', name: 'Forearm Compartment', slot: 'arms', world: 'street', text: '+1 gear slot on street jobs (a hidden holster in the arm)', price: 360, streetRep: 4, perks: [{ kind: 'slots', value: 1 }] },
     hydraulic: { id: 'hydraulic', name: 'Hydraulic Arms', slot: 'arms', world: 'street', text: '+2 damage on every street attack', price: 480, streetRep: 4, perks: [{ kind: 'damageBonus', value: 2 }] },
     // Torso
     spine: { id: 'spine', name: 'Reinforced Spine', slot: 'torso', world: 'both', text: '+8 max Integrity and Health', price: 220, perks: [{ kind: 'maxIntegrity', value: 8 }] },
@@ -1527,8 +1531,28 @@ const GEAR = {
 };
 Object.assign(PROGRAMS, GEAR);
 const STARTER_KIT = ['sidearm', 'knife', 'taser', 'cover', 'smoke'];
-/** Your body as a "deck": gear slots and AP. Cyberware will change these later. */
-const STREET_BODY = { name: 'Street kit', slots: 5, ramPerTurn: 3, ramMax: 5 };
+const RIGS = {
+    belt: { id: 'belt', name: 'Belt Holster', tagline: 'A belt, a holster and a couple of pouches. Everyone starts here.', slots: 5, ramPerTurn: 3, ramMax: 5, price: 0, color: '#ffb13b' },
+    chestrig: { id: 'chestrig', name: 'Chest Rig', tagline: 'Webbing across the chest. One more thing within reach.', slots: 6, ramPerTurn: 3, ramMax: 5, price: 300, streetRep: 2, color: '#ff8a2b' },
+    harness: {
+        id: 'harness', name: 'Tactical Harness', tagline: 'Loops and clips for everything. You jingle a little.', slots: 7, ramPerTurn: 3, ramMax: 5, price: 560, streetRep: 4, color: '#c9ccd6',
+        perks: [{ kind: 'traceTick', value: 1 }], perkText: 'Noisy: Heat rises 1% faster per turn',
+    },
+    sling: {
+        id: 'sling', name: "Runner's Sling", tagline: 'Almost nothing on you. Fast in, fast out.', slots: 4, ramPerTurn: 4, ramMax: 4, price: 900, streetRep: 10, color: '#39ff88',
+        perks: [{ kind: 'maxIntegrity', value: -8 }], perkText: 'No protection: −8 max Health',
+    },
+    backpack: {
+        id: 'backpack', name: 'Combat Backpack', tagline: 'Room for the whole armory. Heavy on the shoulders.', slots: 8, ramPerTurn: 3, ramMax: 4, price: 800, streetRep: 8, color: '#5c8cff',
+    },
+    exoframe: {
+        id: 'exoframe', name: 'Exo-Frame', tagline: 'A powered frame lifted from a military contractor. Needs a netrunner to unlock its firmware.', slots: 7, ramPerTurn: 4, ramMax: 7, price: 1500, streetRep: 16, rep: 6, color: '#ff2bd6',
+        perks: [{ kind: 'maxIntegrity', value: -6 }, { kind: 'traceTick', value: 1 }], perkText: 'Prototype: −6 max Health, Heat rises 1% faster per turn',
+    },
+};
+const STARTER_RIG = 'belt';
+/** The starter rig's numbers (older code and tests refer to this). */
+const STREET_BODY = { name: RIGS.belt.name, slots: RIGS.belt.slots, ramPerTurn: RIGS.belt.ramPerTurn, ramMax: RIGS.belt.ramMax };
 const LOOT_GEAR = ['shotgun', 'smg', 'silenced', 'monoblade', 'baton', 'emp', 'incendiary', 'stim', 'riot', 'medkit'];
 /** Ivo's stock. `rep` = total street reputation before it's on the rack; `netRep` = net reputation also needed. */
 const ARMS_STOCK = [
@@ -1810,7 +1834,7 @@ CONTRACTS.push(...STREET_CONTRACTS);
 // ---------- Safehouse characters ----------
 NPCS.ivo = { id: 'ivo', name: 'Sgt. Ivo', role: 'Arms Dealer', tagline: 'Ex-military. Sells what works and nothing that doesn’t.' };
 
-__m["content/street"] = { GEAR, STARTER_KIT, STREET_BODY, LOOT_GEAR, ARMS_STOCK, STREET_MODS, LOOT_STREET_MODS, STREET_RESPONDER };
+__m["content/street"] = { GEAR, STARTER_KIT, RIGS, STARTER_RIG, STREET_BODY, LOOT_GEAR, ARMS_STOCK, STREET_MODS, LOOT_STREET_MODS, STREET_RESPONDER };
 })();
 // ---- content/index ----
 (() => {
@@ -2514,7 +2538,7 @@ __m["engine/map"] = { MIDDLE_ROWS, findNode, generateSector };
 (() => {
 // A run: three sector maps, walked node by node. Fights, shops, events, caches,
 // safe nodes and jack-out points. Pure logic, like combat.
-const { ARMOR, COMPONENTS, CONTRACTS, CYBERWARE, DECKS, ENEMIES, FIXERS, LOOT_GEAR, LOOT_STREET_MODS, SECTORS, STREET_BODY, STREET_RESPONDER, MODIFIERS, SECRET_MODIFIERS, SKILLS, EVENTS, RELIC_PROGRAMS, LOOT_MODS, LOOT_PROGRAMS, MAX_SLOTS, MODS, PRICES, PROGRAMS, REWARDS, STARTER_LOADOUT } = __m["engine/content"];
+const { ARMOR, COMPONENTS, CONTRACTS, CYBERWARE, DECKS, RIGS, ENEMIES, FIXERS, LOOT_GEAR, LOOT_STREET_MODS, SECTORS, STREET_BODY, STREET_RESPONDER, MODIFIERS, SECRET_MODIFIERS, SKILLS, EVENTS, RELIC_PROGRAMS, LOOT_MODS, LOOT_PROGRAMS, MAX_SLOTS, MODS, PRICES, PROGRAMS, REWARDS, STARTER_LOADOUT } = __m["engine/content"];
 const { createCombat, TUNING } = __m["engine/combat"];
 const { findNode, generateSector } = __m["engine/map"];
 const { Rng } = __m["engine/rng"];
@@ -2540,6 +2564,7 @@ function perksFrom(world, src = {}) {
         ...(net && src.deck ? DECKS[src.deck]?.perks ?? [] : []),
         ...(net ? (src.components ?? []).flatMap((id) => COMPONENTS[id]?.perks ?? []) : []),
         ...(!net && src.armor ? ARMOR[src.armor]?.perks ?? [] : []),
+        ...(!net && src.rig ? RIGS[src.rig]?.perks ?? [] : []),
         ...(src.skills ?? []).map((id) => SKILLS[id]?.perk),
     ];
     for (const perk of all) {
@@ -2591,14 +2616,15 @@ function newRun(seed, setup = DEFAULT_SETUP()) {
     const world = SECTORS[setup.contract.sectors[0]]?.world ?? 'net';
     const deck = DECKS[setup.deck ?? ''] ?? DECKS.kestrel;
     // On the street your body is the "deck": the cyberdeck's perks don't apply.
-    const perks = perksFrom(world, { cyberware: setup.cyberware, deck: deck.id, skills: setup.skills, components: setup.components, armor: setup.armor });
+    const rig = RIGS[setup.rig ?? ''] ?? STREET_BODY;
+    const perks = perksFrom(world, { cyberware: setup.cyberware, deck: deck.id, skills: setup.skills, components: setup.components, armor: setup.armor, rig: setup.rig });
     const netDeck = setup.net ? DECKS[setup.net.deck] ?? DECKS.kestrel : null;
     // Your deck for terminal hacks on street jobs: net implants and components apply, net skills don't.
     const netPerks = setup.net && netDeck ? perksFrom('net', { cyberware: setup.cyberware, deck: netDeck.id, components: setup.net.components }) : null;
     const mods = contractMods(setup.contract);
     const integrityMax = Math.max(15, START_INTEGRITY + perks.maxIntegrity + mods.maxIntegrity);
     const secret = setup.contract.secret && SECRET_MODIFIERS.length ? new Rng({ rng: seed ^ 0x5ec2e7 }).pick(SECRET_MODIFIERS) : null;
-    const body = world === 'street' ? STREET_BODY : { name: deck.name, slots: deck.slots, ramPerTurn: deck.ramPerTurn, ramMax: deck.ramMax };
+    const body = world === 'street' ? rig : { name: deck.name, slots: deck.slots, ramPerTurn: deck.ramPerTurn, ramMax: deck.ramMax };
     const loadout = {
         chassis: body.name, slots: Math.min(MAX_SLOTS, body.slots + perks.slots), ramPerTurn: body.ramPerTurn + perks.ramPerTurn, ramMax: Math.max(body.ramPerTurn, body.ramMax + perks.ramMax), equipped: [], stash: [],
     };
@@ -3576,6 +3602,589 @@ const STREET = {
 
 __m["ui/art"] = { ICE, RUNNERS, AI_SHAPES, rainFigure, STREET };
 })();
+// ---- ui/portraits ----
+(() => {
+// Safehouse character portraits, drawn in code: flat comic style, heavy
+// outlines, halftone backgrounds. Keyed by fixer id or NPC id.
+const INK = '#1b0b3a';
+const HEAD = 'M100 54 C128 54 140 78 139 104 C138 132 122 154 100 154 C78 154 62 132 61 104 C60 78 72 54 100 54 Z';
+const HEAD_NARROW = 'M100 56 C124 56 134 80 133 106 C132 136 118 158 100 158 C82 158 68 136 67 106 C66 80 76 56 100 56 Z';
+const HEAD_ROUND = 'M100 56 C132 56 144 80 143 106 C142 134 124 152 100 152 C76 152 58 134 57 106 C56 80 68 56 100 56 Z';
+function frame(f, back, front) {
+    const head = f.head ?? HEAD;
+    const id = f.id;
+    return `<svg viewBox="0 0 200 240" role="img" aria-hidden="true">
+  <defs>
+    <pattern id="${id}-dots" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx="4" cy="4" r="1.8" fill="${f.dots}"/></pattern>
+    <pattern id="${id}-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><path d="M0 0 V5" stroke="${INK}" stroke-width="1.1" opacity="0.45"/></pattern>
+    <clipPath id="${id}-head"><path d="${head}"/></clipPath>
+    <radialGradient id="${id}-vig" cx="50%" cy="42%" r="70%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#0b0418" stop-opacity="0.75"/></radialGradient>
+    <filter id="${id}-rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
+    <filter id="${id}-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.03  0 0 0 0 0.16  0 0 0 1.6 -0.62"/></filter>
+  </defs>
+  <rect width="200" height="240" fill="${f.bg}"/>
+  <rect width="200" height="240" fill="url(#${id}-dots)"/>
+  <path d="M18 0 L22 64 L16 120 M164 0 L160 40 L168 98 M120 0 L118 26" stroke="#0b0418" stroke-width="6" opacity="0.18" fill="none"/>
+  <rect width="200" height="240" fill="url(#${id}-vig)"/>
+  <g filter="url(#${id}-rough)">
+  <g transform="${f.zoom ? `translate(${(200 - 200 * f.zoom) / 2} 6) scale(${f.zoom})` : ''}">
+  ${back}
+  <rect x="88" y="138" width="24" height="34" fill="${f.skin}" stroke="${INK}" stroke-width="3"/>
+  <rect x="100" y="138" width="12" height="34" fill="${f.shade}"/>
+  <rect x="88" y="138" width="24" height="12" fill="${INK}" opacity="0.35"/>
+  <path d="${head}" fill="${f.skin}"/>
+  <g clip-path="url(#${id}-head)">
+    <path d="M104 40 C132 70 136 120 112 170 L170 170 L170 40 Z" fill="${f.shade}"/>
+    <path d="M110 60 C134 84 134 124 116 162 L170 162 L170 60 Z" fill="url(#${id}-hatch)"/>
+    <path d="M60 140 C80 160 120 160 140 140 L140 170 L60 170 Z" fill="${f.shade}" opacity="0.6"/>
+  </g>
+  <path d="${head}" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
+  ${front}
+  </g>
+  </g>
+  <rect width="200" height="240" filter="url(#${id}-grain)" opacity="0.55"/>
+  <rect x="1.5" y="1.5" width="197" height="237" fill="none" stroke="#0b0418" stroke-width="3" opacity="0.6"/>
+</svg>`;
+}
+// Small reusable features.
+const ear = (x, skin) => `<path d="M${x} 98 C${x + (x < 100 ? -9 : 9)} 96 ${x + (x < 100 ? -10 : 10)} 116 ${x} 118" fill="${skin}" stroke="${INK}" stroke-width="3"/>`;
+const eye = (x, iris = INK) => `<path d="M${x - 9} 103 Q${x} 96 ${x + 9} 103 Q${x} 108 ${x - 9} 103 Z" fill="#fff" stroke="${INK}" stroke-width="2.5"/><circle cx="${x}" cy="103" r="3.6" fill="${iris}"/><circle cx="${x + 1.2}" cy="101.8" r="1" fill="#fff"/>`;
+const brow = (x, tilt = 0) => `<path d="M${x - 10} ${94 + tilt} Q${x} ${88} ${x + 10} ${94 - tilt}" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
+const bags = (x) => `<path d="M${x - 8} 109 Q${x} 113 ${x + 8} 109" fill="none" stroke="${INK}" stroke-width="1.4" opacity="0.7"/>`;
+const screw = (x, y) => `<circle cx="${x}" cy="${y}" r="1.6" fill="#6b6f7d" stroke="${INK}" stroke-width="0.8"/>`;
+const nose = `<path d="M100 106 L96 122 Q100 125 104 122" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`;
+const PORTRAITS = {
+    // Corporate fixer: sharp asymmetric bob, high collar, one gold cyber-eye.
+    juno: () => frame({ id: 'juno', bg: '#e324bf', dots: '#b81a9a', skin: '#c98b6b', shade: '#9c6450' }, `<path d="M30 240 C34 196 56 176 88 168 L100 182 L112 168 C144 176 166 196 170 240 Z" fill="#3b1d7a" stroke="${INK}" stroke-width="3"/>
+       <path d="M74 150 L88 168 L100 190 L112 168 L126 150 L132 176 L100 204 L68 176 Z" fill="#2a1458" stroke="${INK}" stroke-width="3"/>
+       <path d="M68 176 L100 204 L132 176" fill="none" stroke="#ffe83b" stroke-width="3"/>
+       <path d="M58 70 C60 40 140 36 146 70 C150 96 148 128 144 140 L132 140 C134 112 128 86 116 74 C100 90 80 94 64 92 C64 112 66 138 70 150 L52 150 C48 124 52 96 58 70 Z" fill="${INK}"/>`, `${ear(62, '#c98b6b')}
+       ${eye(84)}
+       <circle cx="116" cy="103" r="9" fill="#120626" stroke="${INK}" stroke-width="2.5"/><circle cx="116" cy="103" r="5.5" fill="#ffe83b"/><circle cx="116" cy="103" r="2" fill="#fff"/>
+       <path d="M108 103 H124 M116 95 V111" stroke="#ffe83b" stroke-width="1" opacity="0.7"/>
+       ${brow(84, 2)}${brow(116, -2)}
+       ${nose}
+       <path d="M89 136 Q100 140 112 133" fill="none" stroke="#7a1650" stroke-width="4" stroke-linecap="round"/>
+       <path d="M56 116 L62 130 L50 130 Z" fill="#ffe83b" stroke="${INK}" stroke-width="2"/>
+       <path d="M58 98 C52 54 92 38 120 46 C140 52 148 70 144 92 C132 80 114 76 100 82 C86 88 72 94 58 98 Z" fill="${INK}"/>
+       <path d="M70 70 C84 54 108 50 126 56" fill="none" stroke="#7b5cff" stroke-width="3" stroke-linecap="round"/>
+       <path d="M78 64 C90 58 104 56 116 58 M74 80 C80 74 88 72 96 72" fill="none" stroke="#3b1d7a" stroke-width="1.5"/>
+       ${bags(84)}
+       <path d="M76 113 V124 M79 113 V121 M81 113 V126 M84 113 V120 M87 113 V124 M89 113 V119" stroke="#0f7a6e" stroke-width="1.6"/>
+       <path d="M121 124 L135 112 L138 132 L122 147 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+       <path d="M124 132 L136 122" stroke="#8a8e9b" stroke-width="1.5"/>${screw(126, 140)}${screw(133, 118)}
+       <circle cx="131" cy="130" r="1.6" fill="#ffe83b"/>
+       <path d="M98 133 L101 139" stroke="${INK}" stroke-width="1.5"/>
+       <rect x="90" y="150" width="8" height="6" rx="1" fill="#2b2b33" stroke="${INK}" stroke-width="1.5"/><circle cx="94" cy="153" r="1.3" fill="#29e0ff"/>
+       <path d="M44 214 L60 196 M150 210 L138 194" stroke="#2a1458" stroke-width="2" stroke-dasharray="3 3"/>
+       <path d="M52 232 C60 224 66 226 70 232" fill="none" stroke="#2a1458" stroke-width="2"/>
+       <circle cx="138" cy="200" r="4" fill="#ffe83b" stroke="${INK}" stroke-width="1.5"/>
+       <path d="M58 132 L60 138 M54 128 L52 134" stroke="#ffe83b" stroke-width="1.5"/>`),
+    // Deep net fixer: gaunt face in a hood, cyan slit eyes, circuit tattoo, six-fingered hand.
+    sixfinger: () => frame({ id: 'six', bg: '#2a1458', dots: '#3b1d7a', skin: '#b9a9c9', shade: '#7d6b93', head: HEAD_NARROW }, `<path d="M20 240 C24 190 46 164 70 156 L100 176 L130 156 C154 164 176 190 180 240 Z" fill="${INK}" stroke="#29e0ff" stroke-width="1.5"/>
+       <path d="M100 28 C150 28 170 70 164 120 C160 150 150 170 140 180 L128 150 C134 120 132 82 100 70 C68 82 66 120 72 150 L60 180 C50 170 40 150 36 120 C30 70 50 28 100 28 Z" fill="${INK}" stroke="#29e0ff" stroke-width="1.5"/>`, `<path d="M67 104 C70 74 130 74 133 104 L133 86 C120 70 80 70 67 86 Z" fill="${INK}" opacity="0.75"/>
+       <path d="M76 104 L92 101" stroke="#29e0ff" stroke-width="3.5" stroke-linecap="round"/><path d="M108 101 L124 104" stroke="#29e0ff" stroke-width="3.5" stroke-linecap="round"/>
+       <path d="M76 104 L92 101 M108 101 L124 104" stroke="#29e0ff" stroke-width="8" stroke-linecap="round" opacity="0.25"/>
+       <path d="M100 108 L97 124 Q100 126 103 124" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>
+       <path d="M90 140 L111 140" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       <path d="M74 116 L82 124 L82 136 M78 120 L72 128 M82 130 L88 134" fill="none" stroke="#29e0ff" stroke-width="1.6"/>
+       <circle cx="82" cy="136" r="1.8" fill="#29e0ff"/><circle cx="72" cy="128" r="1.6" fill="#29e0ff"/>
+       <g stroke="${INK}" stroke-width="2.5" fill="#b9a9c9">
+         <path d="M34 240 L40 196 C42 186 64 184 70 194 L72 240 Z"/>
+         <rect x="34" y="160" width="7" height="34" rx="3.5" transform="rotate(-18 37 194)"/>
+         <rect x="42" y="152" width="7" height="40" rx="3.5" transform="rotate(-9 45 192)"/>
+         <rect x="50" y="150" width="7" height="42" rx="3.5"/>
+         <rect x="58" y="152" width="7" height="40" rx="3.5" transform="rotate(8 61 192)"/>
+         <rect x="65" y="158" width="7" height="34" rx="3.5" transform="rotate(16 68 192)"/>
+         <rect x="70" y="176" width="7" height="24" rx="3.5" transform="rotate(48 73 198)"/>
+       </g>
+       <g fill="#29e0ff"><circle cx="27" cy="166" r="2.2"/><circle cx="39" cy="155" r="2.2"/><circle cx="53.5" cy="152" r="2.2"/><circle cx="66" cy="155" r="2.2"/><circle cx="76" cy="162" r="2.2"/><circle cx="86" cy="186" r="2.2"/></g>
+       <path d="M80 84 C90 80 104 82 118 88" fill="none" stroke="#5a2a3a" stroke-width="2"/>
+       <path d="M84 79 L86 87 M92 79 L93 87 M100 80 L100 88 M108 82 L107 90 M115 85 L113 92" stroke="${INK}" stroke-width="1.3"/>
+       <path d="M74 116 C78 126 80 134 86 140 M126 116 C122 126 120 134 114 140" fill="none" stroke="#5d4c73" stroke-width="2.5" opacity="0.8"/>
+       <path d="M92 146 L96 150 L94 154 M106 146 L104 151" fill="none" stroke="${INK}" stroke-width="1.2"/>
+       <path d="M146 54 C148 96 146 134 138 150 C132 158 124 160 118 160" fill="none" stroke="#120626" stroke-width="7"/>
+       <path d="M146 54 C148 96 146 134 138 150 C132 158 124 160 118 160" fill="none" stroke="#29e0ff" stroke-width="1" stroke-dasharray="2 9"/>
+       <path d="M154 70 C156 110 150 150 140 162 C134 166 126 166 118 164" fill="none" stroke="#120626" stroke-width="5"/>
+       <rect x="108" y="154" width="12" height="8" rx="2" fill="#6b6f7d" stroke="${INK}" stroke-width="1.5"/>
+       <path d="M118 112 L124 118 L122 126 M124 118 L130 116" fill="none" stroke="#29e0ff" stroke-width="1.3"/>
+       <g fill="#6b6f7d" stroke="${INK}" stroke-width="1"><rect x="36" y="186" width="6" height="4"/><rect x="44" y="184" width="6" height="4"/><rect x="51" y="183" width="6" height="4"/><rect x="59" y="184" width="6" height="4"/><rect x="66" y="186" width="6" height="4"/></g>`),
+    // Big-league fixer: heavy-set enforcer, buzz cut, chrome jaw plate, mirrored visor, sharp suit.
+    rook: () => frame({ id: 'rook', bg: '#ff3b5c', dots: '#c41f43', skin: '#8a5a44', shade: '#653f30', head: HEAD_ROUND }, `<path d="M14 240 C18 188 50 164 84 160 L100 178 L116 160 C150 164 182 188 186 240 Z" fill="#1d1f2b" stroke="${INK}" stroke-width="3"/>
+       <path d="M84 160 L100 200 L116 160 L108 160 L100 176 L92 160 Z" fill="#fff4fd" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M96 178 L104 178 L106 214 L100 222 L94 214 Z" fill="#ff3b5c" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M84 160 L70 196 L92 186 L100 200 M116 160 L130 196 L108 186 L100 200" fill="#2b2e3d" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+       <path d="M138 200 L150 196 L152 206 L140 210 Z" fill="#ffe83b" stroke="${INK}" stroke-width="1.5"/>
+       <path d="M80 140 C84 150 116 150 120 140 L122 166 L78 166 Z" fill="#653f30" stroke="${INK}" stroke-width="3"/>`, `${ear(58, '#8a5a44')}${ear(142, '#8a5a44')}
+       <path d="M58 92 C56 62 76 52 100 52 C124 52 144 62 142 92 C136 78 124 70 100 70 C76 70 64 78 58 92 Z" fill="#2a1a20"/>
+       <path d="M66 74 L70 66 M76 68 L78 60 M88 64 L89 57 M100 63 V56 M112 64 L111 57 M124 68 L122 60 M134 74 L130 66" stroke="#6b5a60" stroke-width="1.6"/>
+       <path d="M64 96 H136 L132 112 Q118 116 104 110 L100 106 L96 110 Q82 116 68 112 Z" fill="#120626" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+       <path d="M70 100 L84 100 L80 108 M112 100 L126 100" stroke="#29e0ff" stroke-width="2.5" stroke-linecap="round"/>
+       <path d="M88 98 L96 98 M118 104 L128 104" stroke="#fff4fd" stroke-width="1.5" opacity="0.7"/>
+       <path d="M64 92 L136 92" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+       <path d="M100 112 L96 124 Q100 127 105 124" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>
+       <path d="M76 128 C80 146 120 146 124 128 L128 140 C120 158 80 158 72 140 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+       <path d="M80 140 H120 M86 132 V150 M100 134 V154 M114 132 V150" stroke="#8a8e9b" stroke-width="1.5"/>
+       ${screw(78, 136)}${screw(122, 136)}${screw(90, 148)}${screw(110, 148)}
+       <path d="M90 133 Q100 137 110 133" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       <path d="M118 60 L130 82 L126 84 M122 70 L128 68" fill="none" stroke="#c97b6b" stroke-width="2.4" stroke-linecap="round"/>
+       <path d="M58 104 L54 112 M60 116 L54 120" stroke="${INK}" stroke-width="1.4"/>
+       <g fill="${INK}"><rect x="84" y="156" width="2" height="8"/><rect x="88" y="156" width="1" height="8"/><rect x="91" y="156" width="3" height="8"/><rect x="96" y="156" width="1" height="8"/><rect x="99" y="156" width="2" height="8"/><rect x="103" y="156" width="1" height="8"/><rect x="106" y="156" width="3" height="8"/><rect x="111" y="156" width="1" height="8"/><rect x="114" y="156" width="2" height="8"/></g>
+       <circle cx="142" cy="122" r="2.6" fill="#ffe83b" stroke="${INK}" stroke-width="1.2"/>
+       <path d="M150 112 C160 130 158 160 150 176" fill="none" stroke="#120626" stroke-width="4"/>
+       <path d="M150 112 C160 130 158 160 150 176" fill="none" stroke="#29e0ff" stroke-width="1" stroke-dasharray="2 8"/>`),
+    // Wild-card fixer: long black hair with acid-green streaks, one glowing green eye, hex sigil tattoo, a smirk.
+    hex: () => frame({ id: 'hex', bg: '#31c46c', dots: '#1d8a49', skin: '#d9a98a', shade: '#a8775e', head: HEAD_NARROW }, `<path d="M38 70 C34 30 166 30 162 70 C168 120 166 190 176 240 L24 240 C34 190 32 120 38 70 Z" fill="${INK}"/>
+       <path d="M24 240 C30 196 54 172 86 166 L100 180 L114 166 C146 172 170 196 176 240 Z" fill="#2a1458" stroke="${INK}" stroke-width="3"/>
+       <path d="M86 166 L100 180 L114 166" fill="none" stroke="#39ff88" stroke-width="2.5"/>
+       <path d="M60 196 L74 210 L60 224 M140 196 L126 210 L140 224" fill="none" stroke="#39ff88" stroke-width="2" opacity="0.7"/>
+       <path d="M48 90 C44 140 46 190 54 236 M152 90 C156 140 154 190 146 236" fill="none" stroke="#39ff88" stroke-width="3" opacity="0.85"/>
+       <path d="M42 120 C40 160 42 200 46 236" fill="none" stroke="#2b2b33" stroke-width="4"/>
+       <path d="M42 120 C40 160 42 200 46 236" fill="none" stroke="#39ff88" stroke-width="1" stroke-dasharray="2 7"/>`, `${eye(84, '#7a1650')}
+       <circle cx="116" cy="103" r="8.5" fill="#0b2a18" stroke="${INK}" stroke-width="2.5"/><circle cx="116" cy="103" r="5" fill="#39ff88"/><circle cx="116" cy="103" r="2" fill="#eafff2"/>
+       <circle cx="116" cy="103" r="12" fill="#39ff88" opacity="0.18"/>
+       <path d="M74 94 Q84 88 94 93" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+       <path d="M106 90 Q116 86 126 92" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+       ${bags(84)}
+       ${nose}
+       <path d="M88 138 Q98 140 112 132" fill="none" stroke="#3b1d4a" stroke-width="4" stroke-linecap="round"/>
+       <path d="M111 132 L114 128" stroke="#3b1d4a" stroke-width="2.5" stroke-linecap="round"/>
+       <circle cx="96" cy="142" r="2.6" fill="none" stroke="#c9ccd6" stroke-width="1.6"/>
+       <path d="M100 66 L108 70.5 V79.5 L100 84 L92 79.5 V70.5 Z" fill="none" stroke="#1d8a49" stroke-width="2"/>
+       <circle cx="100" cy="75" r="2" fill="#1d8a49"/>
+       <path d="M118 114 L124 118 V126 L118 130 L112 126 V118 Z" fill="none" stroke="#1d8a49" stroke-width="1.6"/>
+       <path d="M124 126 L130 134 M130 134 L128 142" stroke="#1d8a49" stroke-width="1.4"/>
+       <path d="M76 114 L78 124 M80 114 L82 122" stroke="#1d8a49" stroke-width="1.3"/>
+       <path d="M66 100 C62 70 80 54 100 54 C124 54 138 70 134 100 C130 84 118 70 100 66 C88 74 74 84 66 100 Z" fill="${INK}"/>
+       <path d="M86 60 C78 72 72 84 70 98" fill="none" stroke="#39ff88" stroke-width="3" stroke-linecap="round"/>
+       <path d="M120 62 C126 72 130 82 132 94" fill="none" stroke="#39ff88" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+       <circle cx="66" cy="118" r="2" fill="#c9ccd6" stroke="${INK}" stroke-width="1"/><circle cx="64" cy="126" r="2" fill="#c9ccd6" stroke="${INK}" stroke-width="1"/>
+       <path d="M134 116 L138 120 L136 126" fill="none" stroke="#ffe83b" stroke-width="1.6"/>
+       <rect x="104" y="150" width="10" height="6" rx="1" fill="#2b2b33" stroke="${INK}" stroke-width="1.5"/><circle cx="109" cy="153" r="1.3" fill="#39ff88"/>`),
+    // Street fixer: wiry old hustler, slicked grey hair, gold tooth, koi neck tattoo, chrome hand with a cigarette.
+    dutch: () => frame({ id: 'dutch', bg: '#ff8a2b', dots: '#c45f12', skin: '#c99a76', shade: '#9a6f52', head: HEAD_NARROW }, `<path d="M24 240 C28 194 54 172 84 166 L100 184 L116 166 C146 172 172 194 176 240 Z" fill="#7a1650" stroke="${INK}" stroke-width="3"/>
+       <path d="M84 166 L100 200 L116 166 L108 164 L100 180 L92 164 Z" fill="#c99a76" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M86 172 C92 190 108 190 114 172" fill="none" stroke="#ffe83b" stroke-width="2.5"/>
+       <path d="M84 166 L66 210 L92 192 M116 166 L134 210 L108 192" fill="#5a0f3a" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+       <path d="M40 214 L52 204 L62 216 M140 212 L150 202" stroke="#ffe83b" stroke-width="1.6" fill="none" opacity="0.6"/>`, `${ear(67, '#c99a76')}${ear(133, '#c99a76')}
+       <path d="M66 96 C62 62 82 50 100 50 C120 50 138 62 134 96 C130 80 118 66 100 64 C84 66 72 78 66 96 Z" fill="#9aa0ad" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M74 80 C84 68 104 62 124 70 M72 88 C84 76 106 70 128 80 M80 66 C92 58 108 56 120 62" fill="none" stroke="#5d6270" stroke-width="1.6"/>
+       ${eye(85)}${eye(115)}
+       <path d="M74 95 Q85 90 95 95" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><path d="M105 95 Q115 90 126 96" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       <path d="M76 108 Q85 112 94 108 M106 108 Q115 112 124 108" fill="none" stroke="${INK}" stroke-width="1.4" opacity="0.7"/>
+       ${nose}
+       <path d="M86 128 C92 124 108 124 114 128" fill="none" stroke="#5d6270" stroke-width="3" stroke-linecap="round"/>
+       <path d="M86 135 Q100 143 114 133" fill="#fff4fd" stroke="${INK}" stroke-width="2.5"/>
+       <rect x="103" y="135" width="5" height="5" fill="#ffe83b" stroke="${INK}" stroke-width="1"/>
+       <path d="M78 116 C82 124 82 132 86 140 M122 116 C118 124 118 132 114 140" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.6"/>
+       <path d="M114 146 C122 150 128 158 124 166 C120 172 112 170 110 164" fill="none" stroke="#ff3b5c" stroke-width="2.2"/>
+       <path d="M112 152 L118 150 M116 158 L122 158" stroke="#29e0ff" stroke-width="1.4"/>
+       <g stroke="${INK}" stroke-width="2.5">
+         <path d="M132 240 L136 196 C138 186 160 184 164 196 L164 240 Z" fill="#c9ccd6"/>
+         <rect x="134" y="176" width="8" height="24" rx="3" fill="#c9ccd6"/><rect x="143" y="172" width="8" height="28" rx="3" fill="#c9ccd6"/><rect x="152" y="174" width="8" height="26" rx="3" fill="#c9ccd6"/>
+         <rect x="133" y="180" width="28" height="7" rx="2" fill="#ffe83b"/>
+       </g>
+       ${screw(140, 214)}${screw(156, 214)}
+       <path d="M150 172 L170 150" stroke="#fff4fd" stroke-width="4" stroke-linecap="round"/><path d="M168 152 L171 149" stroke="#ff3b5c" stroke-width="4" stroke-linecap="round"/>
+       <path d="M172 146 C166 136 178 128 172 118 C168 110 176 104 174 96" fill="none" stroke="#fff4fd" stroke-width="2" opacity="0.55"/>`),
+    // Arms dealer: ex-military, grey buzz cut, red cyber eye, scar, combat vest and dog tags.
+    ivo: () => frame({ id: 'ivo', bg: '#8a9a3b', dots: '#62702a', skin: '#b58463', shade: '#87604a', head: HEAD }, `<path d="M16 240 C20 192 50 168 84 164 L100 176 L116 164 C150 168 180 192 184 240 Z" fill="#4a5228" stroke="${INK}" stroke-width="3"/>
+       <path d="M48 196 H76 V226 H48 Z M124 196 H152 V226 H124 Z" fill="#3a4120" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M52 204 H72 M128 204 H148" stroke="${INK}" stroke-width="2"/>
+       <path d="M84 164 L100 176 L116 164 L116 180 L100 190 L84 180 Z" fill="#2b2f1a" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M90 170 C94 186 106 186 110 170" fill="none" stroke="#c9ccd6" stroke-width="1.6" stroke-dasharray="2 2"/>
+       <rect x="98" y="186" width="10" height="14" rx="2" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/>`, `${ear(61, '#b58463')}${ear(139, '#b58463')}
+       <path d="M62 92 C60 64 78 52 100 52 C122 52 140 64 138 92 C130 76 118 70 100 70 C82 70 70 76 62 92 Z" fill="#8f939c"/>
+       <path d="M66 82 L68 74 M74 74 L76 66 M84 68 L85 61 M94 66 V59 M104 66 V59 M114 68 L115 61 M124 74 L122 66 M132 82 L130 74" stroke="#5d6270" stroke-width="1.6"/>
+       ${eye(84)}
+       <circle cx="116" cy="103" r="10" fill="#2b2b33" stroke="${INK}" stroke-width="2.5"/><circle cx="116" cy="103" r="6" fill="#ff3b3b"/><circle cx="116" cy="103" r="2" fill="#fff"/>
+       <circle cx="116" cy="103" r="14" fill="#ff3b3b" opacity="0.15"/>
+       <path d="M104 92 L128 92 L130 114 L104 114" fill="none" stroke="#6b6f7d" stroke-width="2"/>${screw(106, 112)}${screw(128, 94)}
+       ${brow(84, 3)}
+       ${nose}
+       <path d="M88 96 L112 128" stroke="#e8b0a0" stroke-width="2.4" stroke-linecap="round"/><path d="M92 100 L96 98 M100 110 L104 108 M106 118 L110 116" stroke="#9a5a50" stroke-width="1.2"/>
+       <path d="M88 135 H112" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+       <g fill="${INK}" opacity="0.35"><circle cx="80" cy="132" r="0.9"/><circle cx="84" cy="138" r="0.9"/><circle cx="90" cy="142" r="0.9"/><circle cx="98" cy="144" r="0.9"/><circle cx="106" cy="143" r="0.9"/><circle cx="114" cy="140" r="0.9"/><circle cx="120" cy="134" r="0.9"/><circle cx="86" cy="130" r="0.9"/><circle cx="116" cy="130" r="0.9"/></g>
+       <path d="M64 118 L70 124 M62 126 L66 130" stroke="${INK}" stroke-width="1.2"/>`),
+    // Street fixer: ex-corporate security. Severe platinum crop, scar, earpiece, Kessler badge clipped to a leather jacket.
+    vesna: () => frame({ id: 'vesna', bg: '#29b8d8', dots: '#1b86a0', skin: '#e2b49a', shade: '#b4866e', head: HEAD_NARROW }, `<path d="M26 240 C30 196 56 174 86 168 L100 182 L114 168 C144 174 170 196 174 240 Z" fill="#2a1a20" stroke="${INK}" stroke-width="3"/>
+       <path d="M86 168 L72 210 L96 196 L100 182 M114 168 L128 210 L104 196 L100 182" fill="#3b2a30" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+       <path d="M90 170 L100 182 L110 170" fill="#fff4fd" stroke="${INK}" stroke-width="2"/>
+       <rect x="120" y="200" width="22" height="14" rx="2" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/><path d="M124 205 H138 M124 209 H134" stroke="#29b8d8" stroke-width="1.5"/>
+       <path d="M44 220 L60 206" stroke="#5d4c55" stroke-width="2" stroke-dasharray="3 3"/>`, `${ear(67, '#e2b49a')}${ear(133, '#e2b49a')}
+       <path d="M66 94 C62 62 82 50 100 50 C120 50 138 62 134 94 C132 82 126 72 116 68 C104 74 88 76 72 74 C70 80 68 86 66 94 Z" fill="#e9e4ef" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M76 66 C88 60 108 58 122 64 M80 72 C94 66 110 66 124 72" fill="none" stroke="#b9b2c6" stroke-width="1.6"/>
+       ${eye(85, '#1b86a0')}${eye(115, '#1b86a0')}
+       <path d="M74 94 L96 92" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/><path d="M104 92 L126 94" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>
+       ${nose}
+       <path d="M89 134 Q100 136 111 133" fill="none" stroke="#7a3a40" stroke-width="3.5" stroke-linecap="round"/>
+       <path d="M118 108 L126 128" stroke="#c97b6b" stroke-width="2.2" stroke-linecap="round"/><path d="M119 114 L123 112 M121 120 L125 118" stroke="#9a5a50" stroke-width="1.1"/>
+       <path d="M133 100 C140 104 140 116 134 122 L130 136" fill="none" stroke="#2b2b33" stroke-width="2.5"/><circle cx="135" cy="104" r="3" fill="#2b2b33" stroke="${INK}" stroke-width="1"/><circle cx="135" cy="104" r="1.2" fill="#39ff88"/>
+       <path d="M78 118 L82 124 M80 114 L84 120" stroke="#1b86a0" stroke-width="1.4"/>
+       ${bags(85)}${bags(115)}`),
+    // The fence: older woman, grey bun with pens, round glasses, a jeweler's loupe.
+    mags: () => frame({ id: 'mags', bg: '#f0d232', dots: '#c98f14', skin: '#e0b48e', shade: '#b8865f', head: HEAD_ROUND }, `<path d="M26 240 C30 196 56 174 90 168 L110 168 C144 174 170 196 174 240 Z" fill="#7b5cff" stroke="${INK}" stroke-width="3"/>
+       <path d="M44 214 C70 196 130 196 156 214 L160 240 L40 240 Z" fill="#ff2bd6" stroke="${INK}" stroke-width="3"/>
+       <path d="M52 226 C80 212 120 212 148 226" fill="none" stroke="#ffe83b" stroke-width="3"/>
+       <path d="M120 24 L132 6 M134 30 L152 18" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+       <path d="M120 24 L132 6" stroke="#ff2bd6" stroke-width="2.5" stroke-linecap="round"/><path d="M134 30 L152 18" stroke="#29e0ff" stroke-width="2.5" stroke-linecap="round"/>
+       <circle cx="100" cy="40" r="26" fill="#cfc6dc" stroke="${INK}" stroke-width="3"/>
+       <path d="M56 104 C50 66 76 50 100 50 C124 50 150 66 144 104 C138 84 124 70 100 70 C76 70 62 84 56 104 Z" fill="#cfc6dc" stroke="${INK}" stroke-width="3"/>
+       <path d="M60 80 C52 70 50 60 56 54 M142 78 C150 70 150 60 146 54" fill="none" stroke="${INK}" stroke-width="2"/>`, `${ear(58, '#e0b48e')}${ear(142, '#b8865f')}
+       ${eye(83)}${eye(117)}
+       <circle cx="83" cy="103" r="14" fill="rgba(255,255,255,0.15)" stroke="${INK}" stroke-width="3.5"/>
+       <circle cx="117" cy="103" r="14" fill="rgba(255,255,255,0.15)" stroke="${INK}" stroke-width="3.5"/>
+       <path d="M97 103 L103 103 M69 101 L58 98 M131 101 L142 98" stroke="${INK}" stroke-width="3"/>
+       <path d="M75 96 L80 91 M78 100 L86 92" stroke="#fff" stroke-width="2"/>
+       <rect x="110" y="88" width="20" height="16" rx="3" fill="#29e0ff" stroke="${INK}" stroke-width="3" transform="rotate(-20 120 96)"/>
+       <path d="M114 90 L122 86" stroke="#fff" stroke-width="2" transform="rotate(-20 120 96)"/>
+       <path d="M72 89 Q83 84 92 88 M108 88 Q117 84 128 89" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       ${nose}
+       <path d="M86 134 Q100 146 114 134" fill="#7a2a35" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M89 135 Q100 139 111 135" fill="none" stroke="#fff" stroke-width="2"/>
+       <path d="M78 126 Q82 134 86 136 M122 126 Q118 134 114 136 M64 108 L69 110 M64 113 L69 113" fill="none" stroke="${INK}" stroke-width="1.8" stroke-linecap="round"/>
+       <path d="M80 78 Q100 72 120 78 M84 84 Q100 80 116 84 M131 108 L136 110 M131 113 L136 113" fill="none" stroke="${INK}" stroke-width="1.4" opacity="0.8"/>
+       ${bags(83)}${bags(117)}
+       <path d="M95 144 V152 M100 145 V154 M105 144 V152" stroke="#0f5a6e" stroke-width="2" stroke-linecap="round"/>
+       <rect x="104" y="135" width="5" height="4" fill="#ffe83b" stroke="${INK}" stroke-width="1"/>
+       <path d="M86 156 L114 156 L113 164 L87 164 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/>
+       <circle cx="100" cy="160" r="2" fill="#ff3b5c"/>${screw(90, 160)}${screw(110, 160)}
+       <rect x="120" y="216" width="22" height="16" fill="#3b1d7a" stroke="${INK}" stroke-width="2" transform="rotate(-6 131 224)"/>
+       <path d="M122 218 L140 216 M122 230 L141 228" stroke="#ffe83b" stroke-width="1.5" stroke-dasharray="2 2"/>
+       <path d="M58 224 L64 236 M70 222 L74 236" stroke="#2a1458" stroke-width="1.5"/>`),
+    // Program dealer: undercut with a yellow streak, visor pushed up, hoodie, headphones.
+    kit: () => frame({ id: 'kit', bg: '#22c4e0', dots: '#1290aa', skin: '#8d5a3b', shade: '#6a3f28' }, `<path d="M24 240 C28 194 54 172 86 166 L114 166 C146 172 172 194 176 240 Z" fill="#ff2bd6" stroke="${INK}" stroke-width="3"/>
+       <path d="M70 168 C78 196 122 196 130 168" fill="#d81fb4" stroke="${INK}" stroke-width="3"/>
+       <path d="M88 192 L86 222 M112 192 L114 222" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+       <path d="M64 170 C60 186 70 196 84 194 L116 194 C130 196 140 186 136 170" fill="none" stroke="${INK}" stroke-width="7"/>
+       <rect x="52" y="160" width="20" height="26" rx="8" fill="#ffe83b" stroke="${INK}" stroke-width="3"/>
+       <rect x="128" y="160" width="20" height="26" rx="8" fill="#ffe83b" stroke="${INK}" stroke-width="3"/>`, `${ear(62, '#8d5a3b')}${ear(138, '#6a3f28')}
+       <path d="M62 96 C62 84 66 74 70 70 L70 98 Z M138 96 C138 84 134 74 130 70 L130 98 Z" fill="#4a2a1a" opacity="0.8"/>
+       <path d="M66 72 C70 34 138 30 142 64 C134 56 120 54 110 58 C120 46 112 40 100 48 C86 42 72 54 66 72 Z" fill="${INK}"/>
+       <path d="M104 46 C114 40 128 42 136 52 C124 48 114 50 106 56 Z" fill="#ffe83b" stroke="${INK}" stroke-width="2"/>
+       <rect x="64" y="66" width="72" height="14" rx="7" fill="rgba(255,43,214,0.75)" stroke="${INK}" stroke-width="3"/>
+       <path d="M74 70 L94 70" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+       ${eye(84)}${eye(116)}
+       ${brow(84, 3)}${brow(116, 0)}
+       <circle cx="124" cy="90" r="3" fill="none" stroke="#ffe83b" stroke-width="2"/>
+       ${nose}
+       <circle cx="104" cy="120" r="1.8" fill="#ffe83b"/>
+       <path d="M88 134 Q102 142 114 131" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       <path d="M100 137 L104 137" stroke="#fff" stroke-width="2"/>
+       ${bags(84)}
+       <path d="M78 88 L81 95" stroke="#8d5a3b" stroke-width="4"/><path d="M77 86 L82 98" stroke="${INK}" stroke-width="1.2"/>
+       <g fill="#ff2bd6"><rect x="122" y="112" width="5" height="3"/><rect x="123" y="117" width="3" height="5"/><rect x="121" y="124" width="6" height="2"/><rect x="123" y="128" width="3" height="4"/><rect x="122" y="134" width="5" height="2"/></g>
+       <g fill="#29e0ff"><circle cx="70" cy="86" r="1.6"/><circle cx="69" cy="92" r="1.6"/><circle cx="69" cy="98" r="1.6"/></g>
+       <path d="M52 96 L62 92 L64 116 L54 120 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+       <path d="M54 94 L50 84" stroke="${INK}" stroke-width="2"/><circle cx="50" cy="83" r="2" fill="#ff3b5c" stroke="${INK}" stroke-width="1"/>
+       <rect x="93" y="108" width="14" height="5" rx="1" fill="#f2e3c6" stroke="${INK}" stroke-width="1.2" transform="rotate(-12 100 110)"/>
+       <g fill="${INK}" opacity="0.55"><circle cx="90" cy="146" r="0.8"/><circle cx="95" cy="149" r="0.8"/><circle cx="100" cy="150" r="0.8"/><circle cx="105" cy="149" r="0.8"/><circle cx="110" cy="146" r="0.8"/><circle cx="93" cy="144" r="0.8"/><circle cx="107" cy="144" r="0.8"/><circle cx="100" cy="146" r="0.8"/></g>
+       <path d="M94 174 V186 M97 174 V184 M99 174 V188 M102 174 V183 M105 174 V186" stroke="${INK}" stroke-width="1.2" opacity="0.7"/>
+       <rect x="138" y="204" width="20" height="16" fill="#29e0ff" stroke="${INK}" stroke-width="2" transform="rotate(8 148 212)"/>
+       <path d="M140 206 L156 208 M139 218 L155 220" stroke="${INK}" stroke-width="1.2" stroke-dasharray="2 2" transform="rotate(8 148 212)"/>`),
+    // Ripperdoc: patterned head wrap, flip-up magnifier, mask pulled down, a chrome hand.
+    okafor: () => frame({ id: 'okafor', bg: '#7b5cff', dots: '#6545e6', skin: '#5a3825', shade: '#3f2619' }, `<path d="M26 240 C30 194 56 172 88 166 L112 166 C144 172 170 194 174 240 Z" fill="#1fa89a" stroke="${INK}" stroke-width="3"/>
+       <path d="M84 166 L100 196 L116 166" fill="#178578" stroke="${INK}" stroke-width="3"/>`, `${ear(62, '#5a3825')}${ear(138, '#3f2619')}
+       <path d="M60 92 C56 50 80 34 100 34 C124 34 148 48 142 92 C132 74 118 68 100 68 C82 68 68 74 60 92 Z" fill="#ffe83b" stroke="${INK}" stroke-width="3"/>
+       <path d="M70 56 Q80 50 88 56 M96 46 Q106 40 114 46 M118 58 Q128 52 136 60 M78 74 Q86 68 94 72" fill="none" stroke="#ff2bd6" stroke-width="3" stroke-linecap="round"/>
+       <path d="M128 40 C146 30 156 40 150 52 C146 44 138 42 128 48 Z" fill="#ffe83b" stroke="${INK}" stroke-width="3"/>
+       <rect x="58" y="80" width="84" height="7" rx="3" fill="#2b2b33" stroke="${INK}" stroke-width="2"/>
+       <circle cx="80" cy="74" r="11" fill="rgba(41,224,255,0.55)" stroke="#c9ccd6" stroke-width="3.5"/>
+       <path d="M74 70 L80 66" stroke="#fff" stroke-width="2"/>
+       ${eye(84)}${eye(116)}
+       ${brow(84, -1)}${brow(116, 3)}
+       ${nose}
+       <path d="M90 134 Q100 139 110 134" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       <path d="M76 150 C84 160 116 160 124 150 L128 168 C116 176 84 176 72 168 Z" fill="#dff7f2" stroke="${INK}" stroke-width="3"/>
+       <path d="M80 160 Q100 168 120 160" fill="none" stroke="#9fd9cf" stroke-width="2"/>
+       <g stroke="${INK}" stroke-width="2.5" fill="#c9ccd6">
+         <path d="M142 240 L146 200 C148 190 168 188 172 198 L176 240 Z"/>
+         <rect x="146" y="164" width="7" height="32" rx="2"/><rect x="155" y="158" width="7" height="38" rx="2"/><rect x="164" y="162" width="7" height="34" rx="2"/>
+         <rect x="172" y="184" width="7" height="22" rx="2" transform="rotate(30 175 195)"/>
+       </g>
+       <path d="M149 176 H152 M158 172 H161 M167 176 H170" stroke="#29e0ff" stroke-width="2"/>
+       <path d="M158 158 L158 136" stroke="#e8f6ff" stroke-width="3" stroke-linecap="round"/><path d="M158 136 L161 128 L158 124 Z" fill="#e8f6ff" stroke="${INK}" stroke-width="1"/>
+       ${bags(84)}${bags(116)}
+       <g fill="#d9a066"><circle cx="72" cy="112" r="1.4"/><circle cx="76" cy="116" r="1.4"/><circle cx="80" cy="119" r="1.4"/><circle cx="72" cy="120" r="1.4"/><circle cx="76" cy="124" r="1.4"/><circle cx="96" cy="74" r="1.3"/><circle cx="100" cy="72" r="1.3"/><circle cx="104" cy="74" r="1.3"/></g>
+       <path d="M120 112 L134 106 L136 122 L124 128 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+       <path d="M124 116 L134 112 M125 122 L133 118" stroke="#8a8e9b" stroke-width="1.2"/><circle cx="131" cy="120" r="1.5" fill="#39ff88"/>
+       <path d="M112 86 L118 98" stroke="#5a3825" stroke-width="4"/><path d="M111 84 L119 100" stroke="#d9a066" stroke-width="1.2"/>
+       <path d="M78 164 L82 168 M118 164 L114 168" stroke="#9fd9cf" stroke-width="1.5"/>
+       <path d="M60 210 C64 206 70 208 68 214 C66 220 58 218 60 210 Z M120 224 C124 220 130 224 126 228 Z" fill="#7a1650" opacity="0.55"/>
+       <path d="M44 236 L52 218 M150 232 L144 214" stroke="#178578" stroke-width="2" stroke-dasharray="3 3"/>
+       <g stroke="${INK}" stroke-width="1" fill="none"><path d="M146 178 H153 M155 174 H162 M164 178 H171"/></g>`),
+};
+/** A plain silhouette for any character added without a portrait yet. */
+function portrait(id) {
+    const draw = PORTRAITS[id];
+    if (draw)
+        return draw();
+    return `<svg viewBox="0 0 200 240" aria-hidden="true"><rect width="200" height="240" fill="#2a1458"/><circle cx="100" cy="100" r="42" fill="${INK}"/><path d="M30 240 C34 190 70 170 100 170 C130 170 166 190 170 240 Z" fill="${INK}"/></svg>`;
+}
+/** Drawing kit, shared with street enemy profile art (streetfaces.ts). */
+const PORTRAIT_KIT = { INK, HEAD, HEAD_NARROW, HEAD_ROUND, frame, ear, eye, brow, bags, screw, nose };
+
+__m["ui/portraits"] = { PORTRAITS, portrait, PORTRAIT_KIT };
+})();
+// ---- ui/streetfaces ----
+(() => {
+// Street enemy "profiles": detailed, gritty comic busts in the same style as
+// the safehouse portraits, framed like a file photo. Gang members get a
+// spray-painted crew tag; corporate staff get an employee ID strip.
+// Machines (drones, turrets, robot dogs, mechs) keep their silhouettes.
+//
+// Figures are drawn in the portrait space (200x240, face around x=100) and
+// zoomed out to show the chest and hands, so bodies run down to y≈290.
+// To add one: add an entry keyed by the enemy id. The combat screen prefers
+// these over the silhouettes in art.ts when an entry exists.
+const { PORTRAIT_KIT } = __m["ui/portraits"];
+const { INK, HEAD, HEAD_NARROW, HEAD_ROUND, frame, ear, eye, brow, bags, screw, nose } = PORTRAIT_KIT;
+const ZOOM = 0.8;
+/** Dossier strip along the bottom: a crew tag or an employee ID. */
+function strip(svg, kind, label) {
+    const size = Math.min(20, 230 / label.length);
+    const band = kind === 'corp'
+        ? `<rect x="0" y="216" width="200" height="24" fill="${INK}"/><rect x="0" y="216" width="6" height="24" fill="#29e0ff"/>
+       <text x="14" y="232" font-family="monospace" font-size="10" font-weight="700" letter-spacing="1.5" fill="#29e0ff">${label}</text>
+       <g fill="#29e0ff" opacity="0.8"><rect x="158" y="222" width="2" height="12"/><rect x="162" y="222" width="1" height="12"/><rect x="165" y="222" width="3" height="12"/><rect x="170" y="222" width="1" height="12"/><rect x="173" y="222" width="2" height="12"/><rect x="177" y="222" width="1" height="12"/><rect x="180" y="222" width="3" height="12"/><rect x="185" y="222" width="1" height="12"/><rect x="188" y="222" width="2" height="12"/></g>`
+        : `<text x="12" y="232" transform="rotate(-6 12 232)" font-family="Impact, 'Arial Black', sans-serif" font-size="${size}" letter-spacing="1" fill="#ff2bd6" stroke="${INK}" stroke-width="1.2" paint-order="stroke">${label}</text>
+       <path d="M10 236 C40 232 90 238 130 230" stroke="#ff2bd6" stroke-width="2" fill="none" opacity="0.7"/>`;
+    return svg.replace(/<\/svg>\s*$/, `${band}</svg>`);
+}
+// ---- Shared pieces (portrait space) ----
+/** Shoulders and chest down past the frame. */
+const torso = (fill) => `<path d="M8 300 C10 214 48 172 86 166 L100 180 L114 166 C152 172 190 214 192 300 Z" fill="${fill}" stroke="${INK}" stroke-width="3"/>`;
+/** A fist seen from the front. */
+const fist = (x, y, skin) => `<rect x="${x - 12}" y="${y - 9}" width="24" height="18" rx="6" fill="${skin}" stroke="${INK}" stroke-width="2.5"/><path d="M${x - 6} ${y - 9} V${y + 1} M${x} ${y - 9} V${y + 1} M${x + 6} ${y - 9} V${y + 1}" stroke="${INK}" stroke-width="1.3"/>`;
+/** Hard, flat mouth. */
+const flatMouth = (w = 12, y = 134) => `<path d="M${100 - w} ${y} H${100 + w}" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
+/** Mouth turned down at the corners. */
+const frown = (y = 134) => `<path d="M87 ${y + 2} Q100 ${y - 3} 113 ${y + 2}" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
+/** Heavy upper lids: a cold, half-lidded stare. */
+const lids = (x) => `<path d="M${x - 10} 101 Q${x} 96 ${x + 10} 101" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`;
+const stubble = (n = 18) => `<g fill="${INK}" opacity="0.32">${Array.from({ length: n }, (_, i) => {
+    const a = Math.PI * (0.15 + (0.7 * i) / n);
+    return `<circle cx="${(100 - Math.cos(a) * 30).toFixed(1)}" cy="${(128 + Math.sin(a) * 18).toFixed(1)}" r="0.95"/>`;
+}).join('')}</g>`;
+const chain = (y = 178) => `<path d="M80 ${y - 8} C86 ${y + 16} 114 ${y + 16} 120 ${y - 8}" fill="none" stroke="#ffe83b" stroke-width="2.5" stroke-dasharray="3 2"/>`;
+const GANG_BG = { bg: '#c4344f', dots: '#8a1f35' };
+const DOCK_BG = { bg: '#3f8a7a', dots: '#2a5e53' };
+const CORP_BG = { bg: '#5a7090', dots: '#3d4f68' };
+const EXEC_BG = { bg: '#8c7aa8', dots: '#6a5a86' };
+const STREET_FACES = {
+    // ---- Razorbacks (tenement gang) ----
+    // Shaved sides, red crest, cheap red optic, tusk tattoo; cheap pistol held across the chest.
+    ganger: () => strip(frame({ id: 'f-ganger', ...GANG_BG, skin: '#c8906c', shade: '#9a6a4e', head: HEAD_NARROW, zoom: ZOOM }, `${torso('#2b2b33')}
+     <path d="M84 168 L100 196 L116 168 L120 300 H80 Z" fill="#8a1f35" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M60 178 C70 214 72 260 70 300 M140 178 C130 214 128 260 130 300" fill="none" stroke="${INK}" stroke-width="2.5"/>
+     ${chain()}
+     <path d="M168 300 C162 268 140 250 112 246" fill="none" stroke="#2b2b33" stroke-width="26" stroke-linecap="round"/>
+     <path d="M168 300 C162 268 140 250 112 246" fill="none" stroke="${INK}" stroke-width="2" opacity="0.5"/>
+     <path d="M62 232 H100 V244 H84 L82 258 H72 L74 244 H62 Z" fill="#3b3b46" stroke="${INK}" stroke-width="2.5"/>
+     ${fist(106, 244, '#c8906c')}
+     <path d="M44 250 L56 238 L66 252 M150 220 L160 214" stroke="#8a1f35" stroke-width="2" fill="none" opacity="0.6"/>`, `${ear(67, '#c8906c')}${ear(133, '#c8906c')}
+     <path d="M70 90 C68 70 80 58 100 56 C120 58 132 70 130 90 C126 80 116 74 100 74 C84 74 74 80 70 90 Z" fill="#3a2a2a" opacity="0.55"/>
+     <path d="M90 56 C92 44 108 44 110 56 L108 78 L92 78 Z" fill="#ff3b5c" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M94 50 L96 74 M100 46 V76 M106 50 L104 74" stroke="#8a1f35" stroke-width="1.4"/>
+     ${eye(85)}
+     <circle cx="115" cy="103" r="8" fill="#2b2b33" stroke="${INK}" stroke-width="2.5"/><circle cx="115" cy="103" r="4.5" fill="#ff3b3b"/><circle cx="115" cy="103" r="9" fill="#ff3b3b" opacity="0.18"/>
+     <path d="M74 95 L95 99" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/><path d="M105 99 L126 93" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+     ${bags(85)}
+     ${nose}<circle cx="104" cy="121" r="2" fill="none" stroke="#c9ccd6" stroke-width="1.5"/>
+     <path d="M88 137 Q96 133 104 135 Q109 136 112 134" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+     <path d="M74 112 C70 120 72 128 78 132 M78 112 C76 118 77 124 80 128" fill="none" stroke="#8a1f35" stroke-width="2.4" stroke-linecap="round"/>
+     <path d="M118 128 L124 134" stroke="#e8b0a0" stroke-width="2" stroke-linecap="round"/>`), 'gang', 'RAZORBACKS'),
+    // Lean, shaved head with tribal lines, bandana over the face, knife raised.
+    slasher: () => strip(frame({ id: 'f-slasher', ...GANG_BG, skin: '#a8745a', shade: '#7f5442', head: HEAD_NARROW, zoom: ZOOM }, `${torso('#3b1d2a')}
+     <path d="M70 172 L84 300 M130 172 L116 300" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M84 170 L100 192 L116 170 L114 220 H86 Z" fill="#a8745a" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M92 200 L100 212 L108 200" fill="none" stroke="#8a1f35" stroke-width="2"/>
+     <path d="M190 300 C186 250 176 218 160 196" fill="none" stroke="#3b1d2a" stroke-width="24" stroke-linecap="round"/>
+     ${fist(158, 196, '#a8745a')}
+     <path d="M152 186 L170 120 L176 122 L162 188 Z" fill="#e9e4ef" stroke="${INK}" stroke-width="2.5"/><path d="M168 128 L158 184" stroke="#fff" stroke-width="1.2" opacity="0.8"/>
+     <rect x="146" y="186" width="22" height="6" rx="2" fill="${INK}"/>`, `${ear(67, '#a8745a')}${ear(133, '#a8745a')}
+     <path d="M76 70 C82 62 92 60 100 62 M70 82 C78 74 86 72 92 74 M124 70 C118 62 108 60 100 62 M130 82 C122 74 114 72 108 74 M100 56 V72" fill="none" stroke="#3b1d2a" stroke-width="3" stroke-linecap="round"/>
+     ${eye(85, '#5a2a1a')}${eye(115, '#5a2a1a')}
+     <path d="M74 97 L95 101" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/><path d="M105 101 L126 97" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+     <path d="M110 86 L120 100" stroke="#e8b0a0" stroke-width="2" stroke-linecap="round"/>
+     <path d="M64 112 C80 106 120 106 136 112 L132 146 C116 158 84 158 68 146 Z" fill="#ff3b5c" stroke="${INK}" stroke-width="2.5"/>
+     <g fill="#8a1f35"><circle cx="80" cy="122" r="2"/><circle cx="92" cy="130" r="2"/><circle cx="108" cy="124" r="2"/><circle cx="120" cy="134" r="2"/><circle cx="96" cy="142" r="2"/><circle cx="112" cy="146" r="2"/></g>
+     <path d="M66 114 L56 120 L60 126 M134 114 L144 118" stroke="#ff3b5c" stroke-width="3" fill="none"/>`), 'gang', 'RAZORBACKS'),
+    // Huge, bald, heavy brow, nose ring, chrome cyber-arms over a tank top.
+    bruiser: () => strip(frame({ id: 'f-bruiser', ...GANG_BG, skin: '#9a6a52', shade: '#734c3a', head: HEAD_ROUND, zoom: ZOOM }, `<path d="M4 300 C4 220 40 176 82 166 L100 176 L118 166 C160 176 196 220 196 300 Z" fill="#e9dcc8" stroke="${INK}" stroke-width="3"/>
+     <path d="M64 176 C76 186 124 186 136 176 L140 300 H60 Z" fill="#d9ccb8" opacity="0.6"/>
+     <path d="M4 300 C2 240 18 200 52 182 L70 300 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="3"/>
+     <path d="M196 300 C198 240 182 200 148 182 L130 300 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="3"/>
+     <path d="M20 220 L58 210 M14 252 L62 244 M180 220 L142 210 M186 252 L138 244" stroke="#6b6f7d" stroke-width="2"/>
+     ${screw(30, 230)}${screw(46, 226)}${screw(170, 230)}${screw(154, 226)}
+     <path d="M24 196 L40 188 M176 196 L160 188" stroke="#fff" stroke-width="2" opacity="0.6"/>
+     <rect x="80" y="140" width="40" height="34" fill="#9a6a52" stroke="${INK}" stroke-width="3"/>
+     <path d="M84 156 C90 162 96 160 100 166 M104 152 L116 160" stroke="#8a1f35" stroke-width="2" fill="none"/>`, `${ear(57, '#9a6a52')}${ear(143, '#9a6a52')}
+     <path d="M62 80 C70 62 130 62 138 80" fill="none" stroke="#734c3a" stroke-width="2" opacity="0.6"/>
+     <path d="M68 96 Q84 86 98 96 M102 96 Q116 86 132 96" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>
+     <path d="M78 104 Q85 101 92 104 M108 104 Q115 101 122 104" fill="none" stroke="${INK}" stroke-width="2.5"/>
+     <circle cx="85" cy="104" r="2.6" fill="${INK}"/><circle cx="115" cy="104" r="2.6" fill="${INK}"/>
+     <path d="M94 108 L90 124 Q100 130 110 124 L106 108" fill="none" stroke="${INK}" stroke-width="2.8" stroke-linejoin="round"/>
+     <circle cx="100" cy="128" r="3.4" fill="none" stroke="#ffe83b" stroke-width="2"/>
+     ${frown(138)}
+     <path d="M70 118 L76 128 M124 114 L130 124" stroke="#e8b0a0" stroke-width="2" stroke-linecap="round"/>`), 'gang', 'RAZORBACKS'),
+    // The boss: tall crest, boar-tusk implants, scars, cleaver on the shoulder, gold chain.
+    razorback: () => strip(frame({ id: 'f-razorback', bg: '#8a1f35', dots: '#5a1022', skin: '#b07a5a', shade: '#845a42', head: HEAD_ROUND, zoom: ZOOM }, `${torso('#2a1a20')}
+     <path d="M70 176 L60 300 M130 176 L140 300" stroke="#5a3a40" stroke-width="3"/>
+     <path d="M82 168 L100 200 L118 168 L122 300 H78 Z" fill="#b07a5a" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M86 216 L112 234 M90 238 L116 252" stroke="#8a1f35" stroke-width="2.5" fill="none"/>
+     <path d="M74 172 C82 210 118 210 126 172" fill="none" stroke="#ffe83b" stroke-width="3.5" stroke-dasharray="4 2"/>
+     <rect x="96" y="206" width="8" height="12" fill="#ffe83b" stroke="${INK}" stroke-width="1.5"/>
+     <path d="M186 300 C184 260 172 230 156 214" fill="none" stroke="#2a1a20" stroke-width="26" stroke-linecap="round"/>
+     ${fist(156, 212, '#b07a5a')}
+     <path d="M150 204 L170 128 L178 130 L162 206 Z" fill="#5d4c45" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M168 128 L206 116 L212 166 L172 170 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="3"/><path d="M176 136 L204 128" stroke="#fff" stroke-width="1.5" opacity="0.7"/><circle cx="198" cy="150" r="3" fill="${INK}"/>`, `${ear(57, '#b07a5a')}${ear(143, '#b07a5a')}
+     <path d="M82 66 L84 30 L90 60 L94 22 L100 58 L106 22 L110 60 L116 30 L118 66 C112 58 88 58 82 66 Z" fill="#ff3b5c" stroke="${INK}" stroke-width="2.5"/>
+     <circle cx="85" cy="103" r="8" fill="#2b2b33" stroke="${INK}" stroke-width="2.5"/><circle cx="85" cy="103" r="4.5" fill="#ff3b3b"/><circle cx="85" cy="103" r="10" fill="#ff3b3b" opacity="0.2"/>
+     ${eye(115, '#3a1a10')}
+     <path d="M72 92 L96 98 M104 98 L128 92" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
+     ${nose}
+     ${frown(136)}
+     <path d="M84 138 L78 116 L90 134 Z M116 138 L122 116 L110 134 Z" fill="#fff4fd" stroke="${INK}" stroke-width="2"/>
+     <path d="M118 78 L128 112 M122 86 L126 84 M124 96 L128 94" stroke="#e8b0a0" stroke-width="2.4" stroke-linecap="round"/>
+     <path d="M64 118 L72 126 M62 128 L70 134" stroke="#8a1f35" stroke-width="2.2"/>`), 'gang', 'RAZORBACK'),
+    // ---- Kessler Corporation ----
+    // Corp guard: flip-up visor raised, cheek armor, throat mic, rifle across the chest.
+    guard: () => strip(frame({ id: 'f-guard', ...CORP_BG, skin: '#8a5a44', shade: '#653f30', head: HEAD_ROUND, zoom: ZOOM }, `${torso('#2a3346')}
+     <path d="M38 196 H162 V300 H38 Z" fill="#1e2534" stroke="${INK}" stroke-width="3"/>
+     <path d="M50 206 H78 V232 H50 Z M122 206 H150 V232 H122 Z" fill="#2a3346" stroke="${INK}" stroke-width="2.5"/>
+     <circle cx="100" cy="214" r="10" fill="#29e0ff" stroke="${INK}" stroke-width="2.5"/><path d="M95 208 L100 214 L95 220 M101 208 L106 214 L101 220" fill="none" stroke="${INK}" stroke-width="2"/>
+     <path d="M20 260 L178 202 L186 218 L28 276 Z" fill="#2b2b33" stroke="${INK}" stroke-width="3"/>
+     <path d="M104 236 L116 232 L124 258 L112 262 Z" fill="#3b3b46" stroke="${INK}" stroke-width="2"/>
+     <path d="M140 216 L160 210" stroke="#29e0ff" stroke-width="2" opacity="0.7"/>
+     ${fist(58, 250, '#8a5a44')}${fist(150, 216, '#8a5a44')}`, `<path d="M54 100 C50 54 82 40 100 40 C118 40 150 54 146 100 L140 102 C138 76 124 62 100 62 C76 62 62 76 60 102 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="3"/>
+     <path d="M62 66 C76 46 124 46 138 66 L134 76 C118 62 82 62 66 76 Z" fill="#29e0ff" opacity="0.75" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M70 66 C82 56 96 54 108 56" stroke="#fff" stroke-width="2" opacity="0.7" fill="none"/>
+     <path d="M56 100 L62 132 L74 140 L70 104 Z M144 100 L138 132 L126 140 L130 104 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2.5"/>
+     ${screw(62, 112)}${screw(138, 112)}
+     ${eye(85, '#3d2a20')}${eye(115, '#3d2a20')}
+     <path d="M74 94 L96 97" stroke="${INK}" stroke-width="4" stroke-linecap="round"/><path d="M104 97 L126 94" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
+     ${nose}
+     ${flatMouth(12)}
+     <path d="M74 140 C84 146 92 148 96 146" fill="none" stroke="#2b2b33" stroke-width="3"/><rect x="94" y="142" width="10" height="6" rx="2" fill="#2b2b33" stroke="${INK}" stroke-width="1.5"/><circle cx="99" cy="145" r="1.2" fill="#39ff88"/>
+     ${stubble(14)}`), 'corp', 'KESSLER · 4471'),
+    // Bodyguard: broad, shaved, opaque shades, earpiece coil, hands clasped in front.
+    bodyguard: () => strip(frame({ id: 'f-bodyguard', ...CORP_BG, skin: '#6b4535', shade: '#4f3226', head: HEAD_ROUND, zoom: ZOOM }, `<path d="M2 300 C4 214 44 170 84 164 L100 182 L116 164 C156 170 196 214 198 300 Z" fill="#14161f" stroke="${INK}" stroke-width="3"/>
+     <path d="M84 164 L100 204 L116 164 L108 164 L100 182 L92 164 Z" fill="#fff4fd" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M96 184 L104 184 L106 232 L100 240 L94 232 Z" fill="#1d1f2b" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M84 164 L62 214 L92 196 L100 206 M116 164 L138 214 L108 196 L100 206" fill="#1d1f2b" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+     <path d="M34 300 C40 260 66 240 92 240 M166 300 C160 260 134 240 108 240" fill="none" stroke="#14161f" stroke-width="24" stroke-linecap="round"/>
+     <path d="M34 300 C40 260 66 240 92 240 M166 300 C160 260 134 240 108 240" fill="none" stroke="${INK}" stroke-width="1.5" opacity="0.5"/>
+     ${fist(92, 240, '#6b4535')}${fist(110, 244, '#6b4535')}
+     <path d="M136 202 L148 198 L148 204 L138 208 Z" fill="#29e0ff" stroke="${INK}" stroke-width="1.2"/>`, `${ear(57, '#6b4535')}${ear(143, '#6b4535')}
+     <g fill="${INK}" opacity="0.28">${Array.from({ length: 22 }, (_, i) => `<circle cx="${66 + (i % 11) * 7}" cy="${64 + Math.floor(i / 11) * 8 + (i % 2) * 3}" r="0.9"/>`).join('')}</g>
+     <path d="M64 96 H136 L132 112 Q118 116 106 110 L100 106 L94 110 Q82 116 68 112 Z" fill="#0b0418" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
+     <path d="M72 100 L84 100 M112 100 L120 100" stroke="#29e0ff" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
+     ${nose}
+     ${flatMouth(13, 135)}
+     ${stubble(16)}
+     <path d="M143 106 C152 112 150 128 142 136 C138 144 140 156 146 166" fill="none" stroke="#c9ccd6" stroke-width="1.6"/>
+     <circle cx="144" cy="106" r="3" fill="#2b2b33" stroke="${INK}" stroke-width="1.2"/>`), 'corp', 'KESSLER · DETAIL 09'),
+    // Armed response: full riot helmet, red visor down, armor plates, shield at the side.
+    response: () => strip(frame({ id: 'f-response', bg: '#3d4f68', dots: '#2a3648', skin: '#7a5a48', shade: '#5a4234', head: HEAD_ROUND, zoom: ZOOM }, `${torso('#1e2534')}
+     <path d="M30 192 C50 178 80 172 100 174 C120 172 150 178 170 192 L172 210 H28 Z" fill="#2a3346" stroke="${INK}" stroke-width="3"/>
+     <path d="M44 200 H156" stroke="#ff3b5c" stroke-width="2" opacity="0.6"/>
+     <rect x="70" y="214" width="60" height="30" rx="3" fill="#2a3346" stroke="${INK}" stroke-width="2.5"/>
+     <text x="100" y="234" text-anchor="middle" font-family="monospace" font-size="12" font-weight="700" fill="#ffe83b">K-RR</text>
+     <path d="M-4 196 L58 188 L62 300 L-2 300 Z" fill="#c9ccd6" opacity="0.85" stroke="${INK}" stroke-width="3"/>
+     <path d="M6 214 L54 208 M6 230 L56 224" stroke="#ff3b5c" stroke-width="3"/>
+     <path d="M10 250 L50 246" stroke="#fff" stroke-width="2" opacity="0.6"/>`, `<path d="M50 112 C44 54 78 36 100 36 C122 36 156 54 150 112 L146 150 C130 162 70 162 54 150 Z" fill="#2a3346" stroke="${INK}" stroke-width="3"/>
+     <path d="M58 86 H142 L138 118 C120 124 80 124 62 118 Z" fill="#ff3b5c" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M66 92 L96 92 M70 100 L86 100" stroke="#fff" stroke-width="2.4" opacity="0.65"/>
+     <path d="M62 124 L72 150 H128 L138 124" fill="none" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M80 134 H120 M84 142 H116" stroke="#6b6f7d" stroke-width="2"/>
+     <path d="M70 50 C84 42 116 42 130 50" fill="none" stroke="#6b6f7d" stroke-width="2"/>
+     <rect x="92" y="38" width="16" height="6" fill="#ffe83b" stroke="${INK}" stroke-width="1.5"/>
+     ${screw(56, 104)}${screw(144, 104)}`), 'corp', 'K-RESPONSE · 112'),
+    // The Executive: slicked hair, AR glasses, chrome temple port, cold stare. Arms crossed.
+    executive: () => strip(frame({ id: 'f-exec', ...EXEC_BG, skin: '#e8c4a8', shade: '#bc977c', head: HEAD, zoom: ZOOM }, `<path d="M6 300 C10 214 50 170 86 166 L100 182 L114 166 C150 170 190 214 194 300 Z" fill="#1d1f2b" stroke="${INK}" stroke-width="3"/>
+     <path d="M86 166 L100 206 L114 166 L108 166 L100 184 L92 166 Z" fill="#fff4fd" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M96 184 L104 184 L106 222 L100 230 L94 222 Z" fill="#ff2bd6" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M86 166 L66 212 L92 194 L100 206 M114 166 L134 212 L108 194 L100 206" fill="#2b2e3d" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+     <path d="M30 232 C60 208 140 208 170 232 L170 258 C140 238 60 238 30 258 Z" fill="#2b2e3d" stroke="${INK}" stroke-width="3"/>
+     <path d="M40 242 C70 224 130 224 160 242" fill="none" stroke="${INK}" stroke-width="1.8" opacity="0.7"/>
+     <path d="M34 236 L40 252 M166 236 L160 252" stroke="#fff4fd" stroke-width="4"/>
+     ${fist(54, 234, '#e8c4a8')}${fist(146, 234, '#e8c4a8')}
+     <rect x="158" y="242" width="8" height="5" fill="#ffe83b" stroke="${INK}" stroke-width="1"/>`, `${ear(61, '#e8c4a8')}${ear(139, '#e8c4a8')}
+     <path d="M60 96 C56 60 80 48 102 48 C126 48 144 62 140 96 C134 76 120 64 98 64 C84 64 74 70 66 80 Z" fill="#2a1a20" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M70 76 C84 60 112 56 132 68 M68 86 C84 70 114 66 136 80" fill="none" stroke="#6b5a60" stroke-width="1.6"/>
+     ${eye(84, '#4a6a8a')}${eye(116, '#4a6a8a')}
+     ${lids(84)}${lids(116)}
+     <path d="M70 99 H96 L94 110 H72 Z M104 99 H130 L128 110 H106 Z" fill="#29e0ff" opacity="0.3" stroke="${INK}" stroke-width="2"/>
+     <path d="M96 102 H104 M70 101 L62 98 M130 101 L138 98" stroke="${INK}" stroke-width="2"/>
+     <path d="M74 91 L94 93 M106 93 L126 91" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+     ${nose}
+     ${flatMouth(10, 134)}
+     <path d="M86 140 Q100 144 114 140" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.5"/>
+     <rect x="134" y="86" width="9" height="14" rx="2" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/><circle cx="138.5" cy="93" r="2" fill="#39ff88"/>
+     <path d="M142 90 C150 92 152 100 146 106" fill="none" stroke="#c9ccd6" stroke-width="1.6"/>`), 'corp', 'KESSLER · VP OPS'),
+    // ---- Dock Rats (freight yard smugglers) ----
+    // Smuggler: knit beanie, stubble, scar, collar up, shotgun resting on the shoulder.
+    smuggler: () => strip(frame({ id: 'f-smuggler', ...DOCK_BG, skin: '#c99a76', shade: '#9a6f52', head: HEAD, zoom: ZOOM }, `${torso('#4a3a2a')}
+     <path d="M72 160 L86 190 L100 176 L114 190 L128 160 L136 176 L118 206 L100 192 L82 206 L64 176 Z" fill="#5a4632" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+     <path d="M60 220 L70 300 M140 220 L130 300" stroke="${INK}" stroke-width="2" opacity="0.6"/>
+     <circle cx="76" cy="240" r="3" fill="#c9ccd6" stroke="${INK}" stroke-width="1"/><circle cx="78" cy="270" r="3" fill="#c9ccd6" stroke="${INK}" stroke-width="1"/>
+     <path d="M182 300 C178 262 164 236 150 224" fill="none" stroke="#4a3a2a" stroke-width="24" stroke-linecap="round"/>
+     <path d="M140 232 L206 140 L214 146 L150 240 Z" fill="#2b2b33" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M146 228 L172 250 L164 262 L136 238 Z" fill="#6b4a2a" stroke="${INK}" stroke-width="2.5"/>
+     ${fist(150, 228, '#c99a76')}`, `${ear(61, '#c99a76')}${ear(139, '#c99a76')}
+     <path d="M60 88 C56 52 144 52 140 88 L141 96 H59 Z" fill="#c4344f" stroke="${INK}" stroke-width="2.8"/>
+     <path d="M59 86 H141" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M70 60 V86 M80 56 V86 M90 54 V86 M100 53 V86 M110 54 V86 M120 56 V86 M130 60 V86" stroke="#8a1f35" stroke-width="1.6"/>
+     ${eye(85, '#2a4a40')}${eye(115, '#2a4a40')}
+     ${lids(85)}${lids(115)}
+     ${bags(85)}${bags(115)}
+     ${nose}
+     ${frown(136)}
+     ${stubble(24)}
+     <path d="M110 112 L122 138" stroke="#e8b0a0" stroke-width="2.4" stroke-linecap="round"/><path d="M112 118 L116 116 M116 126 L120 124" stroke="#9a5a50" stroke-width="1.1"/>`), 'gang', 'DOCK RATS'),
+    // Sniper: hood up, long scope implant over one eye, respirator, rifle strap across the chest.
+    sniper: () => strip(frame({ id: 'f-sniper', ...DOCK_BG, skin: '#d4a684', shade: '#a67b5e', head: HEAD_NARROW, zoom: ZOOM }, `${torso('#2a3a34')}
+     <path d="M40 168 C30 120 50 40 100 36 C150 40 170 120 160 168 C150 150 140 120 136 96 C130 66 70 66 64 96 C60 120 50 150 40 168 Z" fill="#2a3a34" stroke="${INK}" stroke-width="3"/>
+     <path d="M30 204 L170 300" stroke="#5a4632" stroke-width="10"/>
+     <path d="M30 204 L170 300" stroke="${INK}" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.6"/>
+     <rect x="66" y="226" width="20" height="14" rx="2" fill="#3a2a20" stroke="${INK}" stroke-width="2" transform="rotate(34 76 233)"/>
+     <rect x="104" y="252" width="20" height="14" rx="2" fill="#3a2a20" stroke="${INK}" stroke-width="2" transform="rotate(34 114 259)"/>`, `${ear(67, '#d4a684')}${ear(133, '#d4a684')}
+     <path d="M74 98 Q85 94 96 99" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><path d="M76 104 Q85 101 94 104" fill="none" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M106 94 L144 88 L146 114 L108 112 Z" fill="#2b2b33" stroke="${INK}" stroke-width="2.5"/>
+     <rect x="140" y="86" width="12" height="30" rx="3" fill="#3b3b46" stroke="${INK}" stroke-width="2.5"/>
+     <circle cx="146" cy="101" r="5" fill="#ff3b3b"/><circle cx="146" cy="101" r="9" fill="#ff3b3b" opacity="0.2"/>
+     <path d="M112 100 H136 M112 106 H136" stroke="#6b6f7d" stroke-width="1.5"/>${screw(110, 96)}
+     <path d="M78 118 C88 114 112 114 122 118 L120 142 C112 150 88 150 80 142 Z" fill="#3b3b46" stroke="${INK}" stroke-width="2.5"/>
+     <circle cx="90" cy="132" r="5" fill="#2b2b33" stroke="${INK}" stroke-width="1.5"/><circle cx="110" cy="132" r="5" fill="#2b2b33" stroke="${INK}" stroke-width="1.5"/>
+     <path d="M78 120 L66 116 M122 120 L134 116" stroke="#2b2b33" stroke-width="3"/>`), 'gang', 'DOCK RATS'),
+    // The Harbormaster: half his face chrome, grey beard, captain's cap, heavy coat, chain on the shoulder.
+    harbormaster: () => strip(frame({ id: 'f-harbor', bg: '#2a5e53', dots: '#1a3e37', skin: '#b58463', shade: '#87604a', head: HEAD_ROUND, zoom: ZOOM }, `<path d="M2 300 C4 212 44 168 84 162 L100 178 L116 162 C156 168 196 212 198 300 Z" fill="#1d2a3a" stroke="${INK}" stroke-width="3"/>
+     <path d="M84 162 L68 210 L100 198 L132 210 L116 162" fill="#16202c" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+     <g fill="#ffe83b" stroke="${INK}" stroke-width="1.5"><circle cx="84" cy="232" r="4"/><circle cx="84" cy="258" r="4"/><circle cx="116" cy="232" r="4"/><circle cx="116" cy="258" r="4"/></g>
+     <path d="M30 186 C60 214 110 250 150 300" fill="none" stroke="#c9ccd6" stroke-width="5" stroke-dasharray="7 4"/>
+     <path d="M30 186 C60 214 110 250 150 300" fill="none" stroke="${INK}" stroke-width="1" opacity="0.5"/>
+     <path d="M150 190 L186 182 L190 196 L154 204 Z" fill="#ffe83b" stroke="${INK}" stroke-width="1.5"/>`, `${ear(57, '#b58463')}
+     <path d="M100 56 C132 56 144 80 143 106 C142 134 124 152 100 152 Z" fill="#9aa0ad" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M104 74 L136 80 M104 128 L134 120 M118 60 L120 150" stroke="#6b6f7d" stroke-width="1.8"/>
+     ${screw(110, 70)}${screw(132, 96)}${screw(126, 136)}${screw(108, 140)}
+     <circle cx="116" cy="103" r="8" fill="#2b2b33" stroke="${INK}" stroke-width="2.5"/><circle cx="116" cy="103" r="4.5" fill="#ff3b3b"/><circle cx="116" cy="103" r="11" fill="#ff3b3b" opacity="0.18"/>
+     ${eye(84, '#2a3a40')}${lids(84)}
+     <path d="M72 92 L96 96" stroke="#d9d4cc" stroke-width="5" stroke-linecap="round"/>
+     ${nose}
+     <path d="M62 118 C62 150 78 166 100 168 C122 166 138 150 138 118 C130 130 118 134 100 134 C82 134 70 130 62 118 Z" fill="#d9d4cc" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M74 136 L76 150 M86 140 L88 158 M100 142 V162 M114 140 L112 158 M126 136 L124 150" stroke="#9a948c" stroke-width="1.4"/>
+     ${flatMouth(10, 136)}
+     <path d="M58 80 C60 50 140 50 142 80 Z" fill="#1d2a3a" stroke="${INK}" stroke-width="2.8"/>
+     <path d="M52 80 H148 L144 90 H56 Z" fill="#0b0418" stroke="${INK}" stroke-width="2.5"/>
+     <path d="M92 64 L100 58 L108 64 L100 70 Z" fill="#ffe83b" stroke="${INK}" stroke-width="1.5"/>`), 'gang', 'HARBORMASTER'),
+};
+// Helpers kept for upcoming faces.
+void HEAD;
+void brow;
+
+__m["ui/streetfaces"] = { STREET_FACES };
+})();
 // ---- ui/rain ----
 (() => {
 // Digital rain background on a canvas. `getHeat` returns 0..1 (Trace level);
@@ -4507,326 +5116,6 @@ function renderEnd(outcome) {
 
 __m["ui/screens"] = { runHud, renderMap, renderTerminal, renderNotice, renderEvent, renderRest, renderShop, renderJackout, renderSectorClear, renderEnd };
 })();
-// ---- ui/portraits ----
-(() => {
-// Safehouse character portraits, drawn in code: flat comic style, heavy
-// outlines, halftone backgrounds. Keyed by fixer id or NPC id.
-const INK = '#1b0b3a';
-const HEAD = 'M100 54 C128 54 140 78 139 104 C138 132 122 154 100 154 C78 154 62 132 61 104 C60 78 72 54 100 54 Z';
-const HEAD_NARROW = 'M100 56 C124 56 134 80 133 106 C132 136 118 158 100 158 C82 158 68 136 67 106 C66 80 76 56 100 56 Z';
-const HEAD_ROUND = 'M100 56 C132 56 144 80 143 106 C142 134 124 152 100 152 C76 152 58 134 57 106 C56 80 68 56 100 56 Z';
-function frame(f, back, front) {
-    const head = f.head ?? HEAD;
-    const id = f.id;
-    return `<svg viewBox="0 0 200 240" role="img" aria-hidden="true">
-  <defs>
-    <pattern id="${id}-dots" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx="4" cy="4" r="1.8" fill="${f.dots}"/></pattern>
-    <pattern id="${id}-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><path d="M0 0 V5" stroke="${INK}" stroke-width="1.1" opacity="0.45"/></pattern>
-    <clipPath id="${id}-head"><path d="${head}"/></clipPath>
-    <radialGradient id="${id}-vig" cx="50%" cy="42%" r="70%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#0b0418" stop-opacity="0.75"/></radialGradient>
-    <filter id="${id}-rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
-    <filter id="${id}-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.03  0 0 0 0 0.16  0 0 0 1.6 -0.62"/></filter>
-  </defs>
-  <rect width="200" height="240" fill="${f.bg}"/>
-  <rect width="200" height="240" fill="url(#${id}-dots)"/>
-  <path d="M18 0 L22 64 L16 120 M164 0 L160 40 L168 98 M120 0 L118 26" stroke="#0b0418" stroke-width="6" opacity="0.18" fill="none"/>
-  <rect width="200" height="240" fill="url(#${id}-vig)"/>
-  <g filter="url(#${id}-rough)">
-  ${back}
-  <rect x="88" y="138" width="24" height="34" fill="${f.skin}" stroke="${INK}" stroke-width="3"/>
-  <rect x="100" y="138" width="12" height="34" fill="${f.shade}"/>
-  <rect x="88" y="138" width="24" height="12" fill="${INK}" opacity="0.35"/>
-  <path d="${head}" fill="${f.skin}"/>
-  <g clip-path="url(#${id}-head)">
-    <path d="M104 40 C132 70 136 120 112 170 L170 170 L170 40 Z" fill="${f.shade}"/>
-    <path d="M110 60 C134 84 134 124 116 162 L170 162 L170 60 Z" fill="url(#${id}-hatch)"/>
-    <path d="M60 140 C80 160 120 160 140 140 L140 170 L60 170 Z" fill="${f.shade}" opacity="0.6"/>
-  </g>
-  <path d="${head}" fill="none" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
-  ${front}
-  </g>
-  <rect width="200" height="240" filter="url(#${id}-grain)" opacity="0.55"/>
-  <rect x="1.5" y="1.5" width="197" height="237" fill="none" stroke="#0b0418" stroke-width="3" opacity="0.6"/>
-</svg>`;
-}
-// Small reusable features.
-const ear = (x, skin) => `<path d="M${x} 98 C${x + (x < 100 ? -9 : 9)} 96 ${x + (x < 100 ? -10 : 10)} 116 ${x} 118" fill="${skin}" stroke="${INK}" stroke-width="3"/>`;
-const eye = (x, iris = INK) => `<path d="M${x - 9} 103 Q${x} 96 ${x + 9} 103 Q${x} 108 ${x - 9} 103 Z" fill="#fff" stroke="${INK}" stroke-width="2.5"/><circle cx="${x}" cy="103" r="3.6" fill="${iris}"/><circle cx="${x + 1.2}" cy="101.8" r="1" fill="#fff"/>`;
-const brow = (x, tilt = 0) => `<path d="M${x - 10} ${94 + tilt} Q${x} ${88} ${x + 10} ${94 - tilt}" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>`;
-const bags = (x) => `<path d="M${x - 8} 109 Q${x} 113 ${x + 8} 109" fill="none" stroke="${INK}" stroke-width="1.4" opacity="0.7"/>`;
-const screw = (x, y) => `<circle cx="${x}" cy="${y}" r="1.6" fill="#6b6f7d" stroke="${INK}" stroke-width="0.8"/>`;
-const nose = `<path d="M100 106 L96 122 Q100 125 104 122" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`;
-const PORTRAITS = {
-    // Corporate fixer: sharp asymmetric bob, high collar, one gold cyber-eye.
-    juno: () => frame({ id: 'juno', bg: '#e324bf', dots: '#b81a9a', skin: '#c98b6b', shade: '#9c6450' }, `<path d="M30 240 C34 196 56 176 88 168 L100 182 L112 168 C144 176 166 196 170 240 Z" fill="#3b1d7a" stroke="${INK}" stroke-width="3"/>
-       <path d="M74 150 L88 168 L100 190 L112 168 L126 150 L132 176 L100 204 L68 176 Z" fill="#2a1458" stroke="${INK}" stroke-width="3"/>
-       <path d="M68 176 L100 204 L132 176" fill="none" stroke="#ffe83b" stroke-width="3"/>
-       <path d="M58 70 C60 40 140 36 146 70 C150 96 148 128 144 140 L132 140 C134 112 128 86 116 74 C100 90 80 94 64 92 C64 112 66 138 70 150 L52 150 C48 124 52 96 58 70 Z" fill="${INK}"/>`, `${ear(62, '#c98b6b')}
-       ${eye(84)}
-       <circle cx="116" cy="103" r="9" fill="#120626" stroke="${INK}" stroke-width="2.5"/><circle cx="116" cy="103" r="5.5" fill="#ffe83b"/><circle cx="116" cy="103" r="2" fill="#fff"/>
-       <path d="M108 103 H124 M116 95 V111" stroke="#ffe83b" stroke-width="1" opacity="0.7"/>
-       ${brow(84, 2)}${brow(116, -2)}
-       ${nose}
-       <path d="M89 136 Q100 140 112 133" fill="none" stroke="#7a1650" stroke-width="4" stroke-linecap="round"/>
-       <path d="M56 116 L62 130 L50 130 Z" fill="#ffe83b" stroke="${INK}" stroke-width="2"/>
-       <path d="M58 98 C52 54 92 38 120 46 C140 52 148 70 144 92 C132 80 114 76 100 82 C86 88 72 94 58 98 Z" fill="${INK}"/>
-       <path d="M70 70 C84 54 108 50 126 56" fill="none" stroke="#7b5cff" stroke-width="3" stroke-linecap="round"/>
-       <path d="M78 64 C90 58 104 56 116 58 M74 80 C80 74 88 72 96 72" fill="none" stroke="#3b1d7a" stroke-width="1.5"/>
-       ${bags(84)}
-       <path d="M76 113 V124 M79 113 V121 M81 113 V126 M84 113 V120 M87 113 V124 M89 113 V119" stroke="#0f7a6e" stroke-width="1.6"/>
-       <path d="M121 124 L135 112 L138 132 L122 147 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
-       <path d="M124 132 L136 122" stroke="#8a8e9b" stroke-width="1.5"/>${screw(126, 140)}${screw(133, 118)}
-       <circle cx="131" cy="130" r="1.6" fill="#ffe83b"/>
-       <path d="M98 133 L101 139" stroke="${INK}" stroke-width="1.5"/>
-       <rect x="90" y="150" width="8" height="6" rx="1" fill="#2b2b33" stroke="${INK}" stroke-width="1.5"/><circle cx="94" cy="153" r="1.3" fill="#29e0ff"/>
-       <path d="M44 214 L60 196 M150 210 L138 194" stroke="#2a1458" stroke-width="2" stroke-dasharray="3 3"/>
-       <path d="M52 232 C60 224 66 226 70 232" fill="none" stroke="#2a1458" stroke-width="2"/>
-       <circle cx="138" cy="200" r="4" fill="#ffe83b" stroke="${INK}" stroke-width="1.5"/>
-       <path d="M58 132 L60 138 M54 128 L52 134" stroke="#ffe83b" stroke-width="1.5"/>`),
-    // Deep net fixer: gaunt face in a hood, cyan slit eyes, circuit tattoo, six-fingered hand.
-    sixfinger: () => frame({ id: 'six', bg: '#2a1458', dots: '#3b1d7a', skin: '#b9a9c9', shade: '#7d6b93', head: HEAD_NARROW }, `<path d="M20 240 C24 190 46 164 70 156 L100 176 L130 156 C154 164 176 190 180 240 Z" fill="${INK}" stroke="#29e0ff" stroke-width="1.5"/>
-       <path d="M100 28 C150 28 170 70 164 120 C160 150 150 170 140 180 L128 150 C134 120 132 82 100 70 C68 82 66 120 72 150 L60 180 C50 170 40 150 36 120 C30 70 50 28 100 28 Z" fill="${INK}" stroke="#29e0ff" stroke-width="1.5"/>`, `<path d="M67 104 C70 74 130 74 133 104 L133 86 C120 70 80 70 67 86 Z" fill="${INK}" opacity="0.75"/>
-       <path d="M76 104 L92 101" stroke="#29e0ff" stroke-width="3.5" stroke-linecap="round"/><path d="M108 101 L124 104" stroke="#29e0ff" stroke-width="3.5" stroke-linecap="round"/>
-       <path d="M76 104 L92 101 M108 101 L124 104" stroke="#29e0ff" stroke-width="8" stroke-linecap="round" opacity="0.25"/>
-       <path d="M100 108 L97 124 Q100 126 103 124" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>
-       <path d="M90 140 L111 140" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
-       <path d="M74 116 L82 124 L82 136 M78 120 L72 128 M82 130 L88 134" fill="none" stroke="#29e0ff" stroke-width="1.6"/>
-       <circle cx="82" cy="136" r="1.8" fill="#29e0ff"/><circle cx="72" cy="128" r="1.6" fill="#29e0ff"/>
-       <g stroke="${INK}" stroke-width="2.5" fill="#b9a9c9">
-         <path d="M34 240 L40 196 C42 186 64 184 70 194 L72 240 Z"/>
-         <rect x="34" y="160" width="7" height="34" rx="3.5" transform="rotate(-18 37 194)"/>
-         <rect x="42" y="152" width="7" height="40" rx="3.5" transform="rotate(-9 45 192)"/>
-         <rect x="50" y="150" width="7" height="42" rx="3.5"/>
-         <rect x="58" y="152" width="7" height="40" rx="3.5" transform="rotate(8 61 192)"/>
-         <rect x="65" y="158" width="7" height="34" rx="3.5" transform="rotate(16 68 192)"/>
-         <rect x="70" y="176" width="7" height="24" rx="3.5" transform="rotate(48 73 198)"/>
-       </g>
-       <g fill="#29e0ff"><circle cx="27" cy="166" r="2.2"/><circle cx="39" cy="155" r="2.2"/><circle cx="53.5" cy="152" r="2.2"/><circle cx="66" cy="155" r="2.2"/><circle cx="76" cy="162" r="2.2"/><circle cx="86" cy="186" r="2.2"/></g>
-       <path d="M80 84 C90 80 104 82 118 88" fill="none" stroke="#5a2a3a" stroke-width="2"/>
-       <path d="M84 79 L86 87 M92 79 L93 87 M100 80 L100 88 M108 82 L107 90 M115 85 L113 92" stroke="${INK}" stroke-width="1.3"/>
-       <path d="M74 116 C78 126 80 134 86 140 M126 116 C122 126 120 134 114 140" fill="none" stroke="#5d4c73" stroke-width="2.5" opacity="0.8"/>
-       <path d="M92 146 L96 150 L94 154 M106 146 L104 151" fill="none" stroke="${INK}" stroke-width="1.2"/>
-       <path d="M146 54 C148 96 146 134 138 150 C132 158 124 160 118 160" fill="none" stroke="#120626" stroke-width="7"/>
-       <path d="M146 54 C148 96 146 134 138 150 C132 158 124 160 118 160" fill="none" stroke="#29e0ff" stroke-width="1" stroke-dasharray="2 9"/>
-       <path d="M154 70 C156 110 150 150 140 162 C134 166 126 166 118 164" fill="none" stroke="#120626" stroke-width="5"/>
-       <rect x="108" y="154" width="12" height="8" rx="2" fill="#6b6f7d" stroke="${INK}" stroke-width="1.5"/>
-       <path d="M118 112 L124 118 L122 126 M124 118 L130 116" fill="none" stroke="#29e0ff" stroke-width="1.3"/>
-       <g fill="#6b6f7d" stroke="${INK}" stroke-width="1"><rect x="36" y="186" width="6" height="4"/><rect x="44" y="184" width="6" height="4"/><rect x="51" y="183" width="6" height="4"/><rect x="59" y="184" width="6" height="4"/><rect x="66" y="186" width="6" height="4"/></g>`),
-    // Big-league fixer: heavy-set enforcer, buzz cut, chrome jaw plate, mirrored visor, sharp suit.
-    rook: () => frame({ id: 'rook', bg: '#ff3b5c', dots: '#c41f43', skin: '#8a5a44', shade: '#653f30', head: HEAD_ROUND }, `<path d="M14 240 C18 188 50 164 84 160 L100 178 L116 160 C150 164 182 188 186 240 Z" fill="#1d1f2b" stroke="${INK}" stroke-width="3"/>
-       <path d="M84 160 L100 200 L116 160 L108 160 L100 176 L92 160 Z" fill="#fff4fd" stroke="${INK}" stroke-width="2.5"/>
-       <path d="M96 178 L104 178 L106 214 L100 222 L94 214 Z" fill="#ff3b5c" stroke="${INK}" stroke-width="2.5"/>
-       <path d="M84 160 L70 196 L92 186 L100 200 M116 160 L130 196 L108 186 L100 200" fill="#2b2e3d" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
-       <path d="M138 200 L150 196 L152 206 L140 210 Z" fill="#ffe83b" stroke="${INK}" stroke-width="1.5"/>
-       <path d="M80 140 C84 150 116 150 120 140 L122 166 L78 166 Z" fill="#653f30" stroke="${INK}" stroke-width="3"/>`, `${ear(58, '#8a5a44')}${ear(142, '#8a5a44')}
-       <path d="M58 92 C56 62 76 52 100 52 C124 52 144 62 142 92 C136 78 124 70 100 70 C76 70 64 78 58 92 Z" fill="#2a1a20"/>
-       <path d="M66 74 L70 66 M76 68 L78 60 M88 64 L89 57 M100 63 V56 M112 64 L111 57 M124 68 L122 60 M134 74 L130 66" stroke="#6b5a60" stroke-width="1.6"/>
-       <path d="M64 96 H136 L132 112 Q118 116 104 110 L100 106 L96 110 Q82 116 68 112 Z" fill="#120626" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-       <path d="M70 100 L84 100 L80 108 M112 100 L126 100" stroke="#29e0ff" stroke-width="2.5" stroke-linecap="round"/>
-       <path d="M88 98 L96 98 M118 104 L128 104" stroke="#fff4fd" stroke-width="1.5" opacity="0.7"/>
-       <path d="M64 92 L136 92" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>
-       <path d="M100 112 L96 124 Q100 127 105 124" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>
-       <path d="M76 128 C80 146 120 146 124 128 L128 140 C120 158 80 158 72 140 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>
-       <path d="M80 140 H120 M86 132 V150 M100 134 V154 M114 132 V150" stroke="#8a8e9b" stroke-width="1.5"/>
-       ${screw(78, 136)}${screw(122, 136)}${screw(90, 148)}${screw(110, 148)}
-       <path d="M90 133 Q100 137 110 133" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
-       <path d="M118 60 L130 82 L126 84 M122 70 L128 68" fill="none" stroke="#c97b6b" stroke-width="2.4" stroke-linecap="round"/>
-       <path d="M58 104 L54 112 M60 116 L54 120" stroke="${INK}" stroke-width="1.4"/>
-       <g fill="${INK}"><rect x="84" y="156" width="2" height="8"/><rect x="88" y="156" width="1" height="8"/><rect x="91" y="156" width="3" height="8"/><rect x="96" y="156" width="1" height="8"/><rect x="99" y="156" width="2" height="8"/><rect x="103" y="156" width="1" height="8"/><rect x="106" y="156" width="3" height="8"/><rect x="111" y="156" width="1" height="8"/><rect x="114" y="156" width="2" height="8"/></g>
-       <circle cx="142" cy="122" r="2.6" fill="#ffe83b" stroke="${INK}" stroke-width="1.2"/>
-       <path d="M150 112 C160 130 158 160 150 176" fill="none" stroke="#120626" stroke-width="4"/>
-       <path d="M150 112 C160 130 158 160 150 176" fill="none" stroke="#29e0ff" stroke-width="1" stroke-dasharray="2 8"/>`),
-    // Wild-card fixer: long black hair with acid-green streaks, one glowing green eye, hex sigil tattoo, a smirk.
-    hex: () => frame({ id: 'hex', bg: '#31c46c', dots: '#1d8a49', skin: '#d9a98a', shade: '#a8775e', head: HEAD_NARROW }, `<path d="M38 70 C34 30 166 30 162 70 C168 120 166 190 176 240 L24 240 C34 190 32 120 38 70 Z" fill="${INK}"/>
-       <path d="M24 240 C30 196 54 172 86 166 L100 180 L114 166 C146 172 170 196 176 240 Z" fill="#2a1458" stroke="${INK}" stroke-width="3"/>
-       <path d="M86 166 L100 180 L114 166" fill="none" stroke="#39ff88" stroke-width="2.5"/>
-       <path d="M60 196 L74 210 L60 224 M140 196 L126 210 L140 224" fill="none" stroke="#39ff88" stroke-width="2" opacity="0.7"/>
-       <path d="M48 90 C44 140 46 190 54 236 M152 90 C156 140 154 190 146 236" fill="none" stroke="#39ff88" stroke-width="3" opacity="0.85"/>
-       <path d="M42 120 C40 160 42 200 46 236" fill="none" stroke="#2b2b33" stroke-width="4"/>
-       <path d="M42 120 C40 160 42 200 46 236" fill="none" stroke="#39ff88" stroke-width="1" stroke-dasharray="2 7"/>`, `${eye(84, '#7a1650')}
-       <circle cx="116" cy="103" r="8.5" fill="#0b2a18" stroke="${INK}" stroke-width="2.5"/><circle cx="116" cy="103" r="5" fill="#39ff88"/><circle cx="116" cy="103" r="2" fill="#eafff2"/>
-       <circle cx="116" cy="103" r="12" fill="#39ff88" opacity="0.18"/>
-       <path d="M74 94 Q84 88 94 93" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
-       <path d="M106 90 Q116 86 126 92" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
-       ${bags(84)}
-       ${nose}
-       <path d="M88 138 Q98 140 112 132" fill="none" stroke="#3b1d4a" stroke-width="4" stroke-linecap="round"/>
-       <path d="M111 132 L114 128" stroke="#3b1d4a" stroke-width="2.5" stroke-linecap="round"/>
-       <circle cx="96" cy="142" r="2.6" fill="none" stroke="#c9ccd6" stroke-width="1.6"/>
-       <path d="M100 66 L108 70.5 V79.5 L100 84 L92 79.5 V70.5 Z" fill="none" stroke="#1d8a49" stroke-width="2"/>
-       <circle cx="100" cy="75" r="2" fill="#1d8a49"/>
-       <path d="M118 114 L124 118 V126 L118 130 L112 126 V118 Z" fill="none" stroke="#1d8a49" stroke-width="1.6"/>
-       <path d="M124 126 L130 134 M130 134 L128 142" stroke="#1d8a49" stroke-width="1.4"/>
-       <path d="M76 114 L78 124 M80 114 L82 122" stroke="#1d8a49" stroke-width="1.3"/>
-       <path d="M66 100 C62 70 80 54 100 54 C124 54 138 70 134 100 C130 84 118 70 100 66 C88 74 74 84 66 100 Z" fill="${INK}"/>
-       <path d="M86 60 C78 72 72 84 70 98" fill="none" stroke="#39ff88" stroke-width="3" stroke-linecap="round"/>
-       <path d="M120 62 C126 72 130 82 132 94" fill="none" stroke="#39ff88" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
-       <circle cx="66" cy="118" r="2" fill="#c9ccd6" stroke="${INK}" stroke-width="1"/><circle cx="64" cy="126" r="2" fill="#c9ccd6" stroke="${INK}" stroke-width="1"/>
-       <path d="M134 116 L138 120 L136 126" fill="none" stroke="#ffe83b" stroke-width="1.6"/>
-       <rect x="104" y="150" width="10" height="6" rx="1" fill="#2b2b33" stroke="${INK}" stroke-width="1.5"/><circle cx="109" cy="153" r="1.3" fill="#39ff88"/>`),
-    // Street fixer: wiry old hustler, slicked grey hair, gold tooth, koi neck tattoo, chrome hand with a cigarette.
-    dutch: () => frame({ id: 'dutch', bg: '#ff8a2b', dots: '#c45f12', skin: '#c99a76', shade: '#9a6f52', head: HEAD_NARROW }, `<path d="M24 240 C28 194 54 172 84 166 L100 184 L116 166 C146 172 172 194 176 240 Z" fill="#7a1650" stroke="${INK}" stroke-width="3"/>
-       <path d="M84 166 L100 200 L116 166 L108 164 L100 180 L92 164 Z" fill="#c99a76" stroke="${INK}" stroke-width="2.5"/>
-       <path d="M86 172 C92 190 108 190 114 172" fill="none" stroke="#ffe83b" stroke-width="2.5"/>
-       <path d="M84 166 L66 210 L92 192 M116 166 L134 210 L108 192" fill="#5a0f3a" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
-       <path d="M40 214 L52 204 L62 216 M140 212 L150 202" stroke="#ffe83b" stroke-width="1.6" fill="none" opacity="0.6"/>`, `${ear(67, '#c99a76')}${ear(133, '#c99a76')}
-       <path d="M66 96 C62 62 82 50 100 50 C120 50 138 62 134 96 C130 80 118 66 100 64 C84 66 72 78 66 96 Z" fill="#9aa0ad" stroke="${INK}" stroke-width="2.5"/>
-       <path d="M74 80 C84 68 104 62 124 70 M72 88 C84 76 106 70 128 80 M80 66 C92 58 108 56 120 62" fill="none" stroke="#5d6270" stroke-width="1.6"/>
-       ${eye(85)}${eye(115)}
-       <path d="M74 95 Q85 90 95 95" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><path d="M105 95 Q115 90 126 96" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
-       <path d="M76 108 Q85 112 94 108 M106 108 Q115 112 124 108" fill="none" stroke="${INK}" stroke-width="1.4" opacity="0.7"/>
-       ${nose}
-       <path d="M86 128 C92 124 108 124 114 128" fill="none" stroke="#5d6270" stroke-width="3" stroke-linecap="round"/>
-       <path d="M86 135 Q100 143 114 133" fill="#fff4fd" stroke="${INK}" stroke-width="2.5"/>
-       <rect x="103" y="135" width="5" height="5" fill="#ffe83b" stroke="${INK}" stroke-width="1"/>
-       <path d="M78 116 C82 124 82 132 86 140 M122 116 C118 124 118 132 114 140" fill="none" stroke="${INK}" stroke-width="1.2" opacity="0.6"/>
-       <path d="M114 146 C122 150 128 158 124 166 C120 172 112 170 110 164" fill="none" stroke="#ff3b5c" stroke-width="2.2"/>
-       <path d="M112 152 L118 150 M116 158 L122 158" stroke="#29e0ff" stroke-width="1.4"/>
-       <g stroke="${INK}" stroke-width="2.5">
-         <path d="M132 240 L136 196 C138 186 160 184 164 196 L164 240 Z" fill="#c9ccd6"/>
-         <rect x="134" y="176" width="8" height="24" rx="3" fill="#c9ccd6"/><rect x="143" y="172" width="8" height="28" rx="3" fill="#c9ccd6"/><rect x="152" y="174" width="8" height="26" rx="3" fill="#c9ccd6"/>
-         <rect x="133" y="180" width="28" height="7" rx="2" fill="#ffe83b"/>
-       </g>
-       ${screw(140, 214)}${screw(156, 214)}
-       <path d="M150 172 L170 150" stroke="#fff4fd" stroke-width="4" stroke-linecap="round"/><path d="M168 152 L171 149" stroke="#ff3b5c" stroke-width="4" stroke-linecap="round"/>
-       <path d="M172 146 C166 136 178 128 172 118 C168 110 176 104 174 96" fill="none" stroke="#fff4fd" stroke-width="2" opacity="0.55"/>`),
-    // Arms dealer: ex-military, grey buzz cut, red cyber eye, scar, combat vest and dog tags.
-    ivo: () => frame({ id: 'ivo', bg: '#8a9a3b', dots: '#62702a', skin: '#b58463', shade: '#87604a', head: HEAD }, `<path d="M16 240 C20 192 50 168 84 164 L100 176 L116 164 C150 168 180 192 184 240 Z" fill="#4a5228" stroke="${INK}" stroke-width="3"/>
-       <path d="M48 196 H76 V226 H48 Z M124 196 H152 V226 H124 Z" fill="#3a4120" stroke="${INK}" stroke-width="2.5"/>
-       <path d="M52 204 H72 M128 204 H148" stroke="${INK}" stroke-width="2"/>
-       <path d="M84 164 L100 176 L116 164 L116 180 L100 190 L84 180 Z" fill="#2b2f1a" stroke="${INK}" stroke-width="2.5"/>
-       <path d="M90 170 C94 186 106 186 110 170" fill="none" stroke="#c9ccd6" stroke-width="1.6" stroke-dasharray="2 2"/>
-       <rect x="98" y="186" width="10" height="14" rx="2" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/>`, `${ear(61, '#b58463')}${ear(139, '#b58463')}
-       <path d="M62 92 C60 64 78 52 100 52 C122 52 140 64 138 92 C130 76 118 70 100 70 C82 70 70 76 62 92 Z" fill="#8f939c"/>
-       <path d="M66 82 L68 74 M74 74 L76 66 M84 68 L85 61 M94 66 V59 M104 66 V59 M114 68 L115 61 M124 74 L122 66 M132 82 L130 74" stroke="#5d6270" stroke-width="1.6"/>
-       ${eye(84)}
-       <circle cx="116" cy="103" r="10" fill="#2b2b33" stroke="${INK}" stroke-width="2.5"/><circle cx="116" cy="103" r="6" fill="#ff3b3b"/><circle cx="116" cy="103" r="2" fill="#fff"/>
-       <circle cx="116" cy="103" r="14" fill="#ff3b3b" opacity="0.15"/>
-       <path d="M104 92 L128 92 L130 114 L104 114" fill="none" stroke="#6b6f7d" stroke-width="2"/>${screw(106, 112)}${screw(128, 94)}
-       ${brow(84, 3)}
-       ${nose}
-       <path d="M88 96 L112 128" stroke="#e8b0a0" stroke-width="2.4" stroke-linecap="round"/><path d="M92 100 L96 98 M100 110 L104 108 M106 118 L110 116" stroke="#9a5a50" stroke-width="1.2"/>
-       <path d="M88 135 H112" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
-       <g fill="${INK}" opacity="0.35"><circle cx="80" cy="132" r="0.9"/><circle cx="84" cy="138" r="0.9"/><circle cx="90" cy="142" r="0.9"/><circle cx="98" cy="144" r="0.9"/><circle cx="106" cy="143" r="0.9"/><circle cx="114" cy="140" r="0.9"/><circle cx="120" cy="134" r="0.9"/><circle cx="86" cy="130" r="0.9"/><circle cx="116" cy="130" r="0.9"/></g>
-       <path d="M64 118 L70 124 M62 126 L66 130" stroke="${INK}" stroke-width="1.2"/>`),
-    // Street fixer: ex-corporate security. Severe platinum crop, scar, earpiece, Kessler badge clipped to a leather jacket.
-    vesna: () => frame({ id: 'vesna', bg: '#29b8d8', dots: '#1b86a0', skin: '#e2b49a', shade: '#b4866e', head: HEAD_NARROW }, `<path d="M26 240 C30 196 56 174 86 168 L100 182 L114 168 C144 174 170 196 174 240 Z" fill="#2a1a20" stroke="${INK}" stroke-width="3"/>
-       <path d="M86 168 L72 210 L96 196 L100 182 M114 168 L128 210 L104 196 L100 182" fill="#3b2a30" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
-       <path d="M90 170 L100 182 L110 170" fill="#fff4fd" stroke="${INK}" stroke-width="2"/>
-       <rect x="120" y="200" width="22" height="14" rx="2" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/><path d="M124 205 H138 M124 209 H134" stroke="#29b8d8" stroke-width="1.5"/>
-       <path d="M44 220 L60 206" stroke="#5d4c55" stroke-width="2" stroke-dasharray="3 3"/>`, `${ear(67, '#e2b49a')}${ear(133, '#e2b49a')}
-       <path d="M66 94 C62 62 82 50 100 50 C120 50 138 62 134 94 C132 82 126 72 116 68 C104 74 88 76 72 74 C70 80 68 86 66 94 Z" fill="#e9e4ef" stroke="${INK}" stroke-width="2.5"/>
-       <path d="M76 66 C88 60 108 58 122 64 M80 72 C94 66 110 66 124 72" fill="none" stroke="#b9b2c6" stroke-width="1.6"/>
-       ${eye(85, '#1b86a0')}${eye(115, '#1b86a0')}
-       <path d="M74 94 L96 92" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/><path d="M104 92 L126 94" stroke="${INK}" stroke-width="3.2" stroke-linecap="round"/>
-       ${nose}
-       <path d="M89 134 Q100 136 111 133" fill="none" stroke="#7a3a40" stroke-width="3.5" stroke-linecap="round"/>
-       <path d="M118 108 L126 128" stroke="#c97b6b" stroke-width="2.2" stroke-linecap="round"/><path d="M119 114 L123 112 M121 120 L125 118" stroke="#9a5a50" stroke-width="1.1"/>
-       <path d="M133 100 C140 104 140 116 134 122 L130 136" fill="none" stroke="#2b2b33" stroke-width="2.5"/><circle cx="135" cy="104" r="3" fill="#2b2b33" stroke="${INK}" stroke-width="1"/><circle cx="135" cy="104" r="1.2" fill="#39ff88"/>
-       <path d="M78 118 L82 124 M80 114 L84 120" stroke="#1b86a0" stroke-width="1.4"/>
-       ${bags(85)}${bags(115)}`),
-    // The fence: older woman, grey bun with pens, round glasses, a jeweler's loupe.
-    mags: () => frame({ id: 'mags', bg: '#f0d232', dots: '#c98f14', skin: '#e0b48e', shade: '#b8865f', head: HEAD_ROUND }, `<path d="M26 240 C30 196 56 174 90 168 L110 168 C144 174 170 196 174 240 Z" fill="#7b5cff" stroke="${INK}" stroke-width="3"/>
-       <path d="M44 214 C70 196 130 196 156 214 L160 240 L40 240 Z" fill="#ff2bd6" stroke="${INK}" stroke-width="3"/>
-       <path d="M52 226 C80 212 120 212 148 226" fill="none" stroke="#ffe83b" stroke-width="3"/>
-       <path d="M120 24 L132 6 M134 30 L152 18" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>
-       <path d="M120 24 L132 6" stroke="#ff2bd6" stroke-width="2.5" stroke-linecap="round"/><path d="M134 30 L152 18" stroke="#29e0ff" stroke-width="2.5" stroke-linecap="round"/>
-       <circle cx="100" cy="40" r="26" fill="#cfc6dc" stroke="${INK}" stroke-width="3"/>
-       <path d="M56 104 C50 66 76 50 100 50 C124 50 150 66 144 104 C138 84 124 70 100 70 C76 70 62 84 56 104 Z" fill="#cfc6dc" stroke="${INK}" stroke-width="3"/>
-       <path d="M60 80 C52 70 50 60 56 54 M142 78 C150 70 150 60 146 54" fill="none" stroke="${INK}" stroke-width="2"/>`, `${ear(58, '#e0b48e')}${ear(142, '#b8865f')}
-       ${eye(83)}${eye(117)}
-       <circle cx="83" cy="103" r="14" fill="rgba(255,255,255,0.15)" stroke="${INK}" stroke-width="3.5"/>
-       <circle cx="117" cy="103" r="14" fill="rgba(255,255,255,0.15)" stroke="${INK}" stroke-width="3.5"/>
-       <path d="M97 103 L103 103 M69 101 L58 98 M131 101 L142 98" stroke="${INK}" stroke-width="3"/>
-       <path d="M75 96 L80 91 M78 100 L86 92" stroke="#fff" stroke-width="2"/>
-       <rect x="110" y="88" width="20" height="16" rx="3" fill="#29e0ff" stroke="${INK}" stroke-width="3" transform="rotate(-20 120 96)"/>
-       <path d="M114 90 L122 86" stroke="#fff" stroke-width="2" transform="rotate(-20 120 96)"/>
-       <path d="M72 89 Q83 84 92 88 M108 88 Q117 84 128 89" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
-       ${nose}
-       <path d="M86 134 Q100 146 114 134" fill="#7a2a35" stroke="${INK}" stroke-width="2.5"/>
-       <path d="M89 135 Q100 139 111 135" fill="none" stroke="#fff" stroke-width="2"/>
-       <path d="M78 126 Q82 134 86 136 M122 126 Q118 134 114 136 M64 108 L69 110 M64 113 L69 113" fill="none" stroke="${INK}" stroke-width="1.8" stroke-linecap="round"/>
-       <path d="M80 78 Q100 72 120 78 M84 84 Q100 80 116 84 M131 108 L136 110 M131 113 L136 113" fill="none" stroke="${INK}" stroke-width="1.4" opacity="0.8"/>
-       ${bags(83)}${bags(117)}
-       <path d="M95 144 V152 M100 145 V154 M105 144 V152" stroke="#0f5a6e" stroke-width="2" stroke-linecap="round"/>
-       <rect x="104" y="135" width="5" height="4" fill="#ffe83b" stroke="${INK}" stroke-width="1"/>
-       <path d="M86 156 L114 156 L113 164 L87 164 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2"/>
-       <circle cx="100" cy="160" r="2" fill="#ff3b5c"/>${screw(90, 160)}${screw(110, 160)}
-       <rect x="120" y="216" width="22" height="16" fill="#3b1d7a" stroke="${INK}" stroke-width="2" transform="rotate(-6 131 224)"/>
-       <path d="M122 218 L140 216 M122 230 L141 228" stroke="#ffe83b" stroke-width="1.5" stroke-dasharray="2 2"/>
-       <path d="M58 224 L64 236 M70 222 L74 236" stroke="#2a1458" stroke-width="1.5"/>`),
-    // Program dealer: undercut with a yellow streak, visor pushed up, hoodie, headphones.
-    kit: () => frame({ id: 'kit', bg: '#22c4e0', dots: '#1290aa', skin: '#8d5a3b', shade: '#6a3f28' }, `<path d="M24 240 C28 194 54 172 86 166 L114 166 C146 172 172 194 176 240 Z" fill="#ff2bd6" stroke="${INK}" stroke-width="3"/>
-       <path d="M70 168 C78 196 122 196 130 168" fill="#d81fb4" stroke="${INK}" stroke-width="3"/>
-       <path d="M88 192 L86 222 M112 192 L114 222" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-       <path d="M64 170 C60 186 70 196 84 194 L116 194 C130 196 140 186 136 170" fill="none" stroke="${INK}" stroke-width="7"/>
-       <rect x="52" y="160" width="20" height="26" rx="8" fill="#ffe83b" stroke="${INK}" stroke-width="3"/>
-       <rect x="128" y="160" width="20" height="26" rx="8" fill="#ffe83b" stroke="${INK}" stroke-width="3"/>`, `${ear(62, '#8d5a3b')}${ear(138, '#6a3f28')}
-       <path d="M62 96 C62 84 66 74 70 70 L70 98 Z M138 96 C138 84 134 74 130 70 L130 98 Z" fill="#4a2a1a" opacity="0.8"/>
-       <path d="M66 72 C70 34 138 30 142 64 C134 56 120 54 110 58 C120 46 112 40 100 48 C86 42 72 54 66 72 Z" fill="${INK}"/>
-       <path d="M104 46 C114 40 128 42 136 52 C124 48 114 50 106 56 Z" fill="#ffe83b" stroke="${INK}" stroke-width="2"/>
-       <rect x="64" y="66" width="72" height="14" rx="7" fill="rgba(255,43,214,0.75)" stroke="${INK}" stroke-width="3"/>
-       <path d="M74 70 L94 70" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
-       ${eye(84)}${eye(116)}
-       ${brow(84, 3)}${brow(116, 0)}
-       <circle cx="124" cy="90" r="3" fill="none" stroke="#ffe83b" stroke-width="2"/>
-       ${nose}
-       <circle cx="104" cy="120" r="1.8" fill="#ffe83b"/>
-       <path d="M88 134 Q102 142 114 131" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
-       <path d="M100 137 L104 137" stroke="#fff" stroke-width="2"/>
-       ${bags(84)}
-       <path d="M78 88 L81 95" stroke="#8d5a3b" stroke-width="4"/><path d="M77 86 L82 98" stroke="${INK}" stroke-width="1.2"/>
-       <g fill="#ff2bd6"><rect x="122" y="112" width="5" height="3"/><rect x="123" y="117" width="3" height="5"/><rect x="121" y="124" width="6" height="2"/><rect x="123" y="128" width="3" height="4"/><rect x="122" y="134" width="5" height="2"/></g>
-       <g fill="#29e0ff"><circle cx="70" cy="86" r="1.6"/><circle cx="69" cy="92" r="1.6"/><circle cx="69" cy="98" r="1.6"/></g>
-       <path d="M52 96 L62 92 L64 116 L54 120 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
-       <path d="M54 94 L50 84" stroke="${INK}" stroke-width="2"/><circle cx="50" cy="83" r="2" fill="#ff3b5c" stroke="${INK}" stroke-width="1"/>
-       <rect x="93" y="108" width="14" height="5" rx="1" fill="#f2e3c6" stroke="${INK}" stroke-width="1.2" transform="rotate(-12 100 110)"/>
-       <g fill="${INK}" opacity="0.55"><circle cx="90" cy="146" r="0.8"/><circle cx="95" cy="149" r="0.8"/><circle cx="100" cy="150" r="0.8"/><circle cx="105" cy="149" r="0.8"/><circle cx="110" cy="146" r="0.8"/><circle cx="93" cy="144" r="0.8"/><circle cx="107" cy="144" r="0.8"/><circle cx="100" cy="146" r="0.8"/></g>
-       <path d="M94 174 V186 M97 174 V184 M99 174 V188 M102 174 V183 M105 174 V186" stroke="${INK}" stroke-width="1.2" opacity="0.7"/>
-       <rect x="138" y="204" width="20" height="16" fill="#29e0ff" stroke="${INK}" stroke-width="2" transform="rotate(8 148 212)"/>
-       <path d="M140 206 L156 208 M139 218 L155 220" stroke="${INK}" stroke-width="1.2" stroke-dasharray="2 2" transform="rotate(8 148 212)"/>`),
-    // Ripperdoc: patterned head wrap, flip-up magnifier, mask pulled down, a chrome hand.
-    okafor: () => frame({ id: 'okafor', bg: '#7b5cff', dots: '#6545e6', skin: '#5a3825', shade: '#3f2619' }, `<path d="M26 240 C30 194 56 172 88 166 L112 166 C144 172 170 194 174 240 Z" fill="#1fa89a" stroke="${INK}" stroke-width="3"/>
-       <path d="M84 166 L100 196 L116 166" fill="#178578" stroke="${INK}" stroke-width="3"/>`, `${ear(62, '#5a3825')}${ear(138, '#3f2619')}
-       <path d="M60 92 C56 50 80 34 100 34 C124 34 148 48 142 92 C132 74 118 68 100 68 C82 68 68 74 60 92 Z" fill="#ffe83b" stroke="${INK}" stroke-width="3"/>
-       <path d="M70 56 Q80 50 88 56 M96 46 Q106 40 114 46 M118 58 Q128 52 136 60 M78 74 Q86 68 94 72" fill="none" stroke="#ff2bd6" stroke-width="3" stroke-linecap="round"/>
-       <path d="M128 40 C146 30 156 40 150 52 C146 44 138 42 128 48 Z" fill="#ffe83b" stroke="${INK}" stroke-width="3"/>
-       <rect x="58" y="80" width="84" height="7" rx="3" fill="#2b2b33" stroke="${INK}" stroke-width="2"/>
-       <circle cx="80" cy="74" r="11" fill="rgba(41,224,255,0.55)" stroke="#c9ccd6" stroke-width="3.5"/>
-       <path d="M74 70 L80 66" stroke="#fff" stroke-width="2"/>
-       ${eye(84)}${eye(116)}
-       ${brow(84, -1)}${brow(116, 3)}
-       ${nose}
-       <path d="M90 134 Q100 139 110 134" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
-       <path d="M76 150 C84 160 116 160 124 150 L128 168 C116 176 84 176 72 168 Z" fill="#dff7f2" stroke="${INK}" stroke-width="3"/>
-       <path d="M80 160 Q100 168 120 160" fill="none" stroke="#9fd9cf" stroke-width="2"/>
-       <g stroke="${INK}" stroke-width="2.5" fill="#c9ccd6">
-         <path d="M142 240 L146 200 C148 190 168 188 172 198 L176 240 Z"/>
-         <rect x="146" y="164" width="7" height="32" rx="2"/><rect x="155" y="158" width="7" height="38" rx="2"/><rect x="164" y="162" width="7" height="34" rx="2"/>
-         <rect x="172" y="184" width="7" height="22" rx="2" transform="rotate(30 175 195)"/>
-       </g>
-       <path d="M149 176 H152 M158 172 H161 M167 176 H170" stroke="#29e0ff" stroke-width="2"/>
-       <path d="M158 158 L158 136" stroke="#e8f6ff" stroke-width="3" stroke-linecap="round"/><path d="M158 136 L161 128 L158 124 Z" fill="#e8f6ff" stroke="${INK}" stroke-width="1"/>
-       ${bags(84)}${bags(116)}
-       <g fill="#d9a066"><circle cx="72" cy="112" r="1.4"/><circle cx="76" cy="116" r="1.4"/><circle cx="80" cy="119" r="1.4"/><circle cx="72" cy="120" r="1.4"/><circle cx="76" cy="124" r="1.4"/><circle cx="96" cy="74" r="1.3"/><circle cx="100" cy="72" r="1.3"/><circle cx="104" cy="74" r="1.3"/></g>
-       <path d="M120 112 L134 106 L136 122 L124 128 Z" fill="#c9ccd6" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
-       <path d="M124 116 L134 112 M125 122 L133 118" stroke="#8a8e9b" stroke-width="1.2"/><circle cx="131" cy="120" r="1.5" fill="#39ff88"/>
-       <path d="M112 86 L118 98" stroke="#5a3825" stroke-width="4"/><path d="M111 84 L119 100" stroke="#d9a066" stroke-width="1.2"/>
-       <path d="M78 164 L82 168 M118 164 L114 168" stroke="#9fd9cf" stroke-width="1.5"/>
-       <path d="M60 210 C64 206 70 208 68 214 C66 220 58 218 60 210 Z M120 224 C124 220 130 224 126 228 Z" fill="#7a1650" opacity="0.55"/>
-       <path d="M44 236 L52 218 M150 232 L144 214" stroke="#178578" stroke-width="2" stroke-dasharray="3 3"/>
-       <g stroke="${INK}" stroke-width="1" fill="none"><path d="M146 178 H153 M155 174 H162 M164 178 H171"/></g>`),
-};
-/** A plain silhouette for any character added without a portrait yet. */
-function portrait(id) {
-    const draw = PORTRAITS[id];
-    if (draw)
-        return draw();
-    return `<svg viewBox="0 0 200 240" aria-hidden="true"><rect width="200" height="240" fill="#2a1458"/><circle cx="100" cy="100" r="42" fill="${INK}"/><path d="M30 240 C34 190 70 170 100 170 C130 170 166 190 170 240 Z" fill="${INK}"/></svg>`;
-}
-
-__m["ui/portraits"] = { PORTRAITS, portrait };
-})();
 // ---- ui/scenes ----
 (() => {
 // Safehouse background: the player's rented room, drawn in code in the same
@@ -4995,7 +5284,7 @@ __m["ui/scenes"] = { apartmentScene };
 (() => {
 // The player's profile: everything that lasts between runs. Pure functions
 // like the rest of the engine; the UI saves it to the device.
-const { MAX_SLOTS, ARMOR, ARMS_STOCK, COMPONENTS, CONTRACTS, CYBERWARE, GEAR, SECTORS, STARTER_KIT, STREET_BODY, skillWorld, DEALER_STOCK, DECKS, FENCE, FIXERS, MODIFIERS, PROGRAMS, SKILLS, STARTER_DECK, STARTER_LOADOUT, XP, XP_REWARDS } = __m["engine/content"];
+const { MAX_SLOTS, RIGS, STARTER_RIG, ARMOR, ARMS_STOCK, COMPONENTS, CONTRACTS, CYBERWARE, GEAR, SECTORS, STARTER_KIT, skillWorld, DEALER_STOCK, DECKS, FENCE, FIXERS, MODIFIERS, PROGRAMS, SKILLS, STARTER_DECK, STARTER_LOADOUT, XP, XP_REWARDS } = __m["engine/content"];
 const { MAX_UPGRADE, programDef, upgradeCost } = __m["engine/programs"];
 const { Rng } = __m["engine/rng"];
 const PROFILE_VERSION = 1;
@@ -5019,7 +5308,7 @@ function newProfile() {
         contractsDone: 0,
         cycle: 1,
         intel: 0,
-        street: { owned: [...STARTER_KIT], kit: [...STARTER_KIT], xp: 0, skills: [] },
+        street: { owned: [...STARTER_KIT], kit: [...STARTER_KIT], xp: 0, skills: [], rigs: { owned: [STARTER_RIG], active: STARTER_RIG } },
     };
 }
 /** Load a saved profile from any older version, filling in new fields. */
@@ -5042,6 +5331,9 @@ function migrate(raw) {
         intel: r.intel ?? 0,
         version: PROFILE_VERSION,
     };
+    p.street.rigs = { owned: [...new Set([STARTER_RIG, ...(p.street.rigs?.owned ?? []).filter((id) => RIGS[id])])], active: p.street.rigs?.active ?? STARTER_RIG };
+    if (!p.street.rigs.owned.includes(p.street.rigs.active))
+        p.street.rigs.active = STARTER_RIG;
     p.street.owned = [...new Set([...STARTER_KIT, ...p.street.owned.filter((id) => GEAR[id])])];
     p.street.kit = p.street.kit.filter((id) => p.street.owned.includes(id)).slice(0, kitSlots(p));
     if (!p.street.kit.length)
@@ -5120,6 +5412,7 @@ function runSetup(p, contractId) {
         return {
             contract, programs: [...p.street.kit], cyberware: [...p.cyberware.installed], owned: [...p.street.owned], upgrades: { ...p.upgrades }, skills: [...p.street.skills],
             armor: p.armor.worn,
+            rig: activeRig(p).id,
             net: { programs: [...p.deck], deck: activeDeck(p).id, upgrades: { ...p.upgrades }, components: [...p.components.installed] },
         };
     }
@@ -5320,6 +5613,8 @@ function toggleCyberware(prev, id) {
         p.cyberware.installed = p.cyberware.installed.filter((x) => x !== id);
     else
         p.cyberware.installed = [...p.cyberware.installed.filter((x) => CYBERWARE[x]?.slot !== c.slot), id];
+    // Implants can change street kit slots (Forearm Compartment): trim what no longer fits.
+    p.street.kit = p.street.kit.slice(0, kitSlots(p));
     return p;
 }
 // ---------- Deck components (Kit) ----------
@@ -5393,10 +5688,50 @@ function wearArmor(prev, id) {
     p.armor.worn = p.armor.worn === id ? null : id;
     return p;
 }
-/** Street kit slots: the body's base slots plus street skills (Two Holsters). */
+// ---------- Carry rigs (street "decks") ----------
+const activeRig = (p) => RIGS[p.street.rigs?.active] ?? RIGS[STARTER_RIG];
+/** Street kit slots: your rig, plus street skills (Two Holsters) and street implants (Forearm Compartment). */
 function kitSlots(p) {
-    const bonus = p.street.skills.map((id) => SKILLS[id]?.perk).filter((k) => k?.kind === 'slots').reduce((a, k) => a + k.value, 0);
-    return Math.min(MAX_SLOTS, STREET_BODY.slots + bonus);
+    const skill = p.street.skills.map((id) => SKILLS[id]?.perk).filter((k) => k?.kind === 'slots').reduce((a, k) => a + k.value, 0);
+    const ware = p.cyberware.installed
+        .filter((id) => CYBERWARE[id] && CYBERWARE[id].world !== 'net')
+        .flatMap((id) => CYBERWARE[id].perks).filter((k) => k.kind === 'slots').reduce((a, k) => a + k.value, 0);
+    return Math.min(MAX_SLOTS, activeRig(p).slots + skill + ware);
+}
+/** Fill free kit slots with stowed gear, then trim anything that no longer fits. */
+function fitKit(p) {
+    const slots = kitSlots(p);
+    for (const id of p.street.owned)
+        if (p.street.kit.length < slots && !p.street.kit.includes(id))
+            p.street.kit.push(id);
+    p.street.kit = p.street.kit.slice(0, slots);
+    return p;
+}
+function rigStock(p) {
+    return Object.values(RIGS).map((r) => ({
+        ...r,
+        owned: p.street.rigs.owned.includes(r.id),
+        active: p.street.rigs.active === r.id,
+        locked: !gateOpen(p, r),
+        needs: gateNeeds(p, r),
+    }));
+}
+function buyRig(prev, id) {
+    const r = RIGS[id];
+    if (!r || prev.street.rigs.owned.includes(id) || !gateOpen(prev, r) || prev.credits < r.price)
+        return prev;
+    const p = clone(prev);
+    p.credits -= r.price;
+    p.street.rigs.owned.push(id);
+    p.street.rigs.active = id;
+    return fitKit(p);
+}
+function useRig(prev, id) {
+    if (!prev.street.rigs.owned.includes(id) || !RIGS[id])
+        return prev;
+    const p = clone(prev);
+    p.street.rigs.active = id;
+    return fitKit(p);
 }
 // ---------- Cyberdecks ----------
 function deckStock(p) {
@@ -5558,7 +5893,7 @@ function importSave(code) {
     return { ok: true, profile: migrate(raw) };
 }
 
-__m["engine/profile"] = { PROFILE_VERSION, newProfile, migrate, gateOpen, gateNeeds, activeDeck, fixerWorld, totalRep, contractWorld, repWith, fixerUnlocked, contractBoard, runSetup, applyOutcome, fenceRate, sellData, INTEL_RATE_BONUS, intelRate, sellIntel, armsStock, buyGear, kitAdd, kitRemove, dealerStock, buyProgram, deckAdd, deckRemove, ripperdocStock, implantIn, buyCyberware, toggleCyberware, componentStock, buyComponent, toggleComponent, deckSlots, armorStock, buyArmor, wearArmor, kitSlots, deckStock, buyDeck, useDeck, maxLevel, MAX_LEVEL, xpToNext, levelInfo, canLearn, learnSkill, upgradeLevel, workshop, upgradeProgram, gearWorkshop, upgradeGear, exportSave, importSave };
+__m["engine/profile"] = { PROFILE_VERSION, newProfile, migrate, gateOpen, gateNeeds, activeDeck, fixerWorld, totalRep, contractWorld, repWith, fixerUnlocked, contractBoard, runSetup, applyOutcome, fenceRate, sellData, INTEL_RATE_BONUS, intelRate, sellIntel, armsStock, buyGear, kitAdd, kitRemove, dealerStock, buyProgram, deckAdd, deckRemove, ripperdocStock, implantIn, buyCyberware, toggleCyberware, componentStock, buyComponent, toggleComponent, deckSlots, armorStock, buyArmor, wearArmor, activeRig, kitSlots, rigStock, buyRig, useRig, deckStock, buyDeck, useDeck, maxLevel, MAX_LEVEL, xpToNext, levelInfo, canLearn, learnSkill, upgradeLevel, workshop, upgradeProgram, gearWorkshop, upgradeGear, exportSave, importSave };
 })();
 // ---- ui/safehouse ----
 (() => {
@@ -5570,7 +5905,7 @@ const { ARMOR, BODY_SLOTS, BRANCHES, COMPONENT_SLOTS, COMPONENTS, CONTRACTS, CYB
 const { programDef } = __m["engine/programs"];
 const { portrait } = __m["ui/portraits"];
 const { apartmentScene } = __m["ui/scenes"];
-const { activeDeck, armorStock, armsStock, canLearn, componentStock, deckSlots, gearWorkshop, implantIn, kitSlots, contractBoard, fixerWorld, intelRate, dealerStock, deckStock, fenceRate, fixerUnlocked, levelInfo, repWith, ripperdocStock, totalRep, upgradeLevel, workshop } = __m["engine/profile"];
+const { activeDeck, activeRig, rigStock, armorStock, armsStock, canLearn, componentStock, deckSlots, gearWorkshop, implantIn, kitSlots, contractBoard, fixerWorld, intelRate, dealerStock, deckStock, fenceRate, fixerUnlocked, levelInfo, repWith, ripperdocStock, totalRep, upgradeLevel, workshop } = __m["engine/profile"];
 const { esc, inWorld, moduleHtml } = __m["ui/view"];
 /** A character's portrait with their name and line, at the top of their screen. */
 function who(id, name, role, line) {
@@ -5631,7 +5966,7 @@ function renderHub(p) {
           ${menuButton('market', ICONS.market, 'MARKET', `${NPCS.kit.name} · ${NPCS.mags.name}`)}
           ${menuButton('ripperdoc', ICONS.clinic, 'CLINIC', `${NPCS.okafor.name} · ${ware.installed.length}/5 implants`)}
           ${menuButton('deck', ICONS.deck, 'DECK', `${deck.name} · ${p.deck.length}/${deck.slots}`)}
-          ${menuButton('gear', ICONS.gear, 'GEAR', `Street kit · ${p.street.kit.length}/${kitSlots(p)}`)}
+          ${menuButton('gear', ICONS.gear, 'GEAR', `${activeRig(p).name} · ${p.street.kit.length}/${kitSlots(p)}`)}
         </div>
         ${menuButton('skills', ICONS.skills, 'SKILLS', `Net LV ${lv.level}${lv.points ? ` · ${lv.points} point${lv.points > 1 ? 's' : ''}` : ''} · Street LV ${slv.level}`)}
         <p class="sh-stats">${p.contractsDone} contracts · ${p.extractions}/${p.runs} runs survived · net rep ${totalRep(p)} · street rep ${totalRep(p, 'street')}</p>
@@ -5805,10 +6140,51 @@ function gearWorkbench(p) {
     }).join(''));
 }
 // ---------- Street kit ----------
+/** A carry rig: straps with one pouch per gear slot, AP pips below. */
+function rigArt(r) {
+    const W = 200, H = 120;
+    const pw = 156 / r.slots;
+    const pouches = Array.from({ length: r.slots }, (_, i) => {
+        const x = 22 + i * pw + 2;
+        return `<rect x="${x}" y="40" width="${pw - 4}" height="26" rx="3" fill="#2a1408" stroke="${r.color}" stroke-width="1.5"/><path d="M${x} 47 H${x + pw - 4}" stroke="${r.color}" stroke-width="1" opacity="0.6"/><circle cx="${x + (pw - 4) / 2}" cy="44" r="2" fill="${r.color}"/>`;
+    }).join('');
+    const ap = Array.from({ length: r.ramMax }, (_, i) => `<circle cx="${30 + i * 20}" cy="88" r="6" fill="${i < r.ramPerTurn ? '#ffb13b' : 'none'}" stroke="#ffb13b" stroke-width="1.5"/>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">
+    <rect width="${W}" height="${H}" fill="#140a08"/>
+    <path d="M40 8 L70 36 M160 8 L130 36" stroke="#3b2a20" stroke-width="10" stroke-linecap="round"/>
+    <path d="M40 8 L70 36 M160 8 L130 36" stroke="${r.color}" stroke-width="1.5" opacity="0.7"/>
+    <rect x="12" y="34" width="176" height="38" rx="5" fill="#1d0f08" stroke="#3b2a20" stroke-width="3"/>
+    ${pouches}
+    <rect x="92" y="70" width="16" height="8" rx="2" fill="${r.color}"/>
+    ${ap}
+  </svg>`;
+}
+function rigStats(r) {
+    return `<div class="deck-chips"><span>${r.slots} slots</span><span>+${r.ramPerTurn} AP/turn</span><span>${r.ramMax} max AP</span></div>${r.perkText ? `<div class="deck-perk bad">${esc(r.perkText)}</div>` : ''}`;
+}
 function renderGear(p) {
     return inWorld('street', () => {
         const k = p.street.kit;
         const slots = kitSlots(p);
+        const rig = activeRig(p);
+        const extra = slots - rig.slots;
+        const rigs = rigStock(p).map((x) => {
+            let action;
+            if (x.active)
+                action = '<span class="deck-active">IN USE</span>';
+            else if (x.owned)
+                action = `<button class="secondary small" data-userig="${x.id}">USE</button>`;
+            else if (x.locked)
+                action = `<span class="ware-lock">${esc(x.needs)}</span>`;
+            else
+                action = `<button class="primary small" data-buyrig="${x.id}" ${p.credits >= x.price ? '' : 'disabled'}>BUY ¤ ${x.price}</button>`;
+            return `
+        <div class="deck-row street-row ${x.active ? 'active' : ''} ${x.locked ? 'locked' : ''}">
+          <div class="deck-row-art">${rigArt(x)}</div>
+          <div class="deck-row-info"><div class="ware-name">${esc(x.name)}</div><div class="ware-text">${esc(x.tagline)}</div>${rigStats(x)}</div>
+          <div class="deck-row-action">${action}</div>
+        </div>`;
+        }).join('');
         const carried = k.map((id) => moduleHtml(programDef(id, upgradeLevel(p, id)), `data-kitout="${id}"`)).join('');
         const empty = Array.from({ length: Math.max(0, slots - k.length) }, () => `<div class="module empty">EMPTY SLOT</div>`).join('');
         const spare = p.street.owned.filter((id) => !k.includes(id));
@@ -5817,17 +6193,21 @@ function renderGear(p) {
     ${header(p, 'STREET KIT')}
     <section class="sh-body">
       <div class="deck-hero street-hero">
-        <div><div class="who-role">Street level ${lv.level}</div><div class="who-name">What you carry</div>
-        <div class="deck-stats"><span><b>${slots}</b> slots</span><span><b>+3</b> AP/turn</span><span><b>5</b> max AP</span></div>
-        <div class="sh-hint left">Implants, armor and street skills add to these on jobs.</div></div>
+        <div class="deck-hero-art">${rigArt(rig)}</div>
+        <div><div class="who-role">Rig in use · street level ${lv.level}</div><div class="who-name">${esc(rig.name)}</div>${rigStats(rig)}
+        ${extra > 0 ? `<div class="sh-hint left">+${extra} gear slot${extra > 1 ? 's' : ''} from implants and skills.</div>` : ''}</div>
       </div>
       <p class="sh-hint">For street jobs. Tap carried gear to stow it; tap stowed gear to carry it. Your cyberdeck comes along for hacking terminals.</p>
-      <div class="slots cols-3">${carried}${empty}</div>
+      <h3 class="sh-sub">CARRIED (${k.length}/${slots})</h3>
+      <div class="slots cols-${slots > 6 ? 4 : 3}">${carried}${empty}</div>
       <h3 class="sh-sub">STOWED</h3>
       <div class="slots cols-3">${spare.length ? spare.map((id) => moduleHtml(programDef(id, upgradeLevel(p, id)), `data-kitin="${id}"`, k.length >= slots ? 'full' : '')).join('') : '<p class="sh-hint">Buy more from Sgt. Ivo in the Market.</p>'}</div>
       <h3 class="sh-sub">ARMOR</h3>
       <div class="armor-list">${p.armor.owned.length ? p.armor.owned.map((id) => `<button class="comp-chip ${p.armor.worn === id ? 'on' : ''}" data-armor="${id}"><b>${esc(ARMOR[id].name)}</b><small>${esc(ARMOR[id].text)}</small></button>`).join('') : '<p class="sh-hint">No armor yet. Sgt. Ivo sells it in the Market.</p>'}</div>
       <p class="sh-hint">${p.armor.worn ? 'Tap your armor to take it off, or another to switch.' : 'Tap armor to wear it.'} ${lv.maxed ? '' : `${lv.xpInto}/${lv.xpNeeded} street XP to level ${lv.level + 1}.`}</p>
+      <h3 class="sh-sub">CARRY RIGS</h3>
+      <p class="sh-hint">Your rig sets how much gear you carry and your AP. Switching keeps all your gear: what doesn't fit gets stowed.</p>
+      ${rigs}
       <button class="secondary" data-sh="skills:street">STREET SKILLS ›</button>
     </section>`;
     });
@@ -6099,7 +6479,7 @@ function renderReport(p, outcome, report) {
     </section>`;
 }
 
-__m["ui/safehouse"] = { renderHub, renderJobs, renderMarket, renderFixer, renderFence, renderArms, renderGear, renderDealer, renderRipperdoc, deckArt, renderDeck, renderSkills, renderReport };
+__m["ui/safehouse"] = { renderHub, renderJobs, renderMarket, renderFixer, renderFence, renderArms, rigArt, renderGear, renderDealer, renderRipperdoc, deckArt, renderDeck, renderSkills, renderReport };
 })();
 // ---- ui/main ----
 (() => {
@@ -6111,13 +6491,14 @@ const { programDef } = __m["engine/programs"];
 const { MIDDLE_ROWS } = __m["engine/map"];
 const { buy, chooseEvent, closeLoadout, currentNode, dismissNotice, equip, finishFight, goDeeper, hackTerminal, jackOut, leaveShop, moveTo, newRun, openLoadout, rest, skipTerminal, startFight, stay, takeLoot, unequip } = __m["engine/run"];
 const { AI_SHAPES, ICE, RUNNERS, STREET, rainFigure } = __m["ui/art"];
+const { STREET_FACES } = __m["ui/streetfaces"];
 const { startRain } = __m["ui/rain"];
 const { buzz, installAudioUnlock, onAudioReady, setSound, sfx, unlockAudio } = __m["ui/sfx"];
 const { renderSong, setMusicEnabled, update: updateMusic } = __m["ui/music"];
 const { runBlock, runExploit } = __m["ui/timing"];
 const { renderEnd, renderEvent, renderJackout, renderMap, renderNotice, renderRest, renderSectorClear, renderShop, renderTerminal, runHud } = __m["ui/screens"];
 const { renderArms, renderDealer, renderDeck, renderFence, renderFixer, renderGear, renderHub, renderJobs, renderMarket, renderReport, renderRipperdoc, renderSkills } = __m["ui/safehouse"];
-const { applyOutcome, exportSave, importSave, levelInfo, buyGear, kitAdd, kitRemove, sellIntel, buyCyberware, buyArmor, buyComponent, toggleComponent, upgradeGear, wearArmor, buyDeck, buyProgram, deckAdd, deckRemove, learnSkill, migrate, runSetup, sellData, toggleCyberware, upgradeProgram, useDeck } = __m["engine/profile"];
+const { applyOutcome, exportSave, importSave, levelInfo, buyGear, buyRig, useRig, kitAdd, kitRemove, sellIntel, buyCyberware, buyArmor, buyComponent, toggleComponent, upgradeGear, wearArmor, buyDeck, buyProgram, deckAdd, deckRemove, learnSkill, migrate, runSetup, sellData, toggleCyberware, upgradeProgram, useDeck } = __m["engine/profile"];
 const { EFF_LABEL, esc, LAYER_ICON, modHtml, moduleHtml, setWorld, show, T } = __m["ui/view"];
 const app = document.getElementById('app');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -6345,7 +6726,7 @@ function renderTitle() {
     <div class="title-screen">
       <div class="title-art">
         <h1 class="logo" data-text="NETRUNNER">NETRUNNER</h1>
-        <div class="tagline">prototype · v0.15.1</div>
+        <div class="tagline">prototype · v0.16.1</div>
       </div>
       <p class="pitch">Jack in. Crack the ICE. Get out before they trace you.</p>
       ${profile.runs ? `<p class="stash-line">¤ ${profile.credits} · ▤ ${profile.data} · ${profile.contractsDone} contracts done</p>` : ''}
@@ -6550,6 +6931,8 @@ function makeArt(defId, faction, key) {
     el.className = 'art';
     if (faction === 'runner' && RUNNERS[defId])
         el.innerHTML = RUNNERS[defId]();
+    else if (faction === 'street' && STREET_FACES[defId])
+        el.innerHTML = STREET_FACES[defId]();
     else if ((faction === 'street' || faction === 'machine') && STREET[defId])
         el.innerHTML = STREET[defId]();
     else if (ICE[defId])
@@ -6839,7 +7222,7 @@ function onEnemy(uid) {
 }
 app.addEventListener('click', (ev) => {
     const t = ev.target;
-    const el = t.closest('[data-slot],[data-enemy],[data-action],[data-loot],[data-equip],[data-unequip],[data-node],[data-choice],[data-rest],[data-buy],[data-sh],[data-contract],[data-sell],[data-dealer],[data-ware],[data-buyware],[data-deckin],[data-deckout],[data-buydeck],[data-usedeck],[data-upgrade],[data-learn],[data-sellintel],[data-arms],[data-kitin],[data-kitout],[data-buycomp],[data-comp],[data-buyarmor],[data-armor],[data-gearup]');
+    const el = t.closest('[data-slot],[data-enemy],[data-action],[data-loot],[data-equip],[data-unequip],[data-node],[data-choice],[data-rest],[data-buy],[data-sh],[data-contract],[data-sell],[data-dealer],[data-ware],[data-buyware],[data-deckin],[data-deckout],[data-buydeck],[data-usedeck],[data-upgrade],[data-learn],[data-sellintel],[data-arms],[data-kitin],[data-kitout],[data-buycomp],[data-comp],[data-buyarmor],[data-armor],[data-gearup],[data-buyrig],[data-userig]');
     if (!el) {
         if (selected !== null) {
             selected = null;
@@ -6935,6 +7318,18 @@ app.addEventListener('click', (ev) => {
     if (d.gearup) {
         profile = upgradeGear(profile, d.gearup);
         sfx.crack();
+        saveProfile();
+        return render();
+    }
+    if (d.buyrig) {
+        profile = buyRig(profile, d.buyrig);
+        sfx.shield();
+        saveProfile();
+        return render();
+    }
+    if (d.userig) {
+        profile = useRig(profile, d.userig);
+        sfx.tap();
         saveProfile();
         return render();
     }
