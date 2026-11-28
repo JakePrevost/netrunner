@@ -745,6 +745,17 @@ body.street .timing-overlay, body.street .banner { --green: #ffb13b; }
   }
 }
 
+/* Wide screens: the whole room on the left (no cropping), menu beside it. */
+@media (min-width: 900px) and (min-aspect-ratio: 5/4) {
+  .home { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); column-gap: 40px; padding: 0 40px 0 0; }
+  .home-scene { position: relative; grid-column: 1; grid-row: 1 / 3; height: 100%; width: auto; aspect-ratio: 390 / 520; }
+  .home-scene::before { display: none; }
+  .home-scene::after { top: 0; bottom: 0; left: auto; right: -1px; width: 90px; height: auto; background: linear-gradient(90deg, rgba(27, 11, 58, 0), #1b0b3a); }
+  .home-top { grid-column: 2; grid-row: 1; padding-top: 28px; }
+  .home-menu { grid-column: 2; grid-row: 2; align-self: center; max-width: 640px; margin: 0; }
+  .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 </style>
 </head>
 <body>
@@ -6860,7 +6871,7 @@ function renderTitle() {
     <div class="title-screen">
       <div class="title-art">
         <h1 class="logo" data-text="NETRUNNER">NETRUNNER</h1>
-        <div class="tagline">prototype · v0.17.1</div>
+        <div class="tagline">prototype · v0.17.2</div>
       </div>
       <p class="pitch">Jack in. Crack the ICE. Get out before they trace you.</p>
       ${profile.runs ? `<p class="stash-line">¤ ${profile.credits} · ▤ ${profile.data} · ${profile.contractsDone} contracts done</p>` : ''}
