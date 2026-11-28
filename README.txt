@@ -1,4 +1,4 @@
-NETRUNNER (PWA build 0.16.1-mwzawx8u)
+NETRUNNER (PWA build 0.17.0-mwzqmzc3)
 
 This folder is the whole game. To play it as an installable app, host the
 folder on any HTTPS static host, then open the address on your phone:

@@ -682,6 +682,52 @@ body.street .timing-overlay, body.street .banner { --green: #ffb13b; }
 .street-row.active { box-shadow: 5px 5px 0 #ffb13b; }
 .slots > .sh-hint { grid-column: 1 / -1; }
 
+/* ---------- Desktop ---------- */
+.desk-only { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .desk-only { display: block; }
+  /* Key hints: numbers on programs, aimable enemies and choices. */
+  .player .slots { counter-reset: key; }
+  .player .slots .module { counter-increment: key; position: relative; }
+  .player .slots .module::after {
+    content: counter(key); position: absolute; top: -7px; left: -7px; width: 16px; height: 16px;
+    display: grid; place-items: center; font: 700 10px var(--mono); color: #0b0418; background: var(--green); border-radius: 3px;
+  }
+  .enemies { counter-reset: foe; }
+  .enemy.targetable { counter-increment: foe; position: relative; }
+  .enemy.targetable::after {
+    content: counter(foe); position: absolute; top: 6px; left: 6px; width: 20px; height: 20px;
+    display: grid; place-items: center; font: 700 12px var(--mono); color: #0b0418; background: var(--green); border-radius: 3px;
+  }
+  .choices { counter-reset: ch; }
+  .choices .choice { counter-increment: ch; }
+  .choices .choice::before { content: counter(ch) '  '; color: var(--green); font-weight: 700; }
+  .end-turn::after { content: '  ⏎'; opacity: 0.6; }
+}
+
+@media (min-width: 900px) {
+  #app { max-width: 1180px; padding: 16px 28px; }
+  /* Non-combat screens: a comfortable centered column. The room scene stays full width. */
+  #app:not([class*="screen-combat"]) > :not(.home):not(.help-overlay):not(.timing-overlay) { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
+  .home { margin: -16px -28px; padding: 24px 40px; }
+  .home-scene { height: 66%; }
+  .home-menu { width: 100%; max-width: 980px; margin-left: auto; margin-right: auto; }
+  .home-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* Combat: enemies and log on the left, you on the right. */
+  #app.screen-combat {
+    display: grid; grid-template-columns: minmax(0, 1fr) 420px; grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: "hud player" "enemies player" "log player"; column-gap: 28px;
+  }
+  #app.screen-combat > .hud { grid-area: hud; }
+  #app.screen-combat > .enemies { grid-area: enemies; padding: 20px 0; }
+  #app.screen-combat > .log { grid-area: log; font-size: 13px; min-height: 90px; }
+  #app.screen-combat > .player { grid-area: player; margin: -16px -28px -16px 0; padding: 24px; border-top: 0; border-left: 1px solid var(--line); justify-content: flex-end; overflow: auto; }
+  .enemies.count-1 { grid-template-columns: minmax(0, 300px); }
+  .enemies.count-2 { grid-template-columns: repeat(2, minmax(0, 300px)); justify-content: center; }
+  .enemies.count-3 { grid-template-columns: repeat(3, minmax(0, 280px)); justify-content: center; }
+  .timing-card { transform: scale(1.15); }
+}
+
 </style>
 </head>
 <body>
@@ -1995,6 +2041,9 @@ const TUNING = {
     /** Trace after a countermeasure fires at 100%. */
     traceAfterCountermeasure: 40,
     countermeasureStrike: 10,
+    /** Global difficulty: every enemy's core/layers and attack damage, on top of job modifiers and fixer tiers. */
+    enemyHp: 1,
+    enemyDmg: 1.1,
 };
 const clone = (s) => structuredClone(s);
 function createCombat(setup) {
@@ -2019,7 +2068,7 @@ function createCombat(setup) {
         enemies: [],
         enemyQueue: [],
         nextUid: 1,
-        foe: { hp: setup.enemyHp ?? 1, dmg: setup.enemyDmg ?? 1 },
+        foe: { hp: (setup.enemyHp ?? 1) * TUNING.enemyHp, dmg: (setup.enemyDmg ?? 1) * TUNING.enemyDmg },
         world: setup.world ?? 'net',
         responder: setup.responder ?? 'hunter',
         nonlethal: !!setup.nonlethal,
@@ -2183,7 +2232,8 @@ function resolveEnemyAction(prev, timing = 'miss') {
         const intent = e.intent;
         switch (intent.kind) {
             case 'attack': {
-                let dmg = Math.round(intent.value * (s.foe?.dmg ?? 1));
+                // Round half-steps down so small hits (like 5 × 1.1) stay put and the dial bites on bigger ones.
+                let dmg = Math.round(intent.value * (s.foe?.dmg ?? 1) - 0.05);
                 if (e.weak > 0)
                     dmg = Math.round(dmg * TUNING.weakMultiplier);
                 const hits = intent.hits ?? 1;
@@ -4184,6 +4234,72 @@ void HEAD;
 void brow;
 
 __m["ui/streetfaces"] = { STREET_FACES };
+})();
+// ---- ui/keys ----
+(() => {
+// Keyboard controls for desktop play. Every key just clicks something already
+// on screen, so keys and taps always do exactly the same thing.
+//
+//   1-9     combat: run program N, or pick enemy N while aiming
+//           map: go to reachable node N (left to right); loot/events/rest: choice N
+//   Enter   combat: end turn; elsewhere: the screen's main button
+//   Esc     cancel aiming, close a panel, or go back
+//   Space / Enter during a timing tap is handled by timing.ts.
+const visible = (el) => {
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+};
+function press(el) {
+    if (!el || el.disabled)
+        return false;
+    el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    return true;
+}
+function installKeys(app) {
+    const all = (sel) => [...app.querySelectorAll(sel)].filter(visible);
+    window.addEventListener('keydown', (ev) => {
+        if (ev.metaKey || ev.ctrlKey || ev.altKey || ev.repeat)
+            return;
+        if (ev.target.closest?.('textarea, input, select'))
+            return;
+        if (document.querySelector('.timing-overlay'))
+            return; // the timing tap owns the keyboard
+        const aiming = all('.enemy.targetable[data-enemy]');
+        if (ev.key === 'Escape') {
+            const handled = press(app.querySelector('[data-action="close-help"]')) ||
+                press(app.querySelector('[data-action="close-save"]')) ||
+                // Clicking empty space cancels aiming.
+                (aiming.length > 0 && (app.dispatchEvent(new MouseEvent('click', { bubbles: true })), true)) ||
+                press(app.querySelector('[data-action="close-loadout"]')) ||
+                press(all('.sh-back')[0]);
+            if (handled)
+                ev.preventDefault();
+            return;
+        }
+        if (/^[1-9]$/.test(ev.key)) {
+            const n = Number(ev.key) - 1;
+            let list = aiming;
+            if (!list.length)
+                list = all('.player [data-slot]');
+            if (!list.length)
+                list = all('[data-node]').sort((a, b) => a.getBoundingClientRect().left - b.getBoundingClientRect().left);
+            if (!list.length)
+                list = all('[data-loot],[data-choice],[data-rest]');
+            if (press(list[n]))
+                ev.preventDefault();
+            return;
+        }
+        if (ev.key === 'Enter') {
+            if (aiming.length)
+                return;
+            const target = app.querySelector('[data-action="end"]') ?? all('.primary:not([disabled])')[0];
+            if (press(target))
+                ev.preventDefault();
+        }
+    });
+}
+
+__m["ui/keys"] = { installKeys };
 })();
 // ---- ui/rain ----
 (() => {
@@ -6492,6 +6608,7 @@ const { MIDDLE_ROWS } = __m["engine/map"];
 const { buy, chooseEvent, closeLoadout, currentNode, dismissNotice, equip, finishFight, goDeeper, hackTerminal, jackOut, leaveShop, moveTo, newRun, openLoadout, rest, skipTerminal, startFight, stay, takeLoot, unequip } = __m["engine/run"];
 const { AI_SHAPES, ICE, RUNNERS, STREET, rainFigure } = __m["ui/art"];
 const { STREET_FACES } = __m["ui/streetfaces"];
+const { installKeys } = __m["ui/keys"];
 const { startRain } = __m["ui/rain"];
 const { buzz, installAudioUnlock, onAudioReady, setSound, sfx, unlockAudio } = __m["ui/sfx"];
 const { renderSong, setMusicEnabled, update: updateMusic } = __m["ui/music"];
@@ -6726,7 +6843,7 @@ function renderTitle() {
     <div class="title-screen">
       <div class="title-art">
         <h1 class="logo" data-text="NETRUNNER">NETRUNNER</h1>
-        <div class="tagline">prototype · v0.16.1</div>
+        <div class="tagline">prototype · v0.17</div>
       </div>
       <p class="pitch">Jack in. Crack the ICE. Get out before they trace you.</p>
       ${profile.runs ? `<p class="stash-line">¤ ${profile.credits} · ▤ ${profile.data} · ${profile.contractsDone} contracts done</p>` : ''}
@@ -6822,6 +6939,7 @@ function renderHelp() {
         <p><b>Trace</b> rises every turn and carries over between nodes until you clear the sector. At 100% security sends a <b>Hunter-Killer</b> after you, then Trace drops back to 40%.</p>
         <p><b>Rogue AIs</b> (red sigil on the map) are old tech that was locked away and got loose. They're optional and brutal: they drain your RAM and scramble your deck. Beat one and it drops a <b>relic</b>, a program you can't get anywhere else. Get out alive and the relic is yours for good.</p>
         <p><b>The map:</b> pick your route through each sector. Fights pay credits, caches hold data, shops sell programs and hardware, safe nodes let you repair or scrub Trace. <b>Jack out</b> at an exit or after a sector boss to keep your credits and data. If you flatline, you lose them.</p>
+        <p class="desk-only"><b>Keyboard:</b> 1–9 run a program (or pick an enemy while aiming), pick a map node or a choice. Space or Enter for timing taps. Enter ends your turn or presses the main button. Esc cancels or goes back.</p>
         <p><b>Street jobs</b> (from street fixers like Dutch) happen in person: <b>Health</b> instead of Integrity, <b>Heat</b> instead of Trace, <b>AP</b> instead of RAM, and your street kit instead of your deck. Ballistic beats flesh, blades beat kevlar, shock beats chrome. Security <b>terminals</b> let you jack in with your deck to cut Heat and copy intel. Street XP and rep are separate from the net.</p>
         <button class="primary small" data-action="close-help">GOT IT</button>
       </div>
@@ -7512,6 +7630,7 @@ app.addEventListener('change', (ev) => {
     }
 });
 installAudioUnlock();
+installKeys(app);
 // For previews and tests: window.__renderSong(id, bars, level) returns an AudioBuffer.
 window.__renderSong = renderSong;
 onAudioReady(syncMusic);
