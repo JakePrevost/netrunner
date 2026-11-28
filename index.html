@@ -708,7 +708,7 @@ body.street .timing-overlay, body.street .banner { --green: #ffb13b; }
 @media (min-width: 900px) {
   #app { max-width: 1180px; padding: 16px 28px; }
   /* Non-combat screens: a comfortable centered column. The room scene stays full width. */
-  #app:not([class*="screen-combat"]) > :not(.home):not(.help-overlay):not(.timing-overlay) { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
+  #app:not([class*="screen-combat"]) > :not(.home):not(.help-overlay):not(.timing-overlay):not(.tactics) { width: 100%; max-width: 760px; margin-left: auto; margin-right: auto; }
   .home { margin: -16px -28px; padding: 24px 40px; }
   .home-scene { height: 66%; }
   .home-menu { width: 100%; max-width: 980px; margin-left: auto; margin-right: auto; }
@@ -755,6 +755,200 @@ body.street .timing-overlay, body.street .banner { --green: #ffb13b; }
   .home-menu { grid-column: 2; grid-row: 2; align-self: center; max-width: 640px; margin: 0; }
   .home-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Old Net Dive */
+.dive-card { background: #c8ffe0; box-shadow: 5px 5px 0 #39ff88; margin-bottom: 4px; }
+.dive-card .person-kicker, .dive-card .person-foot { color: #0f6a3a; }
+.dive-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dive-stats div { padding: 12px; text-align: center; background: #04120a; border: 2px solid #39ff88; }
+.dive-stats b { display: block; font-size: 28px; color: #39ff88; }
+.dive-stats span { font-size: 11px; letter-spacing: 0.12em; color: #b9a6e6; text-transform: uppercase; }
+.dive-rules { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.5; color: #e9dcff; display: flex; flex-direction: column; gap: 6px; }
+.flavor.checkpoint { color: var(--green); font-weight: 700; }
+
+/* ---------- Street tactics (prototype) ---------- */
+.t-proto { margin-top: 14px; }
+.t-proto span { font-size: 10px; opacity: 0.7; margin-left: 6px; letter-spacing: 0.1em; text-transform: uppercase; }
+#app.screen-tactics { max-width: 1500px; padding-left: 10px; padding-right: 10px; }
+.tactics { display: flex; flex-direction: column; height: 100%; min-height: 0; gap: 8px; position: relative; }
+.t-top { display: flex; align-items: center; gap: 12px; }
+.t-top .t-quit { flex: none; }
+.t-title { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.t-title b { color: var(--green); letter-spacing: 0.06em; font-size: 14px; }
+.t-title span { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-round { font-size: 12px; color: var(--yellow); letter-spacing: 0.1em; white-space: nowrap; }
+.t-main { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; overflow-y: auto; }
+.t-map { flex: none; display: flex; justify-content: center; }
+.tgrid { width: 100%; height: auto; max-height: 62dvh; display: block; touch-action: manipulation; user-select: none; }
+.t-side { display: flex; flex-direction: column; gap: 8px; }
+
+/* Tiles */
+.tt-floor { fill: #1a0f0a; }
+.tt-floor.alt { fill: #1e130d; }
+.tt-wall { fill: #3a2418; stroke: #000; stroke-width: 1; }
+.tt-pillar { fill: #5a3a26; stroke: #ffb13b55; stroke-width: 2; }
+.tt-crate { fill: #4a2e12; stroke: #c98a3a; stroke-width: 1.5; }
+.tt-crate-x { stroke: #c98a3a88; stroke-width: 1.2; }
+.tt-smoke { fill: rgba(200, 200, 210, 0.38); filter: blur(4px); pointer-events: none; }
+.hitbox { fill: transparent; cursor: pointer; }
+.reach rect { fill: rgba(255, 177, 59, 0.10); stroke: rgba(255, 177, 59, 0.35); stroke-width: 1; }
+.reach.ap0 rect { fill: rgba(57, 255, 136, 0.14); stroke: rgba(57, 255, 136, 0.45); }
+.reach.ap2 rect { fill: rgba(255, 177, 59, 0.06); }
+.reach.ap3 rect { fill: rgba(255, 177, 59, 0.03); stroke-dasharray: 3 3; }
+.reach text { fill: rgba(255, 220, 160, 0.75); font-size: 11px; text-anchor: end; pointer-events: none; }
+.aoe-ok { fill: rgba(255, 43, 214, 0.10); stroke: rgba(255, 43, 214, 0.45); stroke-width: 1; }
+.range-ring { fill: rgba(255, 232, 59, 0.03); stroke: rgba(255, 232, 59, 0.35); stroke-dasharray: 6 5; stroke-width: 1.5; pointer-events: none; }
+.threat { stroke: rgba(255, 59, 92, 0.35); stroke-width: 1.5; stroke-dasharray: 4 4; pointer-events: none; }
+.t-path { fill: none; stroke: #39ff88; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; opacity: 0.8; pointer-events: none; }
+.t-aimline { stroke: #ffe83b; stroke-width: 2; pointer-events: none; }
+.t-aimline.bad { stroke: #ff3b5c; stroke-dasharray: 5 4; }
+.t-blast { fill: rgba(255, 43, 214, 0.22); stroke: #ff2bd6; stroke-width: 2; pointer-events: none; }
+
+/* Tokens */
+.tok { pointer-events: none; }
+.tok-me { fill: #29e0ff; stroke: #e8fdff; stroke-width: 2; filter: drop-shadow(0 0 6px #29e0ff); }
+.tok-me-core { fill: #002a33; }
+.tok-block { fill: none; stroke: #29e0ff; stroke-width: 2; stroke-dasharray: 4 3; }
+.tok-ring { fill: #3a0b14; stroke: #ff3b5c; stroke-width: 2.5; }
+.tok-enemy.targetable .tok-ring { stroke: #ffe83b; filter: drop-shadow(0 0 6px #ffe83b); }
+.tok-enemy.untargetable { opacity: 0.5; }
+.tok-label { fill: #ffb0bd; font-size: 15px; text-anchor: middle; }
+.tok-num { fill: #fff; font-size: 10px; font-weight: 700; text-anchor: middle; }
+.tok-hpbg { fill: #000; }
+.tok-hp { fill: #ff3b5c; }
+.tok-aim { fill: none; stroke: #ffe83b; stroke-width: 1.5; stroke-dasharray: 2 3; animation: spin 3s linear infinite; transform-box: fill-box; transform-origin: center; }
+.hit-badge rect { fill: #ffe83b; }
+.hit-badge text { fill: #1b0b00; font-size: 12px; font-weight: 700; text-anchor: middle; }
+.tfloat { font-size: 15px; font-weight: 800; text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: #000; stroke-width: 3px; animation: tfloat 1.1s ease-out forwards; }
+.f-dmg { fill: #ffe83b; } .f-kill { fill: #ff3b5c; } .f-hurt { fill: #ff2bd6; } .f-heal { fill: #39ff88; } .f-block { fill: #29e0ff; } .f-miss { fill: #c0c0c0; }
+@keyframes tfloat { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-22px); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Side panel */
+.t-me { background: var(--panel); border: 1px solid var(--line); padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.t-hp, .t-ap { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.t-hp > span, .t-ap > span { width: 22px; color: var(--muted); }
+.t-hp .bar { flex: 1; height: 8px; background: #000; border: 1px solid var(--line); }
+.t-hp .bar i { display: block; height: 100%; background: var(--magenta); box-shadow: 0 0 8px var(--magenta); }
+.t-hp em { color: #29e0ff; font-style: normal; }
+.ap-pip { width: 16px; height: 10px; border: 1px solid var(--green); transform: skewX(-15deg); }
+.ap-pip.on { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.t-ap small { color: var(--muted); margin-left: 4px; }
+.t-help { margin: 0; font-size: 11px; color: var(--muted); min-height: 2.6em; }
+.tactics .player.t-gear { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; margin: 0; padding: 0; background: none; border: 0; }
+.tgear { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "icon name" "meta meta"; gap: 2px 6px; text-align: left; padding: 7px 8px; background: var(--panel); border: 1px solid var(--line); color: var(--text); font: inherit; font-size: 12px; cursor: pointer; position: relative; }
+.tgear .tg-key { position: absolute; top: 3px; right: 5px; font-size: 9px; color: var(--muted); }
+.tgear .tg-icon { grid-area: icon; color: var(--green); }
+.tgear.t-brute .tg-icon { color: var(--brute); } .tgear.t-crypto .tg-icon { color: var(--crypto); } .tgear.t-spoof .tg-icon { color: var(--spoof); }
+.tgear .tg-name { grid-area: name; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+.tgear .tg-meta { grid-area: meta; font-size: 10px; color: var(--muted); }
+.tgear .tg-text { display: none; }
+.tgear.sel { border-color: #ffe83b; box-shadow: 0 0 0 1px #ffe83b, 0 0 12px rgba(255, 232, 59, 0.4); }
+.tgear:disabled { opacity: 0.4; cursor: default; }
+.tgear.cooling { border-style: dashed; }
+.t-endturn kbd { font-size: 10px; opacity: 0.6; margin-left: 6px; font-family: inherit; }
+.t-h { margin: 4px 0 0; font-size: 11px; letter-spacing: 0.14em; color: var(--muted); }
+.t-enemies { display: flex; flex-direction: column; gap: 6px; }
+.trow { display: flex; gap: 8px; align-items: stretch; text-align: left; padding: 6px; background: rgba(30, 12, 8, 0.75); border: 1px solid rgba(255, 59, 92, 0.35); color: var(--text); font: inherit; cursor: pointer; }
+.trow.targetable { border-color: #ffe83b; }
+.trow-art { width: 52px; height: 52px; flex: none; overflow: hidden; position: relative; background: #000; }
+.trow-art .art-host, .trow-art .art-host > * { width: 100%; height: 100%; }
+.trow-art svg, .trow-art canvas { width: 100% !important; height: 100% !important; }
+.trow-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; font-size: 12px; }
+.trow-head { font-weight: 700; }
+.trow-n { display: inline-block; min-width: 16px; text-align: center; background: #ff3b5c; color: #000; font-size: 10px; margin-right: 4px; }
+.trow-hp { float: right; color: #ff8a9c; }
+.trow-lay { display: flex; gap: 6px; font-size: 11px; flex-wrap: wrap; }
+.lay-brute { color: var(--brute); } .lay-crypto { color: var(--crypto); } .lay-spoof { color: var(--spoof); }
+.trow-intent { margin-left: auto; color: var(--yellow); }
+.trow-meta { font-size: 11px; color: var(--muted); }
+.trow-meta .ok { color: var(--yellow); } .trow-meta .bad { color: #ff8a9c; }
+.t-log { font-size: 11px; color: var(--muted); display: flex; flex-direction: column; gap: 2px; padding-bottom: 6px; }
+.t-log div:first-child { color: var(--text); }
+.t-end { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.6); z-index: 5; }
+.t-end-card { background: var(--panel); border: 1px solid var(--line); padding: 22px 26px; max-width: 360px; text-align: center; display: flex; flex-direction: column; gap: 10px; }
+.t-end h2 { margin: 0; letter-spacing: 0.12em; }
+.t-end.won h2 { color: #39ff88; } .t-end.lost h2 { color: #ff3b5c; }
+.t-end p { margin: 0; font-size: 13px; }
+
+@media (min-width: 900px) {
+  #app.screen-tactics { padding: 16px 24px; }
+  .t-main { flex-direction: row; overflow: hidden; gap: 16px; }
+  .t-map { flex: 1; min-width: 0; align-items: center; }
+  .tgrid { max-height: 100%; height: 100%; }
+  .t-side { width: 340px; flex: none; overflow-y: auto; padding-right: 4px; }
+  .tactics .player.t-gear { grid-template-columns: 1fr 1fr; }
+  .tgear .tg-text { display: block; grid-column: 1 / -1; font-size: 10px; color: var(--text); opacity: 0.75; }
+  .t-title b { font-size: 16px; }
+}
+@media (min-width: 1400px) {
+  .t-side { width: 400px; }
+}
+.tgrid { overflow: hidden; }
+@media (max-width: 600px) { .reach text, .tok-num { display: none; } }
+/* 3/4 tactical art */
+.tgrid .tfog { fill: #05030a; opacity: 0.55; pointer-events: none; }
+.tgrid .tlights { mix-blend-mode: screen; pointer-events: none; }
+.tgrid .tlight { animation: tflicker 6s infinite; }
+.tgrid .tlight:nth-child(2n) { animation-delay: -2.3s; }
+@keyframes tflicker { 0%, 100% { opacity: 1; } 47% { opacity: 1; } 48% { opacity: 0.6; } 49% { opacity: 1; } 72% { opacity: 0.9; } }
+.tgrid .ttag { font: 900 22px/1 Impact, 'Arial Black', sans-serif; letter-spacing: 1px; opacity: 0.55; text-anchor: middle; pointer-events: none; }
+.tgrid .tcone { pointer-events: none; }
+.tgrid .tok-ring { fill: rgba(255, 59, 92, 0.18); stroke: #ff3b5c; stroke-width: 1.5; }
+.tgrid .tok-enemy.targetable .tok-ring { fill: rgba(255, 232, 59, 0.25); stroke: #ffe83b; filter: drop-shadow(0 0 5px #ffe83b); }
+.tgrid .tok-enemy.unseen { opacity: 0.45; }
+.tgrid .tok-me-ring { fill: rgba(41, 224, 255, 0.2); stroke: #29e0ff; stroke-width: 1.5; filter: drop-shadow(0 0 5px #29e0ff); }
+.tgrid .tok-block { fill: rgba(41, 224, 255, 0.08); stroke: #29e0ff; stroke-width: 1.5; stroke-dasharray: 4 3; }
+.tgrid .tok-num { fill: #ffd0d8; font-size: 10px; }
+.tgrid .tbob { animation: tbob 1.6s ease-in-out infinite; }
+@keyframes tbob { 50% { transform: translateY(-3px); } }
+.tgrid .reach rect { fill: rgba(255, 177, 59, 0.08); }
+.tgrid .reach.ap0 rect { fill: rgba(57, 255, 136, 0.16); }
+.tgrid .reach rect { fill: rgba(255, 177, 59, 0.07); stroke: none; }
+.tgrid .reach.ap0 rect { fill: rgba(57, 255, 136, 0.14); stroke: rgba(57, 255, 136, 0.5); stroke-width: 1; }
+.tgrid .reach.ap1 rect { stroke: rgba(255, 177, 59, 0.28); stroke-width: 1; }
+.tgrid .reach.ap2 rect { fill: rgba(255, 177, 59, 0.04); }
+.tgrid .reach.ap3 rect { fill: rgba(255, 177, 59, 0.02); }
+.tgrid .reach text { font-size: 9px; fill: rgba(255, 210, 150, 0.5); }
+.tgrid .tok-num { font-size: 11px; font-weight: 700; }
+.tgrid .train rect { animation: train 0.6s linear infinite; }
+.tgrid .train .train2 { animation-duration: 0.9s; }
+@keyframes train { from { transform: translate(0, 0); } to { transform: translate(-17px, 40px); } }
+
+/* Tactics room picker */
+.tpicker-body { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-bottom: 12px; }
+.tarea { background: var(--panel); border: 1px solid var(--line); padding: 10px 12px; --ac: #ffae4a; }
+.tarea-tower { --ac: #29e0ff; } .tarea-lab { --ac: #8aff5c; } .tarea-freightyard { --ac: #9fb8ff; }
+.tarea header { display: flex; align-items: baseline; gap: 10px; }
+.tarea h3 { margin: 0; color: var(--ac); letter-spacing: 0.08em; font-size: 15px; }
+.tarea header span { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-left: auto; }
+.tarea > p { margin: 4px 0 8px; font-size: 11px; color: var(--muted); }
+.troom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.troom { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 9px 10px; background: rgba(0, 0, 0, 0.35); border: 1px solid color-mix(in srgb, var(--ac) 40%, transparent); border-left: 3px solid var(--ac); color: var(--text); font: inherit; cursor: pointer; }
+.troom:hover { background: color-mix(in srgb, var(--ac) 12%, transparent); }
+.troom.boss { border-color: #ff3b5c; border-left-color: #ff3b5c; }
+.troom-name { font-weight: 700; font-size: 13px; }
+.troom-name em { font-style: normal; font-size: 9px; background: #ff3b5c; color: #000; padding: 1px 4px; margin-left: 4px; vertical-align: 2px; }
+.troom-name i { font-style: normal; color: #39ff88; margin-left: 4px; }
+.troom-foes { font-size: 11px; color: var(--ac); }
+.troom-blurb { font-size: 11px; color: var(--muted); }
+.troom.done { opacity: 0.8; }
+
+/* Tactics effects. Each .fx carries --fxd (negative delay) and --fxl (duration). */
+.fx * { animation-delay: var(--fxd) !important; animation-duration: var(--fxl) !important; animation-fill-mode: forwards !important; pointer-events: none; }
+.fx-flash { animation: fxfade linear; filter: drop-shadow(0 0 6px #ffd36a); }
+.fx-tracer { stroke-width: 2.5; stroke-linecap: round; filter: drop-shadow(0 0 4px currentColor); animation: fxfade ease-out; }
+.fx-impact { animation: fxpop ease-out; transform-box: fill-box; transform-origin: center; }
+.fx-slash { fill: none; stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 5px #fff); animation: fxfade ease-out; }
+.fx-blast { fill: rgba(255, 140, 60, 0.35); stroke: #ffd36a; stroke-width: 3; animation: fxblast ease-out; transform-box: fill-box; transform-origin: center; }
+.fx-blast.smoke { fill: rgba(200, 200, 210, 0.3); stroke: rgba(230, 230, 240, 0.6); }
+.fx-sparks line { stroke: #ffe8a0; stroke-width: 2; stroke-linecap: round; }
+.fx-sparks { animation: fxsparks ease-out; transform-box: fill-box; transform-origin: center; }
+.tbody { opacity: 0.7; filter: saturate(0.4) brightness(0.7); }
+@keyframes fxfade { from { opacity: 1; } to { opacity: 0; } }
+@keyframes fxpop { from { opacity: 1; transform: scale(0.4); } to { opacity: 0; transform: scale(1.8); } }
+@keyframes fxblast { from { opacity: 1; transform: scale(0.2); } to { opacity: 0; transform: scale(1); } }
+@keyframes fxsparks { from { opacity: 1; transform: scale(0.5); } to { opacity: 0; transform: scale(1.6); } }
 
 </style>
 </head>
@@ -1106,6 +1300,9 @@ const MODIFIERS = {
     hunted: { id: 'hunted', name: 'Open season', text: 'A Hunter-Killer joins every fight', effects: { hunter: true } },
     doublecross: { id: 'doublecross', name: 'Double-cross', text: 'Someone sold you out. A Hunter-Killer joins every fight.', effects: { hunter: true }, secret: true },
     killswitch: { id: 'killswitch', name: 'Kill switch', text: 'They knew you were coming. Trace starts at 50% and rises +3% faster.', effects: { startTrace: 50, traceTick: 3 }, secret: true },
+    marked: { id: 'marked', name: 'Marked', text: 'Armed response joins every fight', effects: { hunter: true } },
+    payday: { id: 'payday', name: 'Payday', text: '+40% credits and data found on the job', effects: { reward: 1.4 } },
+    roguesighting: { id: 'roguesighting', name: 'Rogue sighting', text: 'A rogue AI waits in every sector (and guards a relic)', effects: { rogueNode: true } },
     nonlethal: { id: 'nonlethal', name: 'Nobody dies', text: 'People only go down to shock damage. Machines are fair game.', effects: { nonlethal: true } },
     blackwall: { id: 'blackwall', name: 'Blackwall', text: 'Military-grade ICE. Enemies have 40% more core and layers.', effects: { enemyHp: 1.4 }, secret: true },
 };
@@ -1135,6 +1332,18 @@ const FIXERS = {
         name: 'Hex',
         tagline: 'Every job has a catch. She tells you about most of them.',
         unlock: { fixer: 'sixfinger', rep: 4 },
+    },
+    wren: {
+        id: 'wren',
+        name: 'Wren',
+        tagline: 'Buys data by the terabyte and never asks where it came from.',
+        unlock: { fixer: 'juno', rep: 2 },
+    },
+    oz: {
+        id: 'oz',
+        name: 'Oz',
+        tagline: 'Hunts the old AIs for a living. Has the scars to prove it.',
+        unlock: { fixer: 'rook', rep: 2 },
     },
 };
 const CONTRACTS = [
@@ -1224,6 +1433,38 @@ const CONTRACTS = [
         id: 'lastjob', fixer: 'hex', title: 'The last job',
         brief: 'Four layers, no safety net. Hex won’t say what the catch is. Only that there is one.',
         sectors: ['perimeter', 'relay', 'vault', 'deepnet'], modifiers: ['lockdown', 'overclock', 'noRepair'], payout: 600, rep: 3, minRep: 4, secret: true,
+    },
+    // Wren: data-rich jobs (Payday), usually on a clock.
+    {
+        id: 'scrape', fixer: 'wren', title: 'Data scrape',
+        brief: 'Scrape a marketing firm’s customer files before tonight’s purge cycle.',
+        sectors: ['perimeter', 'relay'], modifiers: ['payday', 'rush'], payout: 70, rep: 1, minRep: 0,
+    },
+    {
+        id: 'mirror', fixer: 'wren', title: 'Mirror image',
+        brief: 'Copy a bank’s backup vault byte for byte. They’re already watching.',
+        sectors: ['relay', 'vault'], modifiers: ['payday', 'highAlert'], payout: 130, rep: 2, minRep: 1,
+    },
+    {
+        id: 'offsite', fixer: 'wren', title: 'Offsite backup',
+        brief: 'Three layers down to a cold-storage archive nobody remembers paying for.',
+        sectors: ['perimeter', 'vault', 'deepnet'], modifiers: ['payday'], payout: 210, rep: 2, minRep: 2,
+    },
+    // Oz: rogue AI hunts. Every sector has one; they guard relics.
+    {
+        id: 'sighting', fixer: 'oz', title: 'Sighting',
+        brief: 'Something old woke up in a relay hub. Find it. Kill it. Bring back what it was guarding.',
+        sectors: ['relay', 'vault'], modifiers: ['roguesighting'], payout: 180, rep: 1, minRep: 0,
+    },
+    {
+        id: 'nest', fixer: 'oz', title: 'The nest',
+        brief: 'Where there’s one, there’s more. The vault security is on edge too.',
+        sectors: ['vault', 'deepnet'], modifiers: ['roguesighting', 'highAlert'], payout: 260, rep: 2, minRep: 1,
+    },
+    {
+        id: 'leviathan', fixer: 'oz', title: 'Leviathan',
+        brief: 'The big one. Oz has hunted it for ten years. Its ICE is hardened from the inside.',
+        sectors: ['relay', 'vault', 'deepnet'], modifiers: ['roguesighting', 'hardened'], payout: 380, rep: 3, minRep: 2,
     },
 ];
 
@@ -1859,6 +2100,17 @@ const STREET_FIXERS = {
         tagline: 'Ex-Kessler security. Sells out her old employer one job at a time.',
         unlock: { fixer: 'dutch', rep: 3 },
     },
+    ramos: {
+        id: 'ramos', world: 'street', name: 'Padre Ramos',
+        tagline: 'Runs a soup kitchen and a smuggling route out of the same church.',
+        unlock: { fixer: 'dutch', rep: 2 },
+    },
+    kaito: {
+        id: 'kaito', world: 'street', name: 'Kaito Mori',
+        tagline: 'Old-family yakuza. Polite, precise, and never forgives a debt.',
+        unlock: { fixer: 'vesna', rep: 3 },
+        tier: { enemy: 1.18, reward: 1.18 },
+    },
 };
 Object.assign(FIXERS, STREET_FIXERS);
 const STREET_CONTRACTS = [
@@ -1903,12 +2155,505 @@ const STREET_CONTRACTS = [
         brief: 'Helix is shipping its prototype tonight. Hit the docks, then the lab, before the boat leaves.',
         sectors: ['freightyard', 'lab'], modifiers: ['rush'], payout: 250, rep: 3, minRep: 2,
     },
+    // Padre Ramos: protecting his neighborhood, and a little smuggling.
+    {
+        id: 'sanctuary', fixer: 'ramos', title: 'Sanctuary',
+        brief: 'A gang is squatting in the church basement. The padre wants it back by Sunday.',
+        sectors: ['tenement'], modifiers: ['highAlert'], payout: 60, rep: 1, minRep: 0,
+    },
+    {
+        id: 'medicine', fixer: 'ramos', title: 'Medicine run',
+        brief: 'A crate of insulin is sitting on a dock, waiting to be sold. Take it first.',
+        sectors: ['tenement', 'freightyard'], modifiers: [], payout: 120, rep: 1, minRep: 0,
+    },
+    {
+        id: 'lastrites', fixer: 'ramos', title: 'Last rites',
+        brief: 'Kessler is burying a clinical trial. Get the files out of the tower and the lab before they do.',
+        sectors: ['tower', 'lab'], modifiers: ['payday'], payout: 190, rep: 2, minRep: 1,
+    },
+    // Kaito Mori: yakuza work. Tougher targets (tier), better money, and they know you're coming.
+    {
+        id: 'debt', fixer: 'kaito', title: 'Collecting a debt',
+        brief: 'A smuggler owes the family. Remind him at the docks. Everyone will see you do it.',
+        sectors: ['freightyard'], modifiers: ['marked'], payout: 160, rep: 1, minRep: 0,
+    },
+    {
+        id: 'example', fixer: 'kaito', title: 'Making an example',
+        brief: 'A Kessler manager embarrassed the family. Go through the tenements and up the tower.',
+        sectors: ['tenement', 'tower'], modifiers: ['hardened'], payout: 240, rep: 2, minRep: 1,
+    },
+    {
+        id: 'oyabun', fixer: 'kaito', title: 'The oyabun’s order',
+        brief: 'Three sites, one night. The order came from the top. Everyone is looking for you.',
+        sectors: ['tower', 'lab', 'freightyard'], modifiers: ['marked', 'rush'], payout: 360, rep: 3, minRep: 2,
+    },
 ];
 CONTRACTS.push(...STREET_CONTRACTS);
 // ---------- Safehouse characters ----------
 NPCS.ivo = { id: 'ivo', name: 'Sgt. Ivo', role: 'Arms Dealer', tagline: 'Ex-military. Sells what works and nothing that doesn’t.' };
 
 __m["content/street"] = { GEAR, STARTER_KIT, RIGS, STARTER_RIG, STREET_BODY, LOOT_GEAR, ARMS_STOCK, STREET_MODS, LOOT_STREET_MODS, STREET_RESPONDER };
+})();
+// ---- content/dive ----
+(() => {
+const { SECTORS } = __m["content/sectors"];
+const DIVE = {
+    /** A checkpoint every this many levels (5, 10, 15, ...). */
+    checkpointEvery: 5,
+    /** Enemy core/layers per level below the first (0.12 = +12% per level). */
+    hpPerLevel: 0.12,
+    /** Enemy damage per level below the first. */
+    dmgPerLevel: 0.08,
+    /** Credits and data found, per level below the first. */
+    rewardPerLevel: 0.15,
+    /** Net reputation before the way into the Old Net opens. */
+    unlockRep: 2,
+    /** Which sector each depth uses: the deepest band whose `from` you've reached. */
+    bands: [
+        { from: 1, sector: 'oldnet_shallows' },
+        { from: 6, sector: 'oldnet_archive' },
+        { from: 11, sector: 'oldnet_abyss' },
+    ],
+};
+/** The dive runs as a special contract that never appears on a fixer's board. */
+const DIVE_CONTRACT = {
+    id: 'dive', fixer: '', title: 'Old Net Dive',
+    brief: 'Down through the dead networks, as deep as you dare.',
+    sectors: ['oldnet_shallows'], modifiers: [], payout: 0, rep: 0, minRep: 0,
+};
+const diveSector = (level) => [...DIVE.bands].reverse().find((b) => level >= b.from).sector;
+const isCheckpoint = (level) => level > 1 && level % DIVE.checkpointEvery === 0;
+const OLD_NET = {
+    oldnet_shallows: {
+        id: 'oldnet_shallows', name: 'Old Net · Shallows',
+        blurb: 'Pre-crash corporate ruins. Abandoned ICE still runs its patrols.',
+        fights: [['tracer', 'firewall'], ['sentry', 'kiddie'], ['razor'], ['firewall', 'firewall'], ['kiddie', 'kiddie', 'tracer']],
+        elites: [['blackice', 'tracer'], ['razor', 'razor']],
+        boss: ['blackice', 'sentry'],
+        rogue: { chance: 0.25, encounters: [['corruptor']] },
+    },
+    oldnet_archive: {
+        id: 'oldnet_archive', name: 'Old Net · Archive',
+        blurb: 'Stacks of forgotten data, guarded by things that forgot why.',
+        fights: [['blackice'], ['fragment', 'tracer'], ['hunter'], ['sentry', 'razor'], ['fragment', 'kiddie', 'kiddie']],
+        elites: [['blackice', 'fragment'], ['hunter', 'razor']],
+        boss: ['hunter', 'blackice', 'fragment'],
+        rogue: { chance: 0.4, encounters: [['corruptor', 'fragment']] },
+    },
+    oldnet_abyss: {
+        id: 'oldnet_abyss', name: 'Old Net · Abyss',
+        blurb: 'Where the old AIs went to sleep. Some of them are awake.',
+        fights: [['fragment', 'fragment'], ['blackice', 'hunter'], ['fragment', 'razor', 'kiddie'], ['corruptor'], ['blackice', 'fragment']],
+        elites: [['fragment', 'fragment', 'blackice'], ['corruptor', 'kiddie']],
+        boss: ['archon'],
+        rogue: { chance: 0.6, encounters: [['corruptor', 'fragment']] },
+    },
+};
+Object.assign(SECTORS, OLD_NET);
+
+__m["content/dive"] = { DIVE, DIVE_CONTRACT, diveSector, isCheckpoint };
+})();
+// ---- content/tactics ----
+(() => {
+// Tactical street combat (prototype): grid fights in the style of Fallout
+// Tactics. Solo runner, action points, cover, line of sight and hit chance.
+// Gear and enemies come from the normal tables; these entries only add the
+// tactical side: weapon range, enemy reach and movement, and the test rooms.
+//
+// Map legend:  #  wall (blocks movement and sight)
+//              P  pillar (full cover, blocks movement and sight)
+//              c  crate (half cover, blocks movement, not sight)
+//              .  floor     @ player start     e  enemy start
+const TACTICS = {
+    /** Tiles you can move per AP. */
+    tilesPerAp: 3,
+    /** Extra AP every turn on top of your rig. */
+    bonusAp: 0,
+    /** Free tiles of movement every turn before moving costs AP. */
+    freeSteps: 2,
+    /** Hit chance before range and cover. */
+    baseHit: 90,
+    enemyBaseHit: 78,
+    /** Hit chance lost per tile beyond a weapon's best range. */
+    falloff: 8,
+    /** Cover from the side you're shot from. */
+    halfCover: 25,
+    fullCover: 40,
+    minHit: 5,
+    maxHit: 95,
+    /** AIM tap: a miss on the tap lowers the hit chance this much. */
+    aimMissPenalty: 15,
+    /** Damage against mismatched armor (card fights use ×0.5). Matched armor still takes ×2. */
+    mismatch: 0.75,
+    /** Smoke lasts this many enemy turns and blocks sight through it. */
+    smokeTurns: 2,
+};
+const TACTICAL_GEAR = {
+    sidearm: { range: 7, optimal: 4 },
+    silenced: { range: 7, optimal: 4 },
+    shotgun: { range: 4, optimal: 2 },
+    smg: { range: 6, optimal: 3, burst: true },
+    smartrifle: { range: 10, optimal: 8, smart: true },
+    knife: { range: 1, optimal: 1 },
+    monoblade: { range: 1, optimal: 1 },
+    baton: { range: 1, optimal: 1 },
+    taser: { range: 2, optimal: 2, keepCooldown: true },
+    emp: { range: 5, optimal: 5, radius: 1 },
+    incendiary: { range: 5, optimal: 5, radius: 1 },
+    smoke: { range: 5, optimal: 5, radius: 1, place: 'smoke' },
+};
+/** Enemy reach (1 = melee) and tiles moved per turn. Unlisted enemies use the default. */
+const TACTICAL_ENEMIES = {
+    ganger: { range: 6, move: 4 },
+    slasher: { range: 1, move: 5 },
+    bruiser: { range: 1, move: 3 },
+    guard: { range: 7, move: 4 },
+    drone: { range: 5, move: 5, flying: true },
+    turret: { range: 8, move: 0 },
+    robodog: { range: 1, move: 6 },
+    smuggler: { range: 4, move: 4 },
+    sniper: { range: 11, move: 2 },
+    loader: { range: 1, move: 3 },
+    response: { range: 6, move: 4 },
+    bodyguard: { range: 6, move: 4 },
+    executive: { range: 5, move: 3 },
+    razorback: { range: 1, move: 4 },
+    harbormaster: { range: 5, move: 3 },
+    warden: { range: 6, move: 2 },
+};
+const DEFAULT_TACTICAL_ENEMY = { range: 5, move: 4 };
+const TACTICAL_AREAS = [
+    { id: 'tenement', name: 'Tenement Block', blurb: 'Razorback turf. Rust, sodium light, cheap guns.' },
+    { id: 'tower', name: 'Kessler Tower', blurb: 'Corp security, drones and turrets. Cold light, clean lines.' },
+    { id: 'lab', name: 'Helix R&D Lab', blurb: 'Robot dogs and whatever got out of the tanks.' },
+    { id: 'freightyard', name: 'Harbor Freight Yard', blurb: 'Containers, cranes and snipers in the rain.' },
+];
+const room = (r) => [r.id, r];
+const TACTICAL_ROOMS = Object.fromEntries([
+    // ---------- Tenement Block ----------
+    room({
+        id: 'stairwell', area: 'tenement', name: 'Ninth-floor stairwell',
+        blurb: 'Three Razorbacks between you and the stairs. Use the crates.',
+        map: [
+            '###############',
+            '#.....#....e..#',
+            '#.cc..#..c....#',
+            '#.....P..c..e.#',
+            '#..........c..#',
+            '#..##...P.....#',
+            '#..#....cc..e.#',
+            '#..#..........#',
+            '#.......c.....#',
+            '#@...cc....P..#',
+            '###############',
+        ],
+        enemies: ['ganger', 'ganger', 'slasher'],
+        lights: [{ x: 3, y: 2 }, { x: 10, y: 4 }, { x: 5, y: 8 }, { x: 12, y: 8, neon: true }],
+        tags: [{ x: 9, y: 7, text: 'RZR', rot: -14 }, { x: 2, y: 6, text: '✕✕', rot: 8 }],
+    }),
+    room({
+        id: 'laundry', area: 'tenement', name: 'Basement laundry',
+        blurb: 'A Chrome Bruiser and a blade. Keep the machines between you.',
+        map: [
+            '###############',
+            '#e.....#......#',
+            '#..cc..#..cc..#',
+            '#..cc.....cc..#',
+            '#......P......#',
+            '###..#...#..###',
+            '#......P......#',
+            '#..cc.....cc..#',
+            '#..cc..#..cc.e#',
+            '#@.....#......#',
+            '###############',
+        ],
+        enemies: ['bruiser', 'slasher'],
+        lights: [{ x: 4, y: 2 }, { x: 10, y: 7 }, { x: 7, y: 5, neon: true }],
+        tags: [{ x: 11, y: 4, text: 'RZR', rot: 10 }],
+    }),
+    room({
+        id: 'rooftop', hp: 1.3, dmg: 1, area: 'tenement', name: 'Rooftop',
+        blurb: 'AC units and vents. Two slashers rush; the gunner hangs back.',
+        map: [
+            '###############',
+            '#.....e....e..#',
+            '#.P.c....c..P.#',
+            '#.....P.......#',
+            '#.c.......c...#',
+            '#....c.P...c..#',
+            '#.P.......P...#',
+            '#...c..c.....e#',
+            '#.....P....c..#',
+            '#@.c.......P..#',
+            '###############',
+        ],
+        enemies: ['slasher', 'slasher', 'ganger'],
+        lights: [{ x: 3, y: 5 }, { x: 12, y: 3, neon: true }, { x: 8, y: 8 }],
+        tags: [{ x: 6, y: 6, text: 'RAZORBACK', rot: -6 }],
+    }),
+    room({
+        id: 'den', hp: 0.75, dmg: 0.8, area: 'tenement', name: "Razorback's den", boss: true,
+        blurb: 'The gang boss and two shooters. The lamps are out on the flanks.',
+        map: [
+            '###############',
+            '#..c...e...c..#',
+            '#.....P.P.....#',
+            '#e.c.......c.e#',
+            '#.....ccc.....#',
+            '#..P.......P..#',
+            '#.....#.#.....#',
+            '#.c..##.##..c.#',
+            '#.............#',
+            '#..c...@...c..#',
+            '###############',
+        ],
+        enemies: ['razorback', 'ganger', 'ganger'],
+        lights: [{ x: 7, y: 2, neon: true }, { x: 7, y: 8 }],
+        tags: [{ x: 7, y: 5, text: 'RZR', rot: 0 }, { x: 3, y: 8, text: '✕', rot: 20 }, { x: 11, y: 8, text: '✕', rot: -20 }],
+    }),
+    // ---------- Kessler Tower ----------
+    room({
+        id: 'lobby', hp: 1.7, dmg: 1.75, area: 'tower', name: 'Lobby',
+        blurb: 'Two guards and a drone over the reception desk.',
+        map: [
+            '###############',
+            '#..P...e...P..#',
+            '#.............#',
+            '#...ccc.ccc...#',
+            '#e.....c.....e#',
+            '#.............#',
+            '#..P...P...P..#',
+            '#.............#',
+            '#.c..c...c..c.#',
+            '#......@......#',
+            '###############',
+        ],
+        enemies: ['drone', 'guard', 'guard'],
+        lights: [{ x: 4, y: 2 }, { x: 10, y: 2 }, { x: 7, y: 7 }, { x: 7, y: 4, neon: true }],
+        tags: [{ x: 7, y: 5, text: 'KESSLER', rot: 0 }],
+    }),
+    room({
+        id: 'servers', hp: 0.9, dmg: 0.95, area: 'tower', name: 'Server hall',
+        blurb: 'Racks make lanes. A turret covers the middle; a dog runs the aisles.',
+        map: [
+            '###############',
+            '#......e......#',
+            '#.PPP.....PPP.#',
+            '#.............#',
+            '#.PPP.c.c.PPP.#',
+            '#e...........e#',
+            '#.PPP.c.c.PPP.#',
+            '#.............#',
+            '#.PPP.....PPP.#',
+            '#......@......#',
+            '###############',
+        ],
+        enemies: ['turret', 'guard', 'robodog'],
+        lights: [{ x: 7, y: 3 }, { x: 7, y: 7 }, { x: 1, y: 1, neon: true }, { x: 13, y: 9, neon: true }],
+    }),
+    room({
+        id: 'cubicles', hp: 1.6, dmg: 1.8, area: 'tower', name: 'Cubicle farm',
+        blurb: 'Two drones overhead, a guard in the middle. Desks everywhere.',
+        map: [
+            '###############',
+            '#.e.........e.#',
+            '#.cc.cc.cc.cc.#',
+            '#.............#',
+            '#.cc.cc.cc.cc.#',
+            '#......e......#',
+            '#.cc.cc.cc.cc.#',
+            '#.............#',
+            '#.cc.cc.cc.cc.#',
+            '#@............#',
+            '###############',
+        ],
+        enemies: ['drone', 'drone', 'guard'],
+        lights: [{ x: 3, y: 3 }, { x: 11, y: 3 }, { x: 3, y: 7 }, { x: 11, y: 7 }],
+    }),
+    room({
+        id: 'penthouse', hp: 1.35, dmg: 1.35, area: 'tower', name: 'Penthouse', boss: true,
+        blurb: 'The executive hides in the panic room. Two bodyguards stand in the way.',
+        map: [
+            '###############',
+            '#.....#e#.....#',
+            '#..c..#.#..c..#',
+            '#.e.........e.#',
+            '#...P.ccc.P...#',
+            '#.............#',
+            '#.c.........c.#',
+            '#...P.....P...#',
+            '#......c......#',
+            '#..c...@...c..#',
+            '###############',
+        ],
+        enemies: ['executive', 'bodyguard', 'bodyguard'],
+        lights: [{ x: 7, y: 2, neon: true }, { x: 3, y: 5 }, { x: 11, y: 5 }, { x: 7, y: 8 }],
+        tags: [{ x: 7, y: 6, text: 'K', rot: 0 }],
+    }),
+    // ---------- Helix R&D Lab ----------
+    room({
+        id: 'kennels', hp: 1.5, dmg: 1.4, area: 'lab', name: 'Kennels',
+        blurb: 'Two robot dogs out of their cages. They are fast; you are not.',
+        map: [
+            '###############',
+            '#e..#.....#..e#',
+            '#...#.....#...#',
+            '#...##.c.##...#',
+            '#.............#',
+            '#..c..P.P..c..#',
+            '#.............#',
+            '#...##.c.##...#',
+            '#...#.....#...#',
+            '#...#..@..#...#',
+            '###############',
+        ],
+        enemies: ['robodog', 'robodog'],
+        lights: [{ x: 7, y: 2 }, { x: 7, y: 8 }, { x: 2, y: 4, neon: true }],
+        tags: [{ x: 7, y: 4, text: '⚠', rot: 0 }],
+    }),
+    room({
+        id: 'cleanroom', hp: 1.55, dmg: 1.5, area: 'lab', name: 'Clean room',
+        blurb: 'Benches in rows, a turret at the far end and a guard on each side.',
+        map: [
+            '###############',
+            '#......e......#',
+            '#.ccccc.ccccc.#',
+            '#.............#',
+            '#e....P.P....e#',
+            '#.............#',
+            '#.ccccc.ccccc.#',
+            '#.............#',
+            '#..P.......P..#',
+            '#......@......#',
+            '###############',
+        ],
+        enemies: ['turret', 'guard', 'drone'],
+        lights: [{ x: 3, y: 3 }, { x: 11, y: 3 }, { x: 7, y: 7 }],
+        tags: [{ x: 7, y: 8, text: 'HELIX', rot: 0 }],
+    }),
+    room({
+        id: 'specimens', hp: 1.65, dmg: 1.45, area: 'lab', name: 'Specimen hall',
+        blurb: 'Tanks give full cover. Something moves between them.',
+        map: [
+            '###############',
+            '#..e.......e..#',
+            '#.P..P...P..P.#',
+            '#.............#',
+            '#..c..c.c..c..#',
+            '#.P..P.e.P..P.#',
+            '#.............#',
+            '#..c.......c..#',
+            '#.P..P...P..P.#',
+            '#@............#',
+            '###############',
+        ],
+        enemies: ['guard', 'drone', 'robodog'],
+        lights: [{ x: 2, y: 2, neon: true }, { x: 12, y: 2, neon: true }, { x: 7, y: 6 }, { x: 2, y: 8, neon: true }],
+    }),
+    room({
+        id: 'containment', hp: 1.15, dmg: 1.15, area: 'lab', name: 'Containment', boss: true,
+        blurb: 'The Warden holds the vault door. A drone and a dog patrol.',
+        map: [
+            '###############',
+            '#.....#e#.....#',
+            '#.....#.#.....#',
+            '#.e...........#',
+            '#.##.c...c.##.#',
+            '#.............#',
+            '#...P.....P..e#',
+            '#.c.........c.#',
+            '#.....ccc.....#',
+            '#......@......#',
+            '###############',
+        ],
+        enemies: ['warden', 'drone', 'robodog'],
+        lights: [{ x: 7, y: 2, neon: true }, { x: 3, y: 5 }, { x: 11, y: 5 }, { x: 7, y: 9 }],
+        tags: [{ x: 7, y: 5, text: '⚠', rot: 0 }],
+    }),
+    // ---------- Harbor Freight Yard ----------
+    room({
+        id: 'containers', hp: 1.7, dmg: 1.8, area: 'freightyard', name: 'Container stacks',
+        blurb: 'A maze of steel boxes and two smugglers who know it better than you.',
+        map: [
+            '###############',
+            '#.......#....e#',
+            '#.####..#.....#',
+            '#.......#..##.#',
+            '#..c........#.#',
+            '####.####.....#',
+            '#.....#...###.#',
+            '#.###.#.c.....#',
+            '#.....#...#...#',
+            '#@..c.....#.e.#',
+            '###############',
+        ],
+        enemies: ['smuggler', 'smuggler'],
+        lights: [{ x: 3, y: 3 }, { x: 11, y: 5 }, { x: 4, y: 8 }],
+        tags: [{ x: 2, y: 4, text: 'HB-07', rot: 0 }, { x: 8, y: 9, text: 'HB-12', rot: 0 }],
+    }),
+    room({
+        id: 'craneline', hp: 1.7, dmg: 1.15, area: 'freightyard', name: 'Crane line',
+        blurb: 'A sniper in the far corner. Stay out of the floodlights.',
+        map: [
+            '###############',
+            '#e............#',
+            '#.###...###...#',
+            '#.............#',
+            '#..c..P..c..e.#',
+            '#.............#',
+            '#.###...###...#',
+            '#.......c....e#',
+            '#..c..........#',
+            '#@.....###....#',
+            '###############',
+        ],
+        enemies: ['sniper', 'smuggler', 'ganger'],
+        lights: [{ x: 6, y: 1 }, { x: 6, y: 7 }, { x: 12, y: 3 }],
+        tags: [{ x: 5, y: 5, text: 'NO STEP', rot: 0 }],
+    }),
+    room({
+        id: 'dock', hp: 1.7, dmg: 1.75, area: 'freightyard', name: 'Loading dock',
+        blurb: 'A cargo loader rig and a smuggler covering it.',
+        map: [
+            '###############',
+            '#..e....c.....#',
+            '#.ccc.......c.#',
+            '#.....###.....#',
+            '#.c...#.#..c..#',
+            '#.....#.#.....#',
+            '#..c........e.#',
+            '#.....ccc.....#',
+            '#.##.......##.#',
+            '#@....c.......#',
+            '###############',
+        ],
+        enemies: ['smuggler', 'loader'],
+        lights: [{ x: 4, y: 4 }, { x: 10, y: 4 }, { x: 7, y: 8 }],
+        tags: [{ x: 7, y: 6, text: 'DOCK 3', rot: 0 }],
+    }),
+    room({
+        id: 'harboroffice', hp: 1.0, dmg: 0.9, area: 'freightyard', name: "Harbormaster's office", boss: true,
+        blurb: 'The Harbormaster upstairs, a sniper on the catwalk, a smuggler close in.',
+        map: [
+            '###############',
+            '#....#.e.#....#',
+            '#....#...#..e.#',
+            '#..c.##.##....#',
+            '#.............#',
+            '#.P..c...c..P.#',
+            '#e............#',
+            '#....###.###..#',
+            '#..c.......c..#',
+            '#@............#',
+            '###############',
+        ],
+        enemies: ['harbormaster', 'sniper', 'smuggler'],
+        lights: [{ x: 7, y: 2, neon: true }, { x: 3, y: 4 }, { x: 11, y: 4 }, { x: 7, y: 8 }],
+    }),
+]);
+const roomsIn = (area) => Object.values(TACTICAL_ROOMS).filter((r) => r.area === area);
+
+__m["content/tactics"] = { TACTICS, TACTICAL_GEAR, TACTICAL_ENEMIES, DEFAULT_TACTICAL_ENEMY, TACTICAL_AREAS, TACTICAL_ROOMS, roomsIn };
 })();
 // ---- content/index ----
 (() => {
@@ -1930,7 +2675,9 @@ __m["content/street"] = { GEAR, STARTER_KIT, RIGS, STARTER_RIG, STREET_BODY, LOO
 
 
 
-__m["content/index"] = { ...__m["content/programs"], ...__m["content/mods"], ...__m["content/enemies"], ...__m["content/sectors"], ...__m["content/events"], ...__m["content/economy"], ...__m["content/fixers"], ...__m["content/cyberware"], ...__m["content/dealer"], ...__m["content/npcs"], ...__m["content/decks"], ...__m["content/upgrades"], ...__m["content/skills"], ...__m["content/music"], ...__m["content/street"] };
+
+
+__m["content/index"] = { ...__m["content/programs"], ...__m["content/mods"], ...__m["content/enemies"], ...__m["content/sectors"], ...__m["content/events"], ...__m["content/economy"], ...__m["content/fixers"], ...__m["content/cyberware"], ...__m["content/dealer"], ...__m["content/npcs"], ...__m["content/decks"], ...__m["content/upgrades"], ...__m["content/skills"], ...__m["content/music"], ...__m["content/street"], ...__m["content/dive"], ...__m["content/tactics"] };
 })();
 // ---- engine/content ----
 (() => {
@@ -2071,7 +2818,7 @@ const TUNING = {
     countermeasureStrike: 10,
     /** Global difficulty: every enemy's core/layers and attack damage, on top of job modifiers and fixer tiers. */
     enemyHp: 1,
-    enemyDmg: 1.1,
+    enemyDmg: 1.25,
 };
 const clone = (s) => structuredClone(s);
 function createCombat(setup) {
@@ -2345,7 +3092,7 @@ function damageEnemy(s, e, base, type, events) {
     if (type !== 'pierce') {
         while (remaining > 0 && e.layers.length > 0) {
             const layer = e.layers[e.layers.length - 1];
-            const mult = type === null ? 1 : type === layer.type ? TUNING.layerMatch + s.bonus.match : TUNING.layerMismatch;
+            const mult = type === null ? 1 : type === layer.type ? TUNING.layerMatch + s.bonus.match : s.mismatch ?? TUNING.layerMismatch;
             const effective = remaining * mult;
             if (effective >= layer.hp) {
                 dealt += layer.hp;
@@ -2467,7 +3214,7 @@ function countermeasure(s, events) {
     events.push({ kind: 'trace', delta: 0 });
 }
 
-__m["engine/combat"] = { TUNING, createCombat, programOf, living, canPlay, needsTarget, needsExploit, effectiveness, pendingEnemyAction, playProgram, endTurn, resolveEnemyAction, damageEnemy };
+__m["engine/combat"] = { TUNING, createCombat, programOf, living, canPlay, needsTarget, needsExploit, effectiveness, pendingEnemyAction, playProgram, endTurn, resolveEnemyAction, damageEnemy, hitPlayer };
 })();
 // ---- engine/map ----
 (() => {
@@ -2487,7 +3234,7 @@ function findNode(map, id) {
  * Build one sector's map. `sectorId` picks the content (enemy pools), `index`
  * is its position in the run (jack-out points appear from the second sector).
  */
-function generateSector(holder, sectorId, index) {
+function generateSector(holder, sectorId, index, opts = {}) {
     const rng = new Rng(holder);
     const def = SECTORS[sectorId];
     const sector = index;
@@ -2568,7 +3315,7 @@ function generateSector(holder, sectorId, index) {
         }
     }
     // Sometimes a rogue AI lurks on the map: optional, deadly, guarding a relic.
-    if (def.rogue && rng.next() < def.rogue.chance) {
+    if (def.rogue && (rng.next() < def.rogue.chance || opts.forceRogue)) {
         const spots = rows.slice(2, MIDDLE_ROWS + 1).flat().filter((n) => n.type === 'fight' || n.type === 'event' || n.type === 'cache');
         if (spots.length) {
             const spot = rng.pick(spots);
@@ -2616,7 +3363,7 @@ __m["engine/map"] = { MIDDLE_ROWS, findNode, generateSector };
 (() => {
 // A run: three sector maps, walked node by node. Fights, shops, events, caches,
 // safe nodes and jack-out points. Pure logic, like combat.
-const { ARMOR, COMPONENTS, CONTRACTS, CYBERWARE, DECKS, RIGS, ENEMIES, FIXERS, LOOT_GEAR, LOOT_STREET_MODS, SECTORS, STREET_BODY, STREET_RESPONDER, MODIFIERS, SECRET_MODIFIERS, SKILLS, EVENTS, RELIC_PROGRAMS, LOOT_MODS, LOOT_PROGRAMS, MAX_SLOTS, MODS, PRICES, PROGRAMS, REWARDS, STARTER_LOADOUT } = __m["engine/content"];
+const { ARMOR, COMPONENTS, CONTRACTS, CYBERWARE, DECKS, DIVE, DIVE_CONTRACT, RIGS, diveSector, ENEMIES, FIXERS, LOOT_GEAR, LOOT_STREET_MODS, SECTORS, STREET_BODY, STREET_RESPONDER, MODIFIERS, SECRET_MODIFIERS, SKILLS, EVENTS, RELIC_PROGRAMS, LOOT_MODS, LOOT_PROGRAMS, MAX_SLOTS, MODS, PRICES, PROGRAMS, REWARDS, STARTER_LOADOUT } = __m["engine/content"];
 const { createCombat, TUNING } = __m["engine/combat"];
 const { findNode, generateSector } = __m["engine/map"];
 const { Rng } = __m["engine/rng"];
@@ -2670,17 +3417,30 @@ function combineMods(base, effects) {
         m.shopPrice *= e.shopPrice ?? 1;
         m.hunter ||= !!e.hunter;
         m.nonlethal ||= !!e.nonlethal;
+        m.rogueNode ||= !!e.rogueNode;
+        m.reward *= e.reward ?? 1;
     }
     return m;
 }
 function contractMods(contract) {
     const tier = FIXERS[contract.fixer]?.tier;
-    const base = { startTrace: 0, traceTick: 0, enemyHp: tier?.enemy ?? 1, enemyDmg: tier?.enemy ?? 1, noRepair: false, maxIntegrity: 0, shopPrice: 1, hunter: false, nonlethal: false, reward: tier?.reward ?? 1 };
+    const base = { startTrace: 0, traceTick: 0, enemyHp: tier?.enemy ?? 1, enemyDmg: tier?.enemy ?? 1, noRepair: false, maxIntegrity: 0, shopPrice: 1, hunter: false, nonlethal: false, rogueNode: false, reward: tier?.reward ?? 1 };
     return combineMods(base, contract.modifiers.map((id) => MODIFIERS[id].effects));
 }
 /** Integrity (net) / Health (street) every run starts with, before perks. */
 const START_INTEGRITY = 20;
 const REPAIR_AFTER_FIGHT = 3;
+/** Old Net Dive: the level a run is on (0 if it isn't a dive). */
+const diveLevel = (run) => (run.dive ? run.dive.start + run.sector : 0);
+/** Difficulty and rewards for a dive level: each level down is tougher and richer. */
+function diveMods(level) {
+    const m = contractMods(DIVE_CONTRACT);
+    const below = Math.max(0, level - 1);
+    m.enemyHp *= 1 + DIVE.hpPerLevel * below;
+    m.enemyDmg *= 1 + DIVE.dmgPerLevel * below;
+    m.reward *= 1 + DIVE.rewardPerLevel * below;
+    return m;
+}
 /** Heat removed by cracking a security terminal. */
 const HACK_HEAT_DROP = 25;
 const REST_REPAIR = 14;
@@ -2699,7 +3459,8 @@ function newRun(seed, setup = DEFAULT_SETUP()) {
     const netDeck = setup.net ? DECKS[setup.net.deck] ?? DECKS.kestrel : null;
     // Your deck for terminal hacks on street jobs: net implants and components apply, net skills don't.
     const netPerks = setup.net && netDeck ? perksFrom('net', { cyberware: setup.cyberware, deck: netDeck.id, components: setup.net.components }) : null;
-    const mods = contractMods(setup.contract);
+    const dive = setup.contract.id === DIVE_CONTRACT.id ? { start: Math.max(1, Math.floor(setup.diveStart ?? 1)) } : null;
+    const mods = dive ? diveMods(dive.start) : contractMods(setup.contract);
     const integrityMax = Math.max(10, START_INTEGRITY + perks.maxIntegrity + mods.maxIntegrity);
     const secret = setup.contract.secret && SECRET_MODIFIERS.length ? new Rng({ rng: seed ^ 0x5ec2e7 }).pick(SECRET_MODIFIERS) : null;
     const body = world === 'street' ? rig : { name: deck.name, slots: deck.slots, ramPerTurn: deck.ramPerTurn, ramMax: deck.ramMax };
@@ -2711,9 +3472,9 @@ function newRun(seed, setup = DEFAULT_SETUP()) {
     const run = {
         rng: seed,
         contractId: setup.contract.id,
-        sectorIds: [...setup.contract.sectors],
+        sectorIds: dive ? [diveSector(dive.start)] : [...setup.contract.sectors],
         sector: 0,
-        map: { sector: 0, sectorId: setup.contract.sectors[0], rows: [] },
+        map: { sector: 0, sectorId: dive ? diveSector(dive.start) : setup.contract.sectors[0], rows: [] },
         at: '',
         visited: [],
         loadout,
@@ -2747,6 +3508,7 @@ function newRun(seed, setup = DEFAULT_SETUP()) {
             }
             : null,
         hacking: false,
+        dive,
         relics: [],
         known: [...(setup.owned ?? setup.programs)],
         upgrades: { ...(setup.upgrades ?? {}) },
@@ -2757,7 +3519,15 @@ function newRun(seed, setup = DEFAULT_SETUP()) {
 }
 function enterSector(run, sector) {
     run.sector = sector;
-    run.map = generateSector(run, run.sectorIds[sector], sector);
+    const level = diveLevel(run);
+    if (run.dive) {
+        // Each dive level is built as you reach it, with its own difficulty.
+        if (sector >= run.sectorIds.length)
+            run.sectorIds.push(diveSector(level));
+        run.mods = diveMods(level);
+    }
+    // Jack-out points appear from the second sector (or dive level) on.
+    run.map = generateSector(run, run.sectorIds[sector], run.dive ? level - 1 : sector, { forceRogue: run.mods.rogueNode });
     run.at = run.map.rows[0][0].id;
     run.visited = [run.at];
     run.phase = 'map';
@@ -2775,7 +3545,7 @@ function gainData(run, n) {
     return Math.round(n * (1 + run.perks.dataBonus));
 }
 function outcomeOf(run, kind) {
-    return { kind, credits: run.credits, data: run.data, sector: run.sector, integrityLeft: run.integrity / run.integrityMax, relics: [...run.relics], fightsWon: run.fightsWon, sectorsCleared: run.sectorsCleared, world: run.world };
+    return { kind, credits: run.credits, data: run.data, sector: run.sector, integrityLeft: run.integrity / run.integrityMax, relics: [...run.relics], fightsWon: run.fightsWon, sectorsCleared: run.sectorsCleared, world: run.world, ...(run.dive ? { diveLevel: diveLevel(run) } : {}) };
 }
 // ---------- Queries ----------
 const currentNode = (run) => findNode(run.map, run.at);
@@ -2942,7 +3712,7 @@ function finishFight(prev, combat) {
         run.loot = rollLoot(run);
     if (node.type === 'boss') {
         run.sectorsCleared += 1;
-        if (run.sector >= run.sectorIds.length - 1) {
+        if (!run.dive && run.sector >= run.sectorIds.length - 1) {
             run.data += gainData(run, Math.round(REWARDS.winBonusData * run.mods.reward));
             // A rogue final boss leaves its relic behind automatically.
             if (rogueBeaten) {
@@ -3215,7 +3985,7 @@ function goDeeper(prev) {
     return run;
 }
 
-__m["engine/run"] = { WORDS, perksFrom, combineMods, contractMods, START_INTEGRITY, REPAIR_AFTER_FIGHT, HACK_HEAT_DROP, REST_REPAIR, REST_SCRUB, newRun, currentNode, reachable, moveTo, dismissNotice, startFight, finishFight, takeLoot, openLoadout, closeLoadout, equip, unequip, buy, leaveShop, chooseEvent, hackTerminal, skipTerminal, rest, jackOut, stay, goDeeper };
+__m["engine/run"] = { WORDS, perksFrom, combineMods, contractMods, START_INTEGRITY, REPAIR_AFTER_FIGHT, diveLevel, diveMods, HACK_HEAT_DROP, REST_REPAIR, REST_SCRUB, newRun, currentNode, reachable, moveTo, dismissNotice, startFight, finishFight, takeLoot, openLoadout, closeLoadout, equip, unequip, buy, leaveShop, chooseEvent, hackTerminal, skipTerminal, rest, jackOut, stay, goDeeper };
 })();
 // ---- ui/art ----
 (() => {
@@ -3900,6 +4670,70 @@ const PORTRAITS = {
        <path d="M133 100 C140 104 140 116 134 122 L130 136" fill="none" stroke="#2b2b33" stroke-width="2.5"/><circle cx="135" cy="104" r="3" fill="#2b2b33" stroke="${INK}" stroke-width="1"/><circle cx="135" cy="104" r="1.2" fill="#39ff88"/>
        <path d="M78 118 L82 124 M80 114 L84 120" stroke="#1b86a0" stroke-width="1.4"/>
        ${bags(85)}${bags(115)}`),
+    // Data broker: sleek silver bob, three data jacks behind the ear, a row of earrings, sharp eyeliner.
+    wren: () => frame({ id: 'wren', bg: '#7b5cff', dots: '#5a3fd6', skin: '#f0cdb4', shade: '#c4a08a', head: HEAD_NARROW }, `<path d="M50 120 C44 70 70 46 100 46 C130 46 156 70 150 120 L146 150 L130 150 C138 120 136 86 100 78 C64 86 62 120 70 150 L54 150 Z" fill="#d9d4e6" stroke="${INK}" stroke-width="3"/>
+       <path d="M26 240 C30 196 56 174 86 168 L100 182 L114 168 C144 174 170 196 174 240 Z" fill="#14161f" stroke="${INK}" stroke-width="3"/>
+       <path d="M86 168 L100 200 L114 168" fill="none" stroke="#29e0ff" stroke-width="2.5"/>
+       <path d="M60 200 H90 M110 214 H142" stroke="#29e0ff" stroke-width="1.5" opacity="0.6"/>`, `${ear(67, '#f0cdb4')}${ear(133, '#f0cdb4')}
+       <path d="M66 98 C62 60 82 50 100 50 C122 50 140 62 134 100 C128 82 118 72 96 72 C86 76 76 84 66 98 Z" fill="#d9d4e6" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M74 80 C84 66 104 60 124 66" fill="none" stroke="#a9a2bd" stroke-width="1.6"/>
+       ${eye(85, '#5a3fd6')}${eye(115, '#5a3fd6')}
+       <path d="M74 101 L70 98 M126 101 L130 98" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>
+       <path d="M76 94 L95 96 M105 96 L124 94" stroke="${INK}" stroke-width="2.8" stroke-linecap="round"/>
+       ${nose}
+       <path d="M90 134 H110" stroke="#7a1650" stroke-width="3.5" stroke-linecap="round"/>
+       <g fill="#2b2b33" stroke="${INK}" stroke-width="1.2"><rect x="136" y="96" width="6" height="5" rx="1"/><rect x="137" y="104" width="6" height="5" rx="1"/><rect x="136" y="112" width="6" height="5" rx="1"/></g>
+       <g fill="#29e0ff"><circle cx="139" cy="98.5" r="1"/><circle cx="140" cy="106.5" r="1"/><circle cx="139" cy="114.5" r="1"/></g>
+       <g fill="none" stroke="#ffe83b" stroke-width="1.4"><circle cx="65" cy="104" r="2"/><circle cx="64" cy="111" r="2"/><circle cx="64" cy="118" r="2.4"/></g>`),
+    // Rogue-AI hunter: grizzled, claw scars, faraday-mesh hood, a glowing tracker eye.
+    oz: () => frame({ id: 'oz', bg: '#ff3b5c', dots: '#c41f43', skin: '#a8765c', shade: '#7f5442', head: HEAD_ROUND }, `<path d="M38 150 C30 100 50 40 100 36 C150 40 170 100 162 150 L150 172 C146 130 140 96 100 90 C60 96 54 130 50 172 Z" fill="#3b3b46" stroke="${INK}" stroke-width="3"/>
+       <path d="M50 70 L150 70 M44 96 L156 96 M42 122 L158 122 M70 44 L60 160 M100 36 V90 M130 44 L140 160" stroke="#6b6f7d" stroke-width="1.2" opacity="0.7"/>
+       <path d="M14 240 C18 192 50 168 84 164 L100 178 L116 164 C150 168 182 192 186 240 Z" fill="#4a3a2a" stroke="${INK}" stroke-width="3"/>
+       <path d="M84 164 L70 210 L100 196 L130 210 L116 164" fill="#3a2a20" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+       <path d="M140 200 L156 194 L160 206 L144 212 Z" fill="#29e0ff" stroke="${INK}" stroke-width="1.5"/>`, `${ear(57, '#a8765c')}${ear(143, '#a8765c')}
+       ${eye(84, '#3a2a20')}
+       <circle cx="116" cy="103" r="9" fill="#14161f" stroke="${INK}" stroke-width="2.5"/><circle cx="116" cy="103" r="5" fill="#29e0ff"/><circle cx="116" cy="103" r="1.6" fill="#fff"/>
+       <circle cx="116" cy="103" r="13" fill="#29e0ff" opacity="0.2"/>
+       <path d="M72 94 L96 98" stroke="#d9d4cc" stroke-width="5" stroke-linecap="round"/><path d="M104 98 L128 94" stroke="#d9d4cc" stroke-width="5" stroke-linecap="round"/>
+       ${nose}
+       <path d="M86 134 Q100 130 114 134" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round"/>
+       <path d="M70 108 L90 140 M76 104 L96 138 M82 102 L100 132" stroke="#c97b6b" stroke-width="2.4" stroke-linecap="round"/>
+       <g fill="#d9d4cc" opacity="0.8">${[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => `<circle cx="${80 + i * 5}" cy="${142 + (i % 2) * 3}" r="1.2"/>`).join('')}</g>`),
+    // Street priest: collar, shaved grey head, neck tattoos, rosary of chip beads, one chrome hand.
+    ramos: () => frame({ id: 'ramos', bg: '#ffb13b', dots: '#c4811f', skin: '#9a6a52', shade: '#734c3a', head: HEAD }, `<path d="M16 240 C20 194 50 170 84 164 L100 176 L116 164 C150 170 180 194 184 240 Z" fill="#14161f" stroke="${INK}" stroke-width="3"/>
+       <rect x="88" y="164" width="24" height="10" fill="#fff4fd" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M78 178 C84 212 116 212 122 178" fill="none" stroke="#c9ccd6" stroke-width="2" stroke-dasharray="1 4" stroke-linecap="round"/>
+       <g fill="#29e0ff" stroke="${INK}" stroke-width="1"><rect x="80" y="186" width="5" height="4"/><rect x="88" y="200" width="5" height="4"/><rect x="108" y="200" width="5" height="4"/><rect x="116" y="186" width="5" height="4"/></g>
+       <path d="M100 206 V228 M92 214 H108" stroke="#c9ccd6" stroke-width="3"/>
+       <g stroke="${INK}" stroke-width="2.5"><path d="M136 240 L140 204 C142 194 162 192 166 204 L166 240 Z" fill="#c9ccd6"/><rect x="138" y="186" width="7" height="22" rx="3" fill="#c9ccd6"/><rect x="146" y="182" width="7" height="26" rx="3" fill="#c9ccd6"/><rect x="154" y="184" width="7" height="24" rx="3" fill="#c9ccd6"/></g>
+       ${screw(144, 220)}${screw(158, 220)}`, `${ear(61, '#9a6a52')}${ear(139, '#9a6a52')}
+       <g fill="#d9d4cc" opacity="0.5">${Array.from({ length: 24 }, (_, i) => `<circle cx="${68 + (i % 12) * 6}" cy="${62 + Math.floor(i / 12) * 7 + (i % 2) * 2}" r="1"/>`).join('')}</g>
+       ${eye(84, '#3a2a20')}${eye(116, '#3a2a20')}
+       ${bags(84)}${bags(116)}
+       <path d="M74 94 Q84 90 94 94 M106 94 Q116 90 126 94" fill="none" stroke="#d9d4cc" stroke-width="4" stroke-linecap="round"/>
+       ${nose}
+       <path d="M86 127 Q100 120 114 127 L112 131 Q100 126 88 131 Z" fill="#d9d4cc" stroke="${INK}" stroke-width="1.6"/>
+       <path d="M90 135 H110" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       <path d="M92 140 Q100 154 108 140 L106 139 Q100 143 94 139 Z" fill="#d9d4cc" stroke="${INK}" stroke-width="1.6"/>
+       <path d="M108 148 C112 156 120 160 126 156 M114 152 L118 160" stroke="#3b1d4a" stroke-width="2" fill="none"/>
+       <path d="M80 152 C84 158 88 160 92 158" stroke="#3b1d4a" stroke-width="2" fill="none"/>`),
+    // Yakuza: sharp dark suit, slicked hair, irezumi at the collar, red optic, cold face.
+    kaito: () => frame({ id: 'kaito', bg: '#2a2d3a', dots: '#1a1c26', skin: '#e2c09c', shade: '#b8966f', head: HEAD_NARROW }, `<path d="M22 240 C26 194 54 170 86 166 L100 182 L114 166 C146 170 174 194 178 240 Z" fill="#0b0d14" stroke="${INK}" stroke-width="3"/>
+       <path d="M86 166 L100 206 L114 166 L108 166 L100 184 L92 166 Z" fill="#c4344f" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M86 166 L66 212 L92 194 L100 206 M114 166 L134 212 L108 194 L100 206" fill="#14161f" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>
+       <path d="M88 168 C92 176 96 178 100 180 M112 168 C108 176 104 178 100 180" fill="none" stroke="#29e0ff" stroke-width="2"/>
+       <path d="M80 172 C86 178 82 186 88 190" fill="none" stroke="#c4344f" stroke-width="2.2"/>
+       <rect x="134" y="200" width="16" height="6" fill="#ffe83b" stroke="${INK}" stroke-width="1.2"/>`, `${ear(67, '#e2c09c')}${ear(133, '#e2c09c')}
+       <path d="M66 96 C62 58 84 48 102 48 C124 48 140 62 134 96 C130 78 118 66 98 64 C84 66 74 76 66 96 Z" fill="#0b0d14" stroke="${INK}" stroke-width="2.5"/>
+       <path d="M72 80 C86 62 112 58 130 70 M70 90 C86 72 112 68 132 82" fill="none" stroke="#3b3b46" stroke-width="1.6"/>
+       ${eye(85, '#2a1a10')}
+       <circle cx="115" cy="103" r="8" fill="#14161f" stroke="${INK}" stroke-width="2.5"/><circle cx="115" cy="103" r="3.6" fill="#ff3b3b"/><circle cx="115" cy="103" r="10" fill="#ff3b3b" opacity="0.15"/>
+       <path d="M74 96 L96 98 M104 98 L126 96" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       <path d="M75 101 Q85 99 95 101" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       ${nose}
+       <path d="M90 134 H110" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+       <path d="M70 140 C74 150 82 156 88 160 M130 140 C126 150 118 156 112 160" fill="none" stroke="#29e0ff" stroke-width="1.8" opacity="0.8"/>
+       <path d="M72 146 C76 148 78 152 76 156" fill="none" stroke="#c4344f" stroke-width="1.8"/>`),
     // The fence: older woman, grey bun with pens, round glasses, a jeweler's loupe.
     mags: () => frame({ id: 'mags', bg: '#f0d232', dots: '#c98f14', skin: '#e0b48e', shade: '#b8865f', head: HEAD_ROUND }, `<path d="M26 240 C30 196 56 174 90 168 L110 168 C144 174 170 196 174 240 Z" fill="#7b5cff" stroke="${INK}" stroke-width="3"/>
        <path d="M44 214 C70 196 130 196 156 214 L160 240 L40 240 Z" fill="#ff2bd6" stroke="${INK}" stroke-width="3"/>
@@ -4296,6 +5130,7 @@ function installKeys(app) {
         if (ev.key === 'Escape') {
             const handled = press(app.querySelector('[data-action="close-help"]')) ||
                 press(app.querySelector('[data-action="close-save"]')) ||
+                (!!app.querySelector('.tgear.sel') && (app.dispatchEvent(new MouseEvent('click', { bubbles: true })), true)) ||
                 // Clicking empty space cancels aiming.
                 (aiming.length > 0 && (app.dispatchEvent(new MouseEvent('click', { bubbles: true })), true)) ||
                 press(app.querySelector('[data-action="close-loadout"]')) ||
@@ -5030,8 +5865,8 @@ __m["ui/view"] = { TERMS, setWorld, currentWorld, T, esc, show, typeClass, EFF_L
 // ---- ui/screens ----
 (() => {
 // Run screens: the sector map and every non-combat node.
-const { EVENTS, MODS, PRICES, PROGRAMS, SECTORS } = __m["engine/content"];
-const { currentNode, REST_REPAIR, REST_SCRUB, reachable } = __m["engine/run"];
+const { EVENTS, MODS, PRICES, PROGRAMS, SECTORS, diveSector, isCheckpoint } = __m["engine/content"];
+const { currentNode, diveLevel, diveMods, REST_REPAIR, REST_SCRUB, reachable } = __m["engine/run"];
 const { esc, modHtml, moduleHtml, T } = __m["ui/view"];
 const NODE_LABEL = {
     start: 'Entry', fight: 'Fight', elite: 'Elite', cache: 'Cache', shop: 'Shop', safe: 'Safe node', event: 'Event', jackout: 'Jack out', boss: 'Boss', rogue: 'Rogue AI', terminal: 'Terminal',
@@ -5044,7 +5879,7 @@ function runHud(run) {
     return `
     <header class="run-hud">
       <div class="sector-line">
-        <span class="sector-name">${T().sector.toUpperCase()} ${run.sector + 1}/${run.sectorIds.length} · ${esc(SECTORS[run.sectorIds[run.sector]].name)}</span>
+        <span class="sector-name">${run.dive ? `LEVEL ${diveLevel(run)}` : `${T().sector.toUpperCase()} ${run.sector + 1}/${run.sectorIds.length}`} · ${esc(SECTORS[run.sectorIds[run.sector]].name)}</span>
       </div>
       <div class="hud-bars">
         <div class="integrity"><span class="label">${T().integrity.toUpperCase()}</span><div class="bar"><i style="width:${(run.integrity / run.integrityMax) * 100}%"></i></div><span class="val">${run.integrity}/${run.integrityMax}</span></div>
@@ -5211,6 +6046,21 @@ function renderJackout(run) {
     </div>`, 'jackout');
 }
 function renderSectorClear(run) {
+    if (run.dive) {
+        const level = diveLevel(run);
+        const m = diveMods(level + 1);
+        const pct = (x) => `+${Math.round((x - 1) * 100)}%`;
+        const nextCheckpoint = isCheckpoint(level + 1);
+        return runHud(run) + panel(`LEVEL ${level} CLEARED`, `
+    <p class="flavor">Below you: <b>level ${level + 1}</b>, ${esc(SECTORS[diveSector(level + 1)].name)}. Enemies ${pct(m.enemyHp)} tougher and ${pct(m.enemyDmg)} harder-hitting than level 1; loot ${pct(m.reward)}.</p>
+    ${nextCheckpoint ? `<p class="flavor checkpoint">Level ${level + 1} is a checkpoint: reach it and you can start future dives there.</p>` : ''}
+    <p class="flavor">Or jack out now and keep everything you're carrying.</p>
+    <div class="carry"><span>¤ ${run.credits} credits</span><span>▤ ${run.data} data</span></div>
+    <div class="choices">
+      <button class="primary" data-action="deeper">GO DEEPER</button>
+      <button class="secondary" data-action="jackout">JACK OUT</button>
+    </div>`, 'sector-clear');
+    }
     const next = SECTORS[run.sectorIds[run.sector + 1]];
     if (run.world === 'street') {
         return runHud(run) + panel('SITE CLEARED', `
@@ -5232,6 +6082,16 @@ function renderSectorClear(run) {
     </div>`, 'sector-clear');
 }
 function renderEnd(outcome) {
+    if (outcome.diveLevel) {
+        const lost = outcome.kind === 'lost';
+        return `
+    <div class="panel-screen ${lost ? 'lost' : ''}">
+      <h2>${lost ? 'FLATLINED IN THE OLD NET' : 'SURFACED'}</h2>
+      <p>${lost ? `The Old Net took you on level ${outcome.diveLevel}.` : `You climbed back out from level ${outcome.diveLevel}.`}</p>
+      <div class="carry ${lost ? 'lost' : ''}"><span>¤ ${outcome.credits} credits</span><span>▤ ${outcome.data} data</span></div>
+      <button class="primary" data-action="to-safehouse">BACK TO THE SAFEHOUSE</button>
+    </div>`;
+    }
     if (outcome.world === 'street') {
         const t = { won: 'JOB DONE', extracted: 'GOT OUT', lost: 'FLATLINED' }[outcome.kind];
         const line = { won: 'Target handled. Dutch will be pleased.', extracted: `You slipped out of site ${outcome.sector + 1}.`, lost: `You went down in site ${outcome.sector + 1}. A street doc dragged you home.` }[outcome.kind];
@@ -5428,7 +6288,7 @@ __m["ui/scenes"] = { apartmentScene };
 (() => {
 // The player's profile: everything that lasts between runs. Pure functions
 // like the rest of the engine; the UI saves it to the device.
-const { MAX_SLOTS, RIGS, STARTER_RIG, ARMOR, ARMS_STOCK, COMPONENTS, CONTRACTS, CYBERWARE, GEAR, SECTORS, STARTER_KIT, skillWorld, DEALER_STOCK, DECKS, FENCE, FIXERS, MODIFIERS, PROGRAMS, SKILLS, STARTER_DECK, STARTER_LOADOUT, XP, XP_REWARDS } = __m["engine/content"];
+const { MAX_SLOTS, DIVE, DIVE_CONTRACT, isCheckpoint, RIGS, STARTER_RIG, ARMOR, ARMS_STOCK, COMPONENTS, CONTRACTS, CYBERWARE, GEAR, SECTORS, STARTER_KIT, skillWorld, DEALER_STOCK, DECKS, FENCE, FIXERS, MODIFIERS, PROGRAMS, SKILLS, STARTER_DECK, STARTER_LOADOUT, XP, XP_REWARDS } = __m["engine/content"];
 const { MAX_UPGRADE, programDef, upgradeCost } = __m["engine/programs"];
 const { Rng } = __m["engine/rng"];
 const PROFILE_VERSION = 1;
@@ -5443,6 +6303,7 @@ function newProfile() {
         cyberware: { owned: [], installed: [] },
         components: { owned: [], installed: [] },
         armor: { owned: [], worn: null },
+        dive: { best: 0 },
         decks: { owned: [STARTER_DECK], active: STARTER_DECK },
         upgrades: {},
         xp: 0,
@@ -5472,6 +6333,7 @@ function migrate(raw) {
         street: { ...base.street, ...(r.street ?? {}) },
         components: { ...base.components, ...(r.components ?? {}) },
         armor: { ...base.armor, ...(r.armor ?? {}) },
+        dive: { ...base.dive, ...(r.dive ?? {}) },
         intel: r.intel ?? 0,
         version: PROFILE_VERSION,
     };
@@ -5548,6 +6410,24 @@ function contractBoard(p, fixerId) {
     return board.sort((a, b) => Number(!!a.secret) - Number(!!b.secret) || a.sectors.length - b.sectors.length || a.payout - b.payout);
 }
 /** Everything a run needs from the profile. */
+// ---------- Old Net Dive ----------
+/** The dive opens once you have enough net reputation. */
+const diveOpen = (p) => totalRep(p, 'net') >= DIVE.unlockRep;
+/** Levels you can start a dive from: level 1, plus every checkpoint you've reached. */
+function diveStarts(p) {
+    const starts = [1];
+    for (let l = DIVE.checkpointEvery; l <= (p.dive?.best ?? 0); l += DIVE.checkpointEvery)
+        starts.push(l);
+    return starts;
+}
+function diveSetup(p, start = 1) {
+    if (!diveOpen(p) || !diveStarts(p).includes(start))
+        return null;
+    return {
+        contract: DIVE_CONTRACT, programs: [...p.deck], cyberware: [...p.cyberware.installed], deck: activeDeck(p).id, owned: [...p.ownedPrograms],
+        upgrades: { ...p.upgrades }, skills: [...p.skills], components: [...p.components.installed], diveStart: start,
+    };
+}
 function runSetup(p, contractId) {
     const contract = CONTRACTS.find((c) => c.id === contractId);
     if (!contract)
@@ -5586,6 +6466,14 @@ function applyOutcome(prev, contractId, outcome) {
         p.xp += xp;
     const after = levelInfo(p, world);
     const relics = outcome.relics ?? [];
+    if (outcome.diveLevel) {
+        const before = p.dive.best;
+        p.dive.best = Math.max(before, outcome.diveLevel);
+        lines.push(`Old Net Dive: reached level ${outcome.diveLevel}${outcome.diveLevel > before ? ' (new deepest)' : ''}`);
+        for (let l = before + 1; l <= p.dive.best; l++)
+            if (isCheckpoint(l))
+                lines.push(`Checkpoint unlocked: you can start a dive at level ${l}`);
+    }
     if (outcome.kind === 'lost') {
         lines.push(`Lost: ¤ ${outcome.credits} and ${loot}`);
         for (const id of relics)
@@ -6037,7 +6925,7 @@ function importSave(code) {
     return { ok: true, profile: migrate(raw) };
 }
 
-__m["engine/profile"] = { PROFILE_VERSION, newProfile, migrate, gateOpen, gateNeeds, activeDeck, fixerWorld, totalRep, contractWorld, repWith, fixerUnlocked, contractBoard, runSetup, applyOutcome, fenceRate, sellData, INTEL_RATE_BONUS, intelRate, sellIntel, armsStock, buyGear, kitAdd, kitRemove, dealerStock, buyProgram, deckAdd, deckRemove, ripperdocStock, implantIn, buyCyberware, toggleCyberware, componentStock, buyComponent, toggleComponent, deckSlots, armorStock, buyArmor, wearArmor, activeRig, kitSlots, rigStock, buyRig, useRig, deckStock, buyDeck, useDeck, maxLevel, MAX_LEVEL, xpToNext, levelInfo, canLearn, learnSkill, upgradeLevel, workshop, upgradeProgram, gearWorkshop, upgradeGear, exportSave, importSave };
+__m["engine/profile"] = { PROFILE_VERSION, newProfile, migrate, gateOpen, gateNeeds, activeDeck, fixerWorld, totalRep, contractWorld, repWith, fixerUnlocked, contractBoard, diveOpen, diveStarts, diveSetup, runSetup, applyOutcome, fenceRate, sellData, INTEL_RATE_BONUS, intelRate, sellIntel, armsStock, buyGear, kitAdd, kitRemove, dealerStock, buyProgram, deckAdd, deckRemove, ripperdocStock, implantIn, buyCyberware, toggleCyberware, componentStock, buyComponent, toggleComponent, deckSlots, armorStock, buyArmor, wearArmor, activeRig, kitSlots, rigStock, buyRig, useRig, deckStock, buyDeck, useDeck, maxLevel, MAX_LEVEL, xpToNext, levelInfo, canLearn, learnSkill, upgradeLevel, workshop, upgradeProgram, gearWorkshop, upgradeGear, exportSave, importSave };
 })();
 // ---- ui/safehouse ----
 (() => {
@@ -6045,11 +6933,11 @@ __m["engine/profile"] = { PROFILE_VERSION, newProfile, migrate, gateOpen, gateNe
 // (fixers), the market (dealer, fence), the clinic, your deck and skills.
 // Everything here reads from the profile and the content tables, so new
 // fixers, contracts, programs and cyberware show up without UI changes.
-const { ARMOR, BODY_SLOTS, BRANCHES, COMPONENT_SLOTS, COMPONENTS, CONTRACTS, CYBERWARE, FIXERS, MODIFIERS, NPCS, PROGRAMS, SECTORS, SKILLS } = __m["engine/content"];
+const { ARMOR, BODY_SLOTS, DIVE, diveSector, BRANCHES, COMPONENT_SLOTS, COMPONENTS, CONTRACTS, CYBERWARE, FIXERS, MODIFIERS, NPCS, PROGRAMS, SECTORS, SKILLS } = __m["engine/content"];
 const { programDef } = __m["engine/programs"];
 const { portrait } = __m["ui/portraits"];
 const { apartmentScene } = __m["ui/scenes"];
-const { activeDeck, activeRig, rigStock, armorStock, armsStock, canLearn, componentStock, deckSlots, gearWorkshop, implantIn, kitSlots, contractBoard, fixerWorld, intelRate, dealerStock, deckStock, fenceRate, fixerUnlocked, levelInfo, repWith, ripperdocStock, totalRep, upgradeLevel, workshop } = __m["engine/profile"];
+const { activeDeck, activeRig, diveOpen, diveStarts, rigStock, armorStock, armsStock, canLearn, componentStock, deckSlots, gearWorkshop, implantIn, kitSlots, contractBoard, fixerWorld, intelRate, dealerStock, deckStock, fenceRate, fixerUnlocked, levelInfo, repWith, ripperdocStock, totalRep, upgradeLevel, workshop } = __m["engine/profile"];
 const { esc, inWorld, moduleHtml } = __m["ui/view"];
 /** A character's portrait with their name and line, at the top of their screen. */
 function who(id, name, role, line) {
@@ -6143,7 +7031,7 @@ function renderJobs(p) {
             return personCard({ id: '', kicker: 'FIXER', name: '???', text: `Earn ${u.rep} reputation with ${esc(FIXERS[u.fixer].name)} to meet them.`, foot: 'Locked', tone: 'locked' });
         }
         const n = contractBoard(p, f.id).length;
-        const chips = [f.tier ? `<span class="tag">ICE +${pct(f.tier.enemy)} · PAY +${pct(f.tier.reward)}</span>` : '', CONTRACTS.some((c) => c.fixer === f.id && c.secret && c.minRep <= repWith(p, f.id)) ? '<span class="tag secret">CLASSIFIED JOB</span>' : ''].join('');
+        const chips = [f.tier ? `<span class="tag">${world === 'street' ? 'ENEMIES' : 'ICE'} +${pct(f.tier.enemy)} · PAY +${pct(f.tier.reward)}</span>` : '', CONTRACTS.some((c) => c.fixer === f.id && c.secret && c.minRep <= repWith(p, f.id)) ? '<span class="tag secret">CLASSIFIED JOB</span>' : ''].join('');
         return personCard({ view: `fixer:${f.id}`, id: f.id, kicker: `${world === 'street' ? 'STREET FIXER' : 'FIXER'} · REP ${repWith(p, f.id)}`, name: f.name, text: esc(f.tagline), extra: chips ? `<span class="person-chips">${chips}</span>` : '', foot: `${n} job${n === 1 ? '' : 's'} on offer ›`, tone: 'hot' });
     })
         .join('');
@@ -6152,10 +7040,58 @@ function renderJobs(p) {
     <section class="sh-body">
       <p class="sh-intro">Fixers with work for you. Each posts a few contracts; the boards change after every run.</p>
       <h3 class="jobs-head">THE NET <small>Jack in with your deck</small></h3>
+      ${diveCard(p)}
       <div class="people">${cards('net')}</div>
       <h3 class="jobs-head street">THE STREET <small>In person, with your gear</small></h3>
       <div class="people">${cards('street')}</div>
       <p class="sh-hint">New fixers turn up as you build a name.</p>
+    </section>`;
+}
+// ---------- Old Net Dive ----------
+const OLDNET_ICON = '<svg viewBox="0 0 96 115" aria-hidden="true"><rect width="96" height="115" fill="#04120a"/>' +
+    Array.from({ length: 9 }, (_, i) => `<path d="M${48 - i * 5} ${10 + i * 11} H${48 + i * 5}" stroke="#39ff88" stroke-width="2" opacity="${0.25 + i * 0.08}"/>`).join('') +
+    '<path d="M48 8 L48 108" stroke="#39ff88" stroke-width="1" stroke-dasharray="2 4"/><circle cx="48" cy="104" r="5" fill="#ff2850"/></svg>';
+function diveCard(p) {
+    const open = diveOpen(p);
+    const best = p.dive?.best ?? 0;
+    return `
+    <button class="person dive-card ${open ? '' : 'locked'}" ${open ? 'data-sh="dive"' : 'disabled'}>
+      <div class="person-portrait">${OLDNET_ICON}</div>
+      <div class="person-body">
+        <span class="person-kicker">ENDLESS · NO FIXER</span>
+        <span class="person-name">Old Net Dive</span>
+        <span class="person-text">${open ? 'Down through the dead pre-crash networks. Every level is harder and pays more. Leave whenever you like.' : `A way into the Old Net opens at ${DIVE.unlockRep} net reputation.`}</span>
+        <span class="person-foot">${open ? (best ? `Deepest: level ${best} ›` : 'Start the dive ›') : 'Locked'}</span>
+      </div>
+    </button>`;
+}
+function renderDive(p) {
+    const best = p.dive?.best ?? 0;
+    const pct = (x) => `${Math.round(x * 100)}%`;
+    const starts = diveStarts(p).map((l) => {
+        const below = l - 1;
+        return `
+      <div class="ware">
+        <div class="ware-info">
+          <div class="ware-name">${l === 1 ? 'From the top: level 1' : `Checkpoint: level ${l}`}</div>
+          <div class="ware-text">${esc(SECTORS[diveSector(l)].name)}${below ? ` · enemies +${pct(DIVE.hpPerLevel * below)} tougher, +${pct(DIVE.dmgPerLevel * below)} damage · loot +${pct(DIVE.rewardPerLevel * below)}` : ' · standard difficulty'}</div>
+        </div>
+        <button class="primary small" data-dive="${l}">DIVE</button>
+      </div>`;
+    }).join('');
+    return `
+    ${header(p, 'OLD NET DIVE', 'jobs')}
+    <section class="sh-body">
+      <p class="sh-intro">Before the crash, the corps built their nets on top of each other. The old ones are still down there: abandoned ICE, forgotten archives, and AIs that never shut down.</p>
+      <div class="dive-stats"><div><b>${best || '–'}</b><span>deepest level</span></div><div><b>${diveStarts(p).length - 1}</b><span>checkpoints</span></div></div>
+      <ul class="dive-rules">
+        <li>Each level is one sector. Every level down: enemies +${pct(DIVE.hpPerLevel)} tougher and +${pct(DIVE.dmgPerLevel)} harder-hitting, loot +${pct(DIVE.rewardPerLevel)}.</li>
+        <li>After every level, go deeper or jack out with everything you carry. Jack-out points appear on the map from level 2.</li>
+        <li>Reach level ${DIVE.checkpointEvery}, ${DIVE.checkpointEvery * 2}, ${DIVE.checkpointEvery * 3}... to unlock it as a starting point.</li>
+        <li>No contract payout or reputation: just loot, relics and net XP.</li>
+      </ul>
+      <h3 class="sh-sub">START FROM</h3>
+      <div class="wares">${starts}</div>
     </section>`;
 }
 // ---------- Market (the street) ----------
@@ -6176,8 +7112,10 @@ function renderMarket(p) {
 }
 // ---------- Fixer board ----------
 const pct = (x) => `${Math.round((x - 1) * 100)}%`;
-function tierText(t) {
-    return `Heavy hitters: ICE is ${pct(t.enemy)} tougher and hits ${pct(t.enemy)} harder. Credits and data in the net pay ${pct(t.reward)} more.`;
+function tierText(t, world = 'net') {
+    return world === 'street'
+        ? `Heavy hitters: enemies are ${pct(t.enemy)} tougher and hit ${pct(t.enemy)} harder. Credits and intel on the job pay ${pct(t.reward)} more.`
+        : `Heavy hitters: ICE is ${pct(t.enemy)} tougher and hits ${pct(t.enemy)} harder. Credits and data in the net pay ${pct(t.reward)} more.`;
 }
 function routeHtml(c) {
     return c.sectors.map((id) => `<span class="route-step">${esc(SECTORS[id].name)}</span>`).join('<span class="route-arrow">›</span>');
@@ -6205,7 +7143,7 @@ function renderFixer(p, fixerId) {
     ${header(p, esc(f.name.toUpperCase()), 'jobs')}
     <section class="sh-body">
       ${who(fixerId, f.name, `Fixer · reputation ${repWith(p, fixerId)}`, `“${f.tagline}”`)}
-      ${f.tier ? `<p class="tier-note">${tierText(f.tier)}</p>` : ''}
+      ${f.tier ? `<p class="tier-note">${tierText(f.tier, fixerWorld(fixerId))}</p>` : ''}
       <div class="contracts">${jobs || '<p class="sh-intro">No work right now.</p>'}</div>
       ${lockedNext ? `<p class="sh-hint">Bigger jobs at ${lockedNext.minRep} reputation.</p>` : ''}
       <p class="sh-hint">The board changes after every run. Jacking out keeps your loot but doesn't complete the job.</p>
@@ -6623,7 +7561,1378 @@ function renderReport(p, outcome, report) {
     </section>`;
 }
 
-__m["ui/safehouse"] = { renderHub, renderJobs, renderMarket, renderFixer, renderFence, renderArms, rigArt, renderGear, renderDealer, renderRipperdoc, deckArt, renderDeck, renderSkills, renderReport };
+__m["ui/safehouse"] = { renderHub, renderJobs, renderDive, renderMarket, renderFixer, renderFence, renderArms, rigArt, renderGear, renderDealer, renderRipperdoc, deckArt, renderDeck, renderSkills, renderReport };
+})();
+// ---- engine/tactics ----
+(() => {
+// Tactical street combat (prototype). A solo runner on a grid against a few
+// enemies: action points, 8-way movement, line of sight, half/full cover and
+// hit chances. Stats, armor layers, damage types, gear costs and cooldowns
+// all come from the normal combat engine (a CombatState lives inside), so
+// gear, upgrades and enemies behave the same as everywhere else.
+//
+// Turn flow (the UI drives it, so it can animate and run timing taps):
+//   player: moveTo / useGear ... endTurn
+//   enemies, one at a time: enemyAct (moves, maybe queues an attack)
+//                           resolveAttack (with the player's dodge timings)
+//   beginPlayerTurn
+const { DEFAULT_TACTICAL_ENEMY, ENEMIES, TACTICAL_ENEMIES, TACTICAL_GEAR, TACTICAL_ROOMS, TACTICS } = __m["engine/content"];
+const { canPlay, createCombat, damageEnemy, hitPlayer, playProgram, programOf, TUNING } = __m["engine/combat"];
+const { Rng } = __m["engine/rng"];
+const { newRun } = __m["engine/run"];
+const { runSetup } = __m["engine/profile"];
+// ---------- Setup ----------
+function createTactics(setup) {
+    const room = TACTICAL_ROOMS[setup.roomId];
+    const tiles = [];
+    let player = { x: 1, y: 1 };
+    const spawns = [];
+    room.map.forEach((row, y) => {
+        tiles.push([...row].map((ch, x) => {
+            if (ch === '@') {
+                player = { x, y };
+                return '.';
+            }
+            if (ch === 'e') {
+                spawns.push({ x, y });
+                return '.';
+            }
+            return (ch === '#' || ch === 'P' || ch === 'c' ? ch : '.');
+        }));
+    });
+    const ap = Math.max(1, setup.apPerTurn);
+    const c = createCombat({
+        seed: setup.seed, encounter: room.enemies.slice(0, spawns.length), programs: setup.gear, upgrades: setup.upgrades,
+        ramPerTurn: ap, ramMax: ap, integrity: setup.hpMax, integrityMax: setup.hpMax, world: 'street', enemyHp: room.hp, enemyDmg: room.dmg,
+        damageBonus: setup.damageBonus, matchBonus: setup.matchBonus, blockBonus: setup.blockBonus, revive: setup.revive,
+    }).state;
+    c.mismatch = TACTICS.mismatch;
+    const pos = {};
+    c.enemies.forEach((e, i) => (pos[e.uid] = spawns[i]));
+    return {
+        rng: setup.seed ^ 0x7ac71c, roomId: room.id, w: tiles[0].length, h: tiles.length, tiles, player, pos, c,
+        phase: 'player', round: 1, moveLeft: TACTICS.freeSteps, smoke: [], aiming: [], pending: null, log: [`Contact: ${c.enemies.map((e) => e.name).join(', ')}`],
+    };
+}
+// ---------- Geometry ----------
+const dist = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+const key = (p) => `${p.x},${p.y}`;
+const inBounds = (s, p) => p.x >= 0 && p.y >= 0 && p.x < s.w && p.y < s.h;
+const tileAt = (s, p) => (inBounds(s, p) ? s.tiles[p.y][p.x] : '#');
+const living = (s) => s.c.enemies.filter((e) => e.core > 0 && s.pos[e.uid]);
+const enemyAt = (s, p) => living(s).find((e) => s.pos[e.uid].x === p.x && s.pos[e.uid].y === p.y);
+const smokeAt = (s, p) => s.smoke.some((m) => m.x === p.x && m.y === p.y);
+/** Walls, pillars and smoke block sight; crates don't. */
+const blocksSight = (s, p) => tileAt(s, p) === '#' || tileAt(s, p) === 'P' || smokeAt(s, p);
+/** Can a unit stand here? (Flying units pass over crates.) */
+function open(s, p, flying = false) {
+    const t = tileAt(s, p);
+    return t === '.' || (flying && t === 'c');
+}
+/** Line of sight between tile centres. */
+function lineOfSight(s, a, b) {
+    const n = Math.max(Math.abs(b.x - a.x), Math.abs(b.y - a.y)) * 4;
+    for (let i = 1; i < n; i++) {
+        const t = i / n;
+        const p = { x: Math.round(a.x + (b.x - a.x) * t), y: Math.round(a.y + (b.y - a.y) * t) };
+        if ((p.x === a.x && p.y === a.y) || (p.x === b.x && p.y === b.y))
+            continue;
+        if (blocksSight(s, p))
+            return false;
+    }
+    return true;
+}
+/** Cover a target has against a shooter: from the tiles on the shooter's side. */
+function coverAt(s, target, from) {
+    const sx = Math.sign(from.x - target.x), sy = Math.sign(from.y - target.y);
+    const sides = [{ x: target.x + sx, y: target.y }, { x: target.x, y: target.y + sy }, { x: target.x + sx, y: target.y + sy }]
+        .filter((p) => p.x !== target.x || p.y !== target.y);
+    let cover = 'none';
+    for (const p of sides) {
+        const t = tileAt(s, p);
+        if (t === '#' || t === 'P')
+            return 'full';
+        if (t === 'c')
+            cover = 'half';
+    }
+    return cover;
+}
+const coverPenalty = (c) => (c === 'full' ? TACTICS.fullCover : c === 'half' ? TACTICS.halfCover : 0);
+const clampHit = (h) => Math.round(Math.min(TACTICS.maxHit, Math.max(TACTICS.minHit, h)));
+const NEIGHBOURS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+/** Breadth-first distances from a tile over open ground. No cutting corners past walls. */
+function flood(s, from, max, opts = {}) {
+    const seen = new Map([[key(from), { steps: 0, prev: null }]]);
+    const queue = [from];
+    const occupied = new Set(opts.ignoreUnits ? [] : [key(s.player), ...living(s).filter((e) => e.uid !== opts.self).map((e) => key(s.pos[e.uid]))]);
+    while (queue.length) {
+        const p = queue.shift();
+        const here = seen.get(key(p));
+        if (here.steps >= max)
+            continue;
+        for (const [dx, dy] of NEIGHBOURS) {
+            const q = { x: p.x + dx, y: p.y + dy };
+            if (seen.has(key(q)) || !open(s, q, opts.flying) || occupied.has(key(q)))
+                continue;
+            if (dx && dy && (!open(s, { x: p.x + dx, y: p.y }, opts.flying) || !open(s, { x: p.x, y: p.y + dy }, opts.flying)))
+                continue;
+            seen.set(key(q), { steps: here.steps + 1, prev: key(p) });
+            queue.push(q);
+        }
+    }
+    return seen;
+}
+function pathFrom(map, to) {
+    const out = [];
+    let k = key(to);
+    while (k) {
+        const [x, y] = k.split(',').map(Number);
+        out.unshift({ x, y });
+        k = map.get(k)?.prev ?? null;
+    }
+    return out.slice(1);
+}
+// ---------- Player ----------
+/** Tiles the player can still move this turn (paid tiles plus what remaining AP buys). */
+const moveBudget = (s) => s.moveLeft + s.c.ram * TACTICS.tilesPerAp;
+/** Reachable tiles and the AP each would cost. */
+function reachable(s) {
+    const out = new Map();
+    if (s.phase !== 'player')
+        return out;
+    for (const [k, v] of flood(s, s.player, moveBudget(s))) {
+        if (v.steps === 0)
+            continue;
+        out.set(k, { steps: v.steps, ap: Math.max(0, Math.ceil((v.steps - s.moveLeft) / TACTICS.tilesPerAp)) });
+    }
+    return out;
+}
+function pathTo(s, to) {
+    const map = flood(s, s.player, moveBudget(s));
+    return map.has(key(to)) ? pathFrom(map, to) : [];
+}
+function moveTo(prev, to) {
+    if (prev.phase !== 'player')
+        return { state: prev, path: [] };
+    const path = pathTo(prev, to);
+    if (!path.length)
+        return { state: prev, path: [] };
+    const s = structuredClone(prev);
+    const extra = Math.max(0, path.length - s.moveLeft);
+    const ap = Math.ceil(extra / TACTICS.tilesPerAp);
+    s.c.ram -= ap;
+    s.moveLeft = s.moveLeft + ap * TACTICS.tilesPerAp - path.length;
+    s.player = { ...to };
+    return { state: s, path };
+}
+/** How a gear slot works on the grid; null for gear used on yourself. */
+function gearOf(s, slotIndex) {
+    const slot = s.c.slots[slotIndex];
+    if (TACTICAL_GEAR[slot.defId])
+        return TACTICAL_GEAR[slot.defId];
+    const p = programOf(slot);
+    if (p.kind !== 'attack' && p.kind !== 'worm')
+        return null;
+    if (p.kind === 'worm')
+        return { range: 5, optimal: 5, radius: 1 };
+    if (p.layer === 'crypto')
+        return { range: 1, optimal: 1 };
+    if (p.layer === 'spoof')
+        return { range: 2, optimal: 2 };
+    return { range: 6, optimal: 3 };
+}
+/** Can the player use this gear on that tile or enemy, and with what chance? */
+function attackInfo(s, slotIndex, target) {
+    const g = gearOf(s, slotIndex);
+    const d = dist(s.player, target);
+    if (!g)
+        return { ok: false, reason: 'Used on yourself', hit: 0, cover: 'none', distance: d };
+    if (d > g.range)
+        return { ok: false, reason: 'Out of range', hit: 0, cover: 'none', distance: d };
+    if (d > 1 && !lineOfSight(s, s.player, target))
+        return { ok: false, reason: 'No line of sight', hit: 0, cover: 'none', distance: d };
+    if (g.radius || g.place)
+        return { ok: true, hit: 100, cover: 'none', distance: d };
+    if (g.range === 1)
+        return { ok: true, hit: clampHit(TACTICS.baseHit), cover: 'none', distance: d };
+    const cover = g.smart ? 'none' : coverAt(s, target, s.player);
+    return { ok: true, hit: clampHit(TACTICS.baseHit - TACTICS.falloff * Math.max(0, d - g.optimal) - coverPenalty(cover)), cover, distance: d };
+}
+/**
+ * Use a gear slot. Attacks need a target tile (an enemy's, or any tile for
+ * grenades and smoke). The AIM tap: perfect always hits and hits harder; a
+ * missed tap lowers the hit chance and the damage. Self-use gear ignores target.
+ */
+function useGear(prev, slotIndex, target, timing = 'good') {
+    if (prev.phase !== 'player' || !canPlay(prev.c, slotIndex))
+        return { state: prev, events: [] };
+    const g = gearOf(prev, slotIndex);
+    const s = structuredClone(prev);
+    const events = [];
+    const slot = s.c.slots[slotIndex];
+    const p = programOf(slot);
+    if (!g) {
+        // Shields, heals, stims: the normal combat rules.
+        const r = playProgram(s.c, slotIndex, null, timing);
+        s.c = r.state;
+        s.log.push(`${p.name}`);
+        return { state: s, events: r.events };
+    }
+    if (!target)
+        return { state: prev, events: [] };
+    const info = attackInfo(s, slotIndex, target);
+    if (!info.ok)
+        return { state: prev, events: [] };
+    s.c.ram -= p.cost;
+    // Repeat fire: guns and blades fire again while AP lasts; grenades, smoke and
+    // anything marked keepCooldown wait out their cooldown.
+    slot.cooldown = g.radius || g.place || g.keepCooldown ? p.cooldown + 1 : 0;
+    const mult = TUNING.exploit[timing];
+    const dmg = Math.max(1, Math.round(((p.damage ?? 0) + s.c.bonus.damage) * mult));
+    const type = p.pierce ? 'pierce' : p.layer ?? null;
+    const strike = (e) => {
+        if (p.damage)
+            damageEnemy(s.c, e, dmg, type, events);
+        if (p.weak && e.core > 0)
+            e.weak = Math.max(e.weak, p.weak);
+        if (p.worm && e.core > 0)
+            e.worm = e.worm ? { dmg: e.worm.dmg + p.worm.dmg, turns: Math.max(e.worm.turns, p.worm.turns) } : { ...p.worm };
+    };
+    let hit;
+    if (g.place === 'smoke') {
+        for (const [dx, dy] of [[0, 0], ...NEIGHBOURS]) {
+            const q = { x: target.x + dx, y: target.y + dy };
+            if (tileAt(s, q) !== '#' && Math.max(Math.abs(dx), Math.abs(dy)) <= (g.radius ?? 1))
+                s.smoke.push({ ...q, turns: TACTICS.smokeTurns });
+        }
+        s.log.push(`${p.name}: smoke blocks sight`);
+    }
+    else if (g.radius) {
+        const caught = living(s).filter((e) => dist(s.pos[e.uid], target) <= g.radius);
+        caught.forEach(strike);
+        s.log.push(`${p.name} hits ${caught.length || 'nobody'}${caught.length ? ` target${caught.length > 1 ? 's' : ''}` : ''}`);
+    }
+    else {
+        const e = enemyAt(s, target);
+        if (!e)
+            return { state: prev, events: [] };
+        const chance = timing === 'perfect' ? 100 : timing === 'miss' ? info.hit - TACTICS.aimMissPenalty : info.hit;
+        hit = new Rng(s).next() * 100 < chance;
+        if (hit) {
+            strike(e);
+            if (g.burst)
+                living(s).filter((o) => o.uid !== e.uid && dist(s.pos[o.uid], s.pos[e.uid]) <= 1).forEach(strike);
+            s.log.push(`${p.name} → ${e.name}: hit`);
+        }
+        else {
+            events.push({ kind: 'log', text: 'Missed' });
+            s.log.push(`${p.name} → ${e.name}: missed`);
+        }
+    }
+    for (const e of s.c.enemies)
+        if (e.core <= 0)
+            delete s.pos[e.uid];
+    if (!living(s).length)
+        s.phase = 'won';
+    return { state: s, events, hit };
+}
+function endTurn(prev) {
+    if (prev.phase !== 'player')
+        return prev;
+    const s = structuredClone(prev);
+    s.phase = 'enemy';
+    return s;
+}
+// ---------- Enemies ----------
+const enemyReach = (defId) => TACTICAL_ENEMIES[defId] ?? DEFAULT_TACTICAL_ENEMY;
+function canHitFrom(s, defId, from) {
+    const r = enemyReach(defId);
+    const d = dist(from, s.player);
+    return d <= r.range && (d <= 1 || lineOfSight(s, from, s.player));
+}
+/** An enemy's chance to hit the player from a tile. */
+function enemyHitChance(s, defId, from) {
+    const r = enemyReach(defId);
+    const d = dist(from, s.player);
+    if (r.range === 1)
+        return clampHit(TACTICS.enemyBaseHit + 10);
+    const optimal = Math.ceil(r.range / 2);
+    return clampHit(TACTICS.enemyBaseHit - TACTICS.falloff * Math.max(0, d - optimal) - coverPenalty(coverAt(s, s.player, from)));
+}
+/**
+ * One enemy's turn: it moves if it needs to, then either queues an attack
+ * (resolve it with resolveAttack, after the player's dodge taps), aims, or
+ * reinforces an ally. Returns the path walked for the UI to animate.
+ */
+function enemyAct(prev, uid) {
+    const s = structuredClone(prev);
+    const events = [];
+    const e = s.c.enemies.find((x) => x.uid === uid);
+    if (s.phase !== 'enemy' || !e || e.core <= 0 || !s.pos[uid])
+        return { state: prev, events, path: [] };
+    const def = ENEMIES[e.defId];
+    const reach = enemyReach(e.defId);
+    const rng = new Rng(s);
+    const intent = e.intent;
+    let path = [];
+    const goToward = (wantShot) => {
+        const here = s.pos[uid];
+        const options = flood(s, here, reach.move, { flying: reach.flying, self: uid });
+        let best = null;
+        // Distance to the player over open ground (ignoring units), to close in sensibly.
+        const toPlayer = flood(s, s.player, 99, { flying: reach.flying, ignoreUnits: true });
+        for (const [k, v] of options) {
+            const [x, y] = k.split(',').map(Number);
+            const p = { x, y };
+            const shot = canHitFrom(s, e.defId, p);
+            const cover = coverPenalty(coverAt(s, p, s.player));
+            const closeness = toPlayer.get(k)?.steps ?? 99;
+            const score = (wantShot && shot ? 1000 : 0) + (shot ? cover : 0) - closeness * (shot ? 0.5 : 3) - v.steps * 0.2 + rng.next() * 0.1;
+            if (!best || score > best.score)
+                best = { p, score };
+        }
+        if (best && (best.p.x !== here.x || best.p.y !== here.y)) {
+            path = pathFrom(options, best.p);
+            s.pos[uid] = best.p;
+        }
+    };
+    const advance = () => {
+        e.patternIndex = (e.patternIndex + 1) % def.pattern.length;
+        e.intent = def.pattern[e.patternIndex];
+        e.weak = Math.max(0, e.weak - 1);
+    };
+    if (intent.kind === 'shieldAlly') {
+        const allies = living(s).filter((o) => o.uid !== uid);
+        const ally = allies.length ? rng.pick(allies) : e;
+        const outer = ally.layers.at(-1);
+        if (outer)
+            outer.hp = Math.min(outer.max + intent.value, outer.hp + intent.value);
+        else
+            ally.core = Math.min(ally.coreMax, ally.core + intent.value);
+        s.log.push(`${e.name} reinforces ${ally === e ? 'itself' : ally.name}`);
+        events.push({ kind: 'log', text: `${e.name} reinforces ${ally.name}` });
+        advance();
+        return { state: s, events, path };
+    }
+    if (intent.kind === 'charge') {
+        if (!canHitFrom(s, e.defId, s.pos[uid]))
+            goToward(true);
+        if (canHitFrom(s, e.defId, s.pos[uid])) {
+            s.aiming = [...new Set([...s.aiming, uid])];
+            s.log.push(`${e.name} takes aim`);
+        }
+        advance();
+        return { state: s, events, path };
+    }
+    // Attacks (and anything else: they close in and shoot).
+    if (!canHitFrom(s, e.defId, s.pos[uid]))
+        goToward(true);
+    if (intent.kind === 'attack' && canHitFrom(s, e.defId, s.pos[uid])) {
+        const aimed = s.aiming.includes(uid);
+        const chance = Math.min(TACTICS.maxHit, enemyHitChance(s, e.defId, s.pos[uid]) + (aimed ? 20 : 0));
+        const hits = Array.from({ length: intent.hits ?? 1 }, () => rng.next() * 100 < chance);
+        const damage = Math.round(Math.round(intent.value * (s.c.foe?.dmg ?? 1) - 0.05) * (e.weak > 0 ? TUNING.weakMultiplier : 1));
+        s.pending = { uid, hits, damage };
+        s.aiming = s.aiming.filter((x) => x !== uid);
+    }
+    else if (intent.kind !== 'attack') {
+        s.log.push(`${e.name} ${intent.kind === 'trace' ? 'radios for backup' : 'repositions'}`);
+    }
+    advance();
+    return { state: s, events, path };
+}
+/** Land the queued enemy attack. One dodge timing per hit that landed. */
+function resolveAttack(prev, timings = []) {
+    if (!prev.pending)
+        return { state: prev, events: [] };
+    const s = structuredClone(prev);
+    const events = [];
+    const { uid, hits, damage } = s.pending;
+    const e = s.c.enemies.find((x) => x.uid === uid);
+    let t = 0;
+    for (const landed of hits) {
+        if (!landed) {
+            events.push({ kind: 'log', text: `${e.name} misses` });
+            continue;
+        }
+        hitPlayer(s.c, e, damage, timings[t++] ?? 'miss', events);
+    }
+    const landed = hits.filter(Boolean).length;
+    s.log.push(`${e.name} ${landed ? `hits you${hits.length > 1 ? ` ${landed}/${hits.length}` : ''}` : 'misses'}`);
+    s.pending = null;
+    if (s.c.integrity <= 0) {
+        if (s.c.revive && !s.c.reviveUsed) {
+            s.c.integrity = s.c.revive;
+            s.c.reviveUsed = true;
+            s.log.push('Still standing!');
+        }
+        else
+            s.phase = 'lost';
+    }
+    for (const x of s.c.enemies)
+        if (x.core <= 0)
+            delete s.pos[x.uid];
+    if (s.phase !== 'lost' && !living(s).length)
+        s.phase = 'won';
+    return { state: s, events };
+}
+/** After every enemy has acted: smoke fades, burns tick, AP refills. */
+function beginPlayerTurn(prev) {
+    if (prev.phase !== 'enemy')
+        return { state: prev, events: [] };
+    const s = structuredClone(prev);
+    const events = [];
+    s.smoke = s.smoke.map((m) => ({ ...m, turns: m.turns - 1 })).filter((m) => m.turns > 0);
+    for (const e of living(s)) {
+        if (e.worm) {
+            damageEnemy(s.c, e, e.worm.dmg, null, events);
+            e.worm.turns -= 1;
+            if (e.worm.turns <= 0)
+                e.worm = null;
+        }
+    }
+    for (const e of s.c.enemies)
+        if (e.core <= 0)
+            delete s.pos[e.uid];
+    s.c.block = 0;
+    s.c.ram = s.c.ramPerTurn;
+    s.moveLeft = TACTICS.freeSteps;
+    for (const slot of s.c.slots)
+        if (slot.cooldown > 0)
+            slot.cooldown -= 1;
+    s.round += 1;
+    s.phase = living(s).length ? 'player' : 'won';
+    return { state: s, events };
+}
+/** The runner's real street loadout (kit, HP, AP, upgrades, perks) for a tactical room. */
+function tacticsSetup(profile, roomId, seed) {
+    const run = newRun(seed, runSetup(profile, 'shakedown'));
+    return {
+        seed, roomId,
+        gear: [...run.loadout.equipped],
+        upgrades: run.upgrades,
+        hpMax: run.integrityMax,
+        apPerTurn: run.loadout.ramPerTurn + TACTICS.bonusAp,
+        damageBonus: run.perks.damageBonus,
+        matchBonus: run.perks.matchBonus,
+        blockBonus: run.perks.blockBonus,
+        revive: run.perks.revive,
+    };
+}
+
+__m["engine/tactics"] = { createTactics, dist, tileAt, living, enemyAt, blocksSight, lineOfSight, coverAt, moveBudget, reachable, pathTo, moveTo, gearOf, attackInfo, useGear, endTurn, enemyReach, enemyHitChance, enemyAct, resolveAttack, beginPlayerTurn, tacticsSetup };
+})();
+// ---- ui/tacticsArt ----
+(() => {
+const TILE = 48;
+/** Height of a block's front face. */
+const FACE = 14;
+/** Cheap deterministic noise per tile. */
+const hash = (x, y, k = 0) => {
+    let h = (x * 374761393 + y * 668265263 + k * 2147483647) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+};
+const PALETTES = {
+    // Tenement: rust, stained concrete, sodium orange.
+    tenement: {
+        floor: '#231915', floorAlt: '#271c17', grime: '#120b08', wallTop: '#2e1d16', wallFace: '#1a0e09', trim: '#ff9a3c',
+        crateTop: '#6b4520', crateFace: '#3d260f', light: '#ffae4a', neon: '#ff2bd6', tag: '#ff2b6a', puddle: '#7fd8ff',
+    },
+    // Corp tower: cold white light, steel and glass, cyan trim.
+    tower: {
+        floor: '#1a1f26', floorAlt: '#1d232b', grime: '#0d1015', wallTop: '#2a313c', wallFace: '#141920', trim: '#29e0ff',
+        crateTop: '#3a4452', crateFace: '#222832', light: '#d6f2ff', neon: '#29e0ff', tag: '#29e0ff', puddle: '#bfe9ff',
+    },
+    // Lab: sickly green, hazard yellow, chemical spills.
+    lab: {
+        floor: '#17201a', floorAlt: '#1a241d', grime: '#0b110c', wallTop: '#26352a', wallFace: '#121c15', trim: '#8aff5c',
+        crateTop: '#3a4a3c', crateFace: '#223026', light: '#c8ff9a', neon: '#5cff8a', tag: '#ffe83b', puddle: '#7dff5c',
+    },
+    // Freight yard: wet asphalt, rusted blue containers, floodlights and rain.
+    freightyard: {
+        floor: '#181a1e', floorAlt: '#1b1d22', grime: '#0a0b0e', wallTop: '#24384a', wallFace: '#132029', trim: '#ffb13b',
+        crateTop: '#5a4a2a', crateFace: '#33291a', light: '#f2f0ff', neon: '#ff6a2b', tag: '#ffb13b', puddle: '#9fb8ff', ribs: true, rain: true,
+    },
+};
+function defs(p) {
+    return `
+    <defs>
+      <radialGradient id="tlamp"><stop offset="0" stop-color="${p.light}" stop-opacity="0.38"/><stop offset="0.45" stop-color="${p.light}" stop-opacity="0.1"/><stop offset="1" stop-color="${p.light}" stop-opacity="0"/></radialGradient>
+      <radialGradient id="tneon"><stop offset="0" stop-color="${p.neon}" stop-opacity="0.45"/><stop offset="1" stop-color="${p.neon}" stop-opacity="0"/></radialGradient>
+      <radialGradient id="tpuddle"><stop offset="0" stop-color="${p.puddle}" stop-opacity="0.24"/><stop offset="0.7" stop-color="#28485a" stop-opacity="0.35"/><stop offset="1" stop-color="#101820" stop-opacity="0"/></radialGradient>
+      <linearGradient id="tcone" x1="0" x2="1"><stop offset="0" stop-color="#ff3b5c" stop-opacity="0.32"/><stop offset="1" stop-color="#ff3b5c" stop-opacity="0.04"/></linearGradient>
+      <filter id="tsoft"><feGaussianBlur stdDeviation="1.2"/></filter>
+      <pattern id="train" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M8 0l-6 14M28 10l-6 14M18 24l-6 14M38 26l-6 14" stroke="#cfe3ff" stroke-opacity="0.22" stroke-width="1"/></pattern>
+    </defs>`;
+}
+/** Floor: concrete with grime, cracks, puddles and the odd gang tag. */
+function floor(s, p) {
+    let out = '';
+    for (let y = 0; y < s.h; y++)
+        for (let x = 0; x < s.w; x++) {
+            if (s.tiles[y][x] === '#')
+                continue;
+            const px = x * TILE, py = y * TILE;
+            out += `<rect x="${px}" y="${py}" width="${TILE}" height="${TILE}" fill="${(x + y) % 2 ? p.floorAlt : p.floor}"/>`;
+            // Seams between slabs.
+            out += `<path d="M${px} ${py + 0.5}H${px + TILE}M${px + 0.5} ${py}V${py + TILE}" stroke="#000" stroke-opacity="0.35" stroke-width="1"/>`;
+            const r = hash(x, y);
+            if (r < 0.32)
+                out += `<ellipse cx="${px + 10 + hash(x, y, 1) * 28}" cy="${py + 10 + hash(x, y, 2) * 28}" rx="${6 + hash(x, y, 3) * 10}" ry="${4 + hash(x, y, 4) * 6}" fill="${p.grime}" opacity="0.55" filter="url(#tsoft)"/>`;
+            if (r > 0.86)
+                out += `<path d="M${px + 8} ${py + 30 * hash(x, y, 5) + 8}l${10 + hash(x, y, 6) * 8} ${4 - hash(x, y, 7) * 8}l${8} ${6 * hash(x, y, 8)}" stroke="#000" stroke-opacity="0.6" fill="none"/>`;
+            if (r > 0.6 && r < 0.68)
+                out += `<ellipse cx="${px + TILE / 2}" cy="${py + TILE / 2 + 4}" rx="${16 + hash(x, y, 9) * 6}" ry="${8 + hash(x, y, 10) * 3}" fill="url(#tpuddle)"/>`;
+        }
+    return out;
+}
+/** Spray-painted tags on the floor. */
+function tags(spots, p) {
+    return spots.map((t) => `<text class="ttag" x="${t.x * TILE + TILE / 2}" y="${t.y * TILE + TILE / 2 + 6}" fill="${p.tag}" transform="rotate(${t.rot ?? -12} ${t.x * TILE + TILE / 2} ${t.y * TILE + TILE / 2})">${t.text}</text>`).join('');
+}
+/** Blocks in one row: walls, pillars and crates, each with a lit top and a dark front face. */
+function blocks(s, y, p) {
+    let out = '';
+    for (let x = 0; x < s.w; x++) {
+        const t = s.tiles[y][x];
+        const px = x * TILE, py = y * TILE;
+        if (t === '#') {
+            const below = y + 1 < s.h && s.tiles[y + 1][x] !== '#';
+            out += `<rect x="${px}" y="${py}" width="${TILE}" height="${below ? TILE - FACE : TILE}" fill="${p.wallTop}"/>`;
+            // Brick hint on top, or container ribs.
+            out += p.ribs
+                ? `<path d="M${px + 6} ${py}V${py + TILE - FACE}M${px + 18} ${py}V${py + TILE - FACE}M${px + 30} ${py}V${py + TILE - FACE}M${px + 42} ${py}V${py + TILE - FACE}" stroke="#000" stroke-opacity="0.28" stroke-width="2"/>`
+                : `<path d="M${px} ${py + 12}H${px + TILE}M${px} ${py + 24}H${px + TILE}" stroke="#000" stroke-opacity="0.18"/>`;
+            if (below) {
+                out += `<rect x="${px}" y="${py + TILE - FACE}" width="${TILE}" height="${FACE}" fill="${p.wallFace}"/>`;
+                out += `<rect x="${px}" y="${py + TILE - FACE}" width="${TILE}" height="2" fill="${p.trim}" opacity="0.35"/>`;
+                if (hash(x, y, 11) > 0.8)
+                    out += `<rect x="${px + 14}" y="${py + TILE - FACE + 4}" width="20" height="3" fill="${p.trim}" opacity="0.8"/>`;
+            }
+        }
+        else if (t === 'P') {
+            out += `<rect x="${px + 5}" y="${py + TILE - 10}" width="${TILE - 10}" height="8" fill="#000" opacity="0.45" filter="url(#tsoft)"/>`;
+            out += `<rect x="${px + 6}" y="${py - 6}" width="${TILE - 12}" height="${TILE - 12}" rx="2" fill="${p.wallTop}" stroke="#000" stroke-opacity="0.5"/>`;
+            out += `<rect x="${px + 6}" y="${py + TILE - 18}" width="${TILE - 12}" height="${FACE}" fill="${p.wallFace}"/>`;
+            out += `<rect x="${px + 6}" y="${py + TILE - 18}" width="${TILE - 12}" height="2" fill="${p.trim}" opacity="0.5"/>`;
+        }
+        else if (t === 'c') {
+            const h = 9;
+            out += `<ellipse cx="${px + TILE / 2}" cy="${py + TILE - 8}" rx="18" ry="5" fill="#000" opacity="0.5" filter="url(#tsoft)"/>`;
+            out += `<rect x="${px + 8}" y="${py + 10}" width="${TILE - 16}" height="${TILE - 24}" fill="${p.crateTop}" stroke="#000" stroke-opacity="0.5"/>`;
+            out += `<path d="M${px + 8} ${py + 17}H${px + TILE - 8}M${px + 8} ${py + 24}H${px + TILE - 8}" stroke="#000" stroke-opacity="0.3"/>`;
+            out += `<rect x="${px + 8}" y="${py + TILE - 14}" width="${TILE - 16}" height="${h}" fill="${p.crateFace}"/>`;
+            out += `<path d="M${px + 12} ${py + TILE - 10}h6M${px + TILE - 18} ${py + TILE - 10}h6" stroke="#ffd36a" stroke-opacity="0.45"/>`;
+        }
+    }
+    return out;
+}
+/** Tiles the runner can see. */
+function visibility(s, los) {
+    return s.tiles.map((row, y) => row.map((t, x) => t === '#' || (Math.abs(x - s.player.x) <= 1 && Math.abs(y - s.player.y) <= 1) || los(s.player, { x, y })));
+}
+function fogRow(s, y, seen) {
+    let out = '';
+    for (let x = 0; x < s.w; x++)
+        if (!seen[y][x])
+            out += `<rect class="tfog" x="${x * TILE}" y="${y * TILE}" width="${TILE}" height="${TILE}"/>`;
+    return out;
+}
+function lights(spots) {
+    return spots.map((l) => `<circle class="tlight" cx="${l.x * TILE + TILE / 2}" cy="${l.y * TILE + TILE / 2}" r="${TILE * (l.neon ? 2.2 : 3.2)}" fill="url(#${l.neon ? 'tneon' : 'tlamp'})"/>`).join('')
+        + spots.filter((l) => !l.neon).map((l) => `<circle cx="${l.x * TILE + TILE / 2}" cy="${l.y * TILE + TILE / 2}" r="3" fill="#fff3d0"/>`).join('');
+}
+/** A red view cone from a shooter toward you. */
+function cone(from, to) {
+    const ax = from.x * TILE + TILE / 2, ay = from.y * TILE + TILE / 2;
+    const bx = to.x * TILE + TILE / 2, by = to.y * TILE + TILE / 2;
+    const len = Math.hypot(bx - ax, by - ay) + TILE * 0.6;
+    const ang = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI;
+    const spread = Math.max(TILE * 0.7, len * 0.22);
+    return `<path class="tcone" d="M0 0L${len} ${-spread}Q${len + 10} 0 ${len} ${spread}Z" fill="url(#tcone)" transform="translate(${ax} ${ay}) rotate(${ang})"/>`;
+}
+function figureKind(defId, melee) {
+    if (defId === 'drone')
+        return 'drone';
+    if (defId === 'robodog')
+        return 'dog';
+    if (defId === 'turret')
+        return 'turret';
+    if (['bruiser', 'loader', 'razorback'].includes(defId))
+        return 'heavy';
+    if (['executive', 'harbormaster', 'bodyguard', 'guard', 'response', 'warden'].includes(defId))
+        return 'suit';
+    return melee ? 'blade' : 'gunner';
+}
+/**
+ * A standing figure, feet at the bottom of its tile. `face` is −1 (left) or
+ * 1 (right). Colours: jacket and accent.
+ */
+function figure(kind, pos, face, jacket, accent) {
+    const cx = pos.x * TILE + TILE / 2;
+    const fy = pos.y * TILE + TILE - 7;
+    const shadow = `<ellipse cx="${cx}" cy="${fy + 1}" rx="14" ry="5" fill="#000" opacity="0.6"/>`;
+    const flip = `transform="translate(${cx} ${fy}) scale(${face * 1.2} 1.2)"`;
+    const ink = '#0a0506';
+    if (kind === 'drone') {
+        return `${shadow}<g ${flip}><g class="tbob">
+      <ellipse cx="0" cy="-30" rx="15" ry="5" fill="#2b2f38" stroke="${ink}" stroke-width="1.5"/>
+      <rect x="-6" y="-33" width="12" height="7" rx="2" fill="#3c4250" stroke="${ink}"/>
+      <circle cx="4" cy="-29" r="2.2" fill="${accent}"/>
+      <path d="M-15 -32h-5M15 -32h5" stroke="#8a93a6" stroke-width="2"/>
+    </g></g>`;
+    }
+    if (kind === 'turret') {
+        return `${shadow}<g ${flip}>
+      <rect x="-11" y="-12" width="22" height="12" fill="#2b2f38" stroke="${ink}" stroke-width="1.5"/>
+      <rect x="-8" y="-24" width="16" height="12" rx="3" fill="#3c4250" stroke="${ink}" stroke-width="1.5"/>
+      <rect x="6" y="-20" width="14" height="4" fill="#1a1d24" stroke="${ink}"/>
+      <circle cx="0" cy="-18" r="2.5" fill="${accent}"/>
+    </g>`;
+    }
+    if (kind === 'dog') {
+        return `${shadow}<g ${flip}>
+      <path d="M-12 0v-9M-6 0v-9M6 0v-9M12 0v-9" stroke="#8a93a6" stroke-width="2.5" stroke-linecap="round"/>
+      <rect x="-14" y="-18" width="26" height="10" rx="4" fill="#3c4250" stroke="${ink}" stroke-width="1.5"/>
+      <path d="M10 -18l9 -6v8l-6 3z" fill="#2b2f38" stroke="${ink}" stroke-width="1.5"/>
+      <circle cx="15" cy="-20" r="1.8" fill="${accent}"/>
+    </g>`;
+    }
+    const wide = kind === 'heavy' ? 1.3 : 1;
+    const legs = `<path d="M-4 0v-12M4 0v-12" stroke="#15121a" stroke-width="4.5" stroke-linecap="round"/>`;
+    const body = kind === 'runner'
+        // Long coat flaring at the hem.
+        ? `<path d="M-9 -26h18l3 20h-24z" fill="${jacket}" stroke="${ink}" stroke-width="1.5"/><path d="M0 -26v20" stroke="${accent}" stroke-opacity="0.6"/>`
+        : kind === 'suit'
+            ? `<path d="M-8 -27h16v16h-16z" fill="${jacket}" stroke="${ink}" stroke-width="1.5"/><path d="M0 -27l-3 6 3 3 3-3z" fill="#e8e8f0"/>`
+            : `<path d="M${-9 * wide} -27h${18 * wide}l-1 16h${-16 * wide}z" fill="${jacket}" stroke="${ink}" stroke-width="1.5"/>`;
+    const head = `<circle cx="0" cy="-33" r="${kind === 'heavy' ? 5.5 : 5}" fill="#c99a7a" stroke="${ink}" stroke-width="1.5"/>`;
+    const hair = kind === 'runner'
+        ? `<path d="M-5 -35h10v-3a5 5 0 0 0-10 0z" fill="#1a1a22"/><rect x="-1" y="-35" width="7" height="2.6" rx="1" fill="${accent}"/>`
+        : kind === 'gunner' ? `<path d="M-1.5 -38l1.5 -6 1.5 6z" fill="${accent}"/>`
+            : kind === 'blade' ? `<rect x="-5" y="-35" width="10" height="3" fill="${accent}"/>`
+                : kind === 'suit' ? `<path d="M-5 -35a5 5 0 0 1 10 0z" fill="#20202a"/><rect x="0" y="-34.5" width="5" height="2" fill="#29e0ff"/>`
+                    : `<path d="M-5 -36h10" stroke="#1a1a22" stroke-width="3"/>`;
+    const arm = kind === 'blade'
+        ? `<path d="M6 -24l7 7" stroke="${jacket}" stroke-width="4" stroke-linecap="round"/><path d="M13 -17l9 -12" stroke="${accent}" stroke-width="2.2" stroke-linecap="round"/>`
+        : kind === 'heavy'
+            ? `<path d="M10 -24l6 8" stroke="${jacket}" stroke-width="6" stroke-linecap="round"/><circle cx="17" cy="-15" r="4" fill="#8a93a6" stroke="${ink}"/>`
+            : `<path d="M6 -24l9 2" stroke="${jacket}" stroke-width="4" stroke-linecap="round"/><rect x="14" y="-24.5" width="9" height="3.5" fill="#1a1d24" stroke="${ink}" stroke-width="1"/>`;
+    return `${shadow}<g ${flip}>${legs}${body}${arm}${head}${hair}</g>`;
+}
+/** Rain over the whole map (freight yard). */
+function rain(w, h, p) {
+    if (!p.rain)
+        return '';
+    return `<g class="train" pointer-events="none"><rect x="0" y="-40" width="${w}" height="${h + 40}" fill="url(#train)"/><rect x="20" y="-60" width="${w}" height="${h + 60}" fill="url(#train)" opacity="0.6" class="train2"/></g>`;
+}
+
+__m["ui/tacticsArt"] = { TILE, PALETTES, defs, floor, tags, blocks, visibility, fogRow, lights, cone, figureKind, figure, rain };
+})();
+// ---- ui/tactics ----
+(() => {
+// Tactical street combat screen (prototype). The whole room fits on screen, so
+// there's no camera to fight with: the grid on the left (top on phones), the
+// runner's gear and the enemy list on the right (below on phones).
+//
+// Click a floor tile to move there (the highlighted tiles are in reach; the
+// number is the AP it costs). Pick a piece of gear, then an enemy (or a tile,
+// for grenades and smoke). Hit chances show on every enemy in reach.
+const { ENEMIES, roomsIn, TACTICAL_AREAS, TACTICAL_ROOMS, TACTICS } = __m["engine/content"];
+const { programOf } = __m["engine/combat"];
+const { attackInfo, beginPlayerTurn, coverAt, createTactics, endTurn, enemyAct, enemyHitChance, enemyReach, gearOf, living, moveTo, pathTo, reachable, resolveAttack, useGear, lineOfSight, dist, tacticsSetup } = __m["engine/tactics"];
+const { runBlock, runExploit } = __m["ui/timing"];
+const { buzz, sfx } = __m["ui/sfx"];
+const { esc, KIND_ICON, LAYER_ICON, typeClass } = __m["ui/view"];
+const { blocks, cone, defs, rain, figure, figureKind, floor, fogRow, lights, PALETTES, tags, TILE, visibility } = __m["ui/tacticsArt"];
+let ts = null;
+let picking = false;
+let player = null;
+let selected = null;
+let busy = false;
+let floats = [];
+let fxs = [];
+let bodies = [];
+let fxId = 0;
+let lastSetup = null;
+let rerender = () => { };
+let autoTiming = () => false;
+const tacticsActive = () => !!ts || picking;
+const CLEARED_KEY = 'netrunner-tactics-cleared';
+function cleared() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(CLEARED_KEY) ?? '[]'));
+    }
+    catch {
+        return new Set();
+    }
+}
+function markCleared(id) {
+    try {
+        localStorage.setItem(CLEARED_KEY, JSON.stringify([...cleared(), id]));
+    }
+    catch { /* storage off */ }
+}
+/** Open the room picker. Fights use the runner's current street kit and body. */
+function startTactics(profile, opts) {
+    rerender = opts.render;
+    autoTiming = opts.autoTiming;
+    player = profile;
+    picking = true;
+    ts = null;
+}
+function startRoom(roomId) {
+    if (!player || !TACTICAL_ROOMS[roomId])
+        return;
+    lastSetup = tacticsSetup(player, roomId, (Math.random() * 2 ** 31) >>> 0);
+    picking = false;
+    restart();
+}
+function restart() {
+    if (!lastSetup)
+        return;
+    lastSetup.seed = (Math.random() * 2 ** 31) >>> 0;
+    ts = createTactics(lastSetup);
+    selected = null;
+    busy = false;
+    floats = [];
+    fxs = [];
+    bodies = [];
+}
+function leaveTactics() {
+    ts = null;
+    picking = false;
+    selected = null;
+}
+// ---------- Helpers ----------
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const hpOf = (e) => e.core + e.layers.reduce((a, l) => a + l.hp, 0);
+const hpMaxOf = (e) => e.coreMax + e.layers.reduce((a, l) => a + l.max, 0);
+const at = (k) => { const [x, y] = k.split(',').map(Number); return { x, y }; };
+const centre = (p) => ({ x: p.x * TILE + TILE / 2, y: p.y * TILE + TILE / 2 - 12 });
+function float(p, text, cls) {
+    const f = { id: ++fxId, x: p.x, y: p.y, text, cls, born: performance.now() };
+    floats.push(f);
+    setTimeout(() => { floats = floats.filter((x) => x !== f); if (ts && !busy)
+        rerender(); }, 1100);
+}
+function fx(svg, dur) {
+    const f = { id: ++fxId, born: performance.now(), dur, svg };
+    fxs.push(f);
+    setTimeout(() => { fxs = fxs.filter((x) => x !== f); if (ts && !busy)
+        rerender(); }, dur + 30);
+}
+/** Gunfire: a muzzle flash at the shooter and a tracer to the target (or past it, on a miss). */
+function shot(from, to, hit, colour = '#ffe8a0') {
+    const a = centre(from), b = centre(to);
+    const ang = Math.atan2(b.y - a.y, b.x - a.x);
+    let ex = b.x, ey = b.y;
+    if (!hit) {
+        const off = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 14);
+        ex = b.x + Math.cos(ang) * 30 - Math.sin(ang) * off;
+        ey = b.y + Math.sin(ang) * 30 + Math.cos(ang) * off;
+    }
+    const mx = a.x + Math.cos(ang) * 16, my = a.y + Math.sin(ang) * 16;
+    const deg = (ang * 180) / Math.PI;
+    fx(`<g class="fx-flash" transform="translate(${mx} ${my}) rotate(${deg})"><path d="M0 -5L14 0L0 5L4 0Z" fill="#fff6c8"/><circle r="6" fill="#ffd36a" opacity="0.8"/></g>`, 140);
+    fx(`<line class="fx-tracer" x1="${mx}" y1="${my}" x2="${ex}" y2="${ey}" stroke="${colour}"/>`, 260);
+    if (hit)
+        fx(`<circle class="fx-impact" cx="${b.x}" cy="${b.y}" r="7" fill="#fff3c0"/>`, 220);
+}
+function slash(to, colour = '#e8fdff') {
+    const b = centre(to);
+    fx(`<path class="fx-slash" d="M${b.x - 14} ${b.y - 10}Q${b.x + 4} ${b.y - 2} ${b.x + 12} ${b.y + 14}" stroke="${colour}"/>`, 260);
+}
+function blast(to, radius, smoke = false) {
+    const b = centre(to);
+    fx(`<circle class="fx-blast ${smoke ? 'smoke' : ''}" cx="${b.x}" cy="${b.y + 12}" r="${(radius + 0.5) * TILE}"/>`, 500);
+}
+function sparks(p) {
+    const b = centre(p);
+    const lines = Array.from({ length: 7 }, (_, i) => {
+        const a = (i / 7) * Math.PI * 2 + Math.random() * 0.5;
+        return `<line x1="${b.x + Math.cos(a) * 4}" y1="${b.y + Math.sin(a) * 4}" x2="${b.x + Math.cos(a) * 15}" y2="${b.y + Math.sin(a) * 15}"/>`;
+    }).join('');
+    fx(`<g class="fx-sparks">${lines}</g>`, 380);
+}
+function shake() {
+    const app = document.getElementById('app');
+    if (!app)
+        return;
+    app.classList.remove('shake');
+    void app.offsetWidth;
+    app.classList.add('shake');
+}
+/** Damage numbers, sparks and bodies from the change in everyone's state. */
+function diffFloats(before, after) {
+    for (const e of before.c.enemies) {
+        const now = after.c.enemies.find((x) => x.uid === e.uid);
+        const lost = Math.round(hpOf(e) - hpOf(now));
+        const p = before.pos[e.uid];
+        if (!p)
+            continue;
+        if (now.layers.length < e.layers.length)
+            sparks(p);
+        if (now.core <= 0 && e.core > 0) {
+            float(p, 'DOWN', 'f-kill');
+            sfx.kill();
+            bodies.push({ pos: { ...p }, defId: e.defId });
+        }
+        else if (lost > 0)
+            float(p, `−${lost}`, 'f-dmg');
+    }
+    const took = before.c.integrity - after.c.integrity;
+    if (took > 0) {
+        float(after.player, `−${took}`, 'f-hurt');
+        buzz(40);
+        shake();
+    }
+    else if (took < 0)
+        float(after.player, `+${-took}`, 'f-heal');
+    if (after.c.block > before.c.block)
+        float(after.player, `⛨ ${after.c.block}`, 'f-block');
+}
+/** Bodies stay where they fell: people slumped over a dark stain, machines as wrecks. */
+function bodySvg(b) {
+    const [jacket, accent] = jacketOf(b.defId);
+    const machine = ENEMIES[b.defId]?.faction === 'machine';
+    const cx = b.pos.x * TILE + TILE / 2, cy = b.pos.y * TILE + TILE / 2;
+    const stain = `<ellipse cx="${cx + 2}" cy="${cy + 6}" rx="17" ry="9" fill="${machine ? '#05070a' : '#3a0610'}" opacity="0.75"/>`;
+    return `${stain}<g class="tbody" transform="rotate(${machine ? 20 : 78} ${cx} ${cy + 10}) translate(0 6)">${figure(figureKind(b.defId, enemyReach(b.defId).range === 1), b.pos, 1, jacket, machine ? '#333' : accent)}</g>`;
+}
+// ---------- Rendering ----------
+const JACKETS = {
+    ganger: ['#5a1420', '#ff2bd6'], slasher: ['#2a1a22', '#ff3b5c'], bruiser: ['#3a2a1a', '#ffae4a'], razorback: ['#4a1018', '#ff2bd6'],
+    smuggler: ['#2f3a22', '#ffd36a'], sniper: ['#23302a', '#39ff88'], loader: ['#3a3a20', '#ffae4a'],
+};
+const jacketOf = (defId) => JACKETS[defId] ?? (ENEMIES[defId]?.faction === 'machine' ? ['#3c4250', '#ff3b3b'] : ['#22242e', '#29e0ff']);
+const faceToward = (from, to) => (to && to.x < from.x ? -1 : 1);
+function enemyToken(s, e, i, seen) {
+    const p = s.pos[e.uid];
+    const cx = p.x * TILE + TILE / 2, cy = p.y * TILE + TILE / 2;
+    const top = p.y * TILE - 10;
+    const frac = Math.max(0, hpOf(e) / hpMaxOf(e));
+    const melee = enemyReach(e.defId).range === 1;
+    let badge = '';
+    let cls = seen ? '' : 'unseen';
+    if (selected !== null && s.phase === 'player') {
+        const info = attackInfo(s, selected, p);
+        const g = gearOf(s, selected);
+        if (g && !g.radius && !g.place) {
+            cls += info.ok ? ' targetable' : ' untargetable';
+            badge = info.ok
+                ? `<g class="hit-badge"><rect x="${cx - 19}" y="${top - 22}" width="38" height="17" rx="3"/><text x="${cx}" y="${top - 9}">${info.hit}%</text></g>`
+                : '';
+        }
+    }
+    const [jacket, accent] = jacketOf(e.defId);
+    const aiming = s.aiming.includes(e.uid) ? `<ellipse class="tok-aim" cx="${cx}" cy="${cy + 16}" rx="19" ry="7"/>` : '';
+    return `
+    <g class="tok tok-enemy ${cls}" data-tile="${p.x},${p.y}">
+      <ellipse class="tok-ring" cx="${cx}" cy="${cy + 16}" rx="16" ry="6"/>
+      ${aiming}
+      ${figure(figureKind(e.defId, melee), p, faceToward(p, s.player), jacket, accent)}
+      <rect class="tok-hpbg" x="${cx - 14}" y="${top}" width="28" height="4"/>
+      <rect class="tok-hp" x="${cx - 14}" y="${top}" width="${28 * frac}" height="4"/>
+      <text class="tok-num" x="${cx + 19}" y="${top + 5}">${i + 1}</text>
+      ${badge}
+    </g>`;
+}
+function playerToken(s) {
+    const pl = s.player;
+    const cx = pl.x * TILE + TILE / 2, cy = pl.y * TILE + TILE / 2;
+    const near = living(s).sort((a, b) => dist(s.pos[a.uid], pl) - dist(s.pos[b.uid], pl))[0];
+    return `
+    <g class="tok tok-player">
+      <ellipse class="tok-me-ring" cx="${cx}" cy="${cy + 16}" rx="16" ry="6"/>
+      ${s.c.block ? `<ellipse class="tok-block" cx="${cx}" cy="${cy + 2}" rx="17" ry="24"/>` : ''}
+      ${figure('runner', pl, faceToward(pl, near ? s.pos[near.uid] : undefined), '#0d3a48', '#29e0ff')}
+    </g>`;
+}
+function gridSvg(s) {
+    const room = TACTICAL_ROOMS[s.roomId];
+    const pal = PALETTES[room.area] ?? PALETTES.tenement;
+    const seen = visibility(s, (a, b) => lineOfSight(s, a, b));
+    const smoke = s.smoke.map((m) => `<circle class="tt-smoke" cx="${m.x * TILE + TILE / 2}" cy="${m.y * TILE + TILE / 2}" r="${TILE * 0.62}"/>`).join('');
+    const g = selected !== null ? gearOf(s, selected) : null;
+    // Highlights: where you can walk, or where an area weapon can land.
+    let marks = '';
+    if (s.phase === 'player' && !busy) {
+        if (selected === null) {
+            for (const [k, r] of reachable(s)) {
+                const p = at(k);
+                marks += `<g class="reach ap${Math.min(3, r.ap)}" data-tile="${k}"><rect x="${p.x * TILE + 3}" y="${p.y * TILE + 3}" width="${TILE - 6}" height="${TILE - 6}" rx="4"/>${r.ap ? `<text x="${p.x * TILE + TILE - 7}" y="${p.y * TILE + 15}">${r.ap}</text>` : ''}</g>`;
+            }
+        }
+        else if (g && (g.radius || g.place)) {
+            for (let y = 0; y < s.h; y++)
+                for (let x = 0; x < s.w; x++) {
+                    if (s.tiles[y][x] === '#')
+                        continue;
+                    if (attackInfo(s, selected, { x, y }).ok)
+                        marks += `<rect class="aoe-ok" data-tile="${x},${y}" x="${x * TILE + 3}" y="${y * TILE + 3}" width="${TILE - 6}" height="${TILE - 6}" rx="4"/>`;
+                }
+        }
+        else if (g) {
+            const x0 = Math.max(0, s.player.x - g.range), y0 = Math.max(0, s.player.y - g.range);
+            const x1 = Math.min(s.w - 1, s.player.x + g.range), y1 = Math.min(s.h - 1, s.player.y + g.range);
+            marks += `<rect class="range-ring" x="${x0 * TILE}" y="${y0 * TILE}" width="${(x1 - x0 + 1) * TILE}" height="${(y1 - y0 + 1) * TILE}" rx="10"/>`;
+        }
+    }
+    // View cones from everyone who has a shot on you.
+    let cones = '';
+    if (s.phase === 'player') {
+        for (const e of living(s)) {
+            const p = s.pos[e.uid];
+            const r = enemyReach(e.defId);
+            if (r.range > 1 && dist(p, s.player) <= r.range && lineOfSight(s, p, s.player))
+                cones += cone(p, s.player);
+        }
+    }
+    // Blocks, shadow and people row by row, back to front, so people stand in front of what's behind them.
+    let scene = '';
+    for (let y = 0; y < s.h; y++) {
+        scene += blocks(s, y, pal) + fogRow(s, y, seen);
+        for (const e of living(s))
+            if (s.pos[e.uid].y === y)
+                scene += enemyToken(s, e, s.c.enemies.indexOf(e), seen[y][s.pos[e.uid].x]);
+        if (s.player.y === y)
+            scene += playerToken(s);
+    }
+    const now = performance.now();
+    // Negative delays keep animations in step across re-renders.
+    const fl = floats.map((f) => `<text class="tfloat ${f.cls}" style="animation-delay:-${Math.round(now - f.born)}ms" x="${f.x * TILE + TILE / 2}" y="${f.y * TILE - 4}">${esc(f.text)}</text>`).join('')
+        + fxs.map((f) => `<g class="fx" style="--fxd:-${Math.round(now - f.born)}ms;--fxl:${f.dur}ms">${f.svg}</g>`).join('');
+    // Invisible hit areas on top so every tile is clickable.
+    let hits = '';
+    for (let y = 0; y < s.h; y++)
+        for (let x = 0; x < s.w; x++)
+            if (s.tiles[y][x] !== '#')
+                hits += `<rect class="hitbox" data-tile="${x},${y}" x="${x * TILE}" y="${y * TILE}" width="${TILE}" height="${TILE}"/>`;
+    return `
+    <svg class="tgrid" viewBox="0 0 ${s.w * TILE} ${s.h * TILE}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Tactical map">
+      ${defs(pal)}<clipPath id="tclip"><rect width="${s.w * TILE}" height="${s.h * TILE}"/></clipPath><g clip-path="url(#tclip)">
+      <rect width="${s.w * TILE}" height="${s.h * TILE}" fill="${pal.wallFace}"/>
+      ${floor(s, pal)}${tags(room.tags ?? [], pal)}${bodies.map(bodySvg).join('')}${marks}${cones}<g id="t-preview"></g>
+      ${scene}${smoke}<g class="tlights">${lights(room.lights ?? [])}</g>${rain(s.w * TILE, s.h * TILE, pal)}</g>${fl}${hits}
+    </svg>`;
+}
+function intentText(e) {
+    const i = e.intent;
+    const dmg = (v) => Math.round(v * TACTICS_DMG() - 0.05);
+    if (i.kind === 'attack')
+        return `Attack ${dmg(i.value)}${i.hits && i.hits > 1 ? ` ×${i.hits}` : ''}`;
+    if (i.kind === 'charge')
+        return 'Aiming';
+    if (i.kind === 'shieldAlly')
+        return 'Reinforce';
+    return 'Move';
+}
+const TACTICS_DMG = () => ts?.c.foe?.dmg ?? 1;
+function enemyRow(s, e, i) {
+    const p = s.pos[e.uid];
+    const cover = coverAt(s, p, s.player);
+    const theirShot = enemyReach(e.defId).range >= dist(p, s.player) && (dist(p, s.player) <= 1 || lineOfSight(s, p, s.player)) ? `hits you ${enemyHitChance(s, e.defId, p)}%` : 'no shot on you';
+    const layers = e.layers.filter((l) => l.hp > 0).map((l) => `<span class="lay lay-${l.type}">${LAYER_ICON[l.type]} ${Math.ceil(l.hp)}</span>`).join('');
+    const info = selected !== null ? attackInfo(s, selected, p) : null;
+    const g = selected !== null ? gearOf(s, selected) : null;
+    const target = info && g && !g.radius && !g.place ? (info.ok ? `<b class="ok">${info.hit}% · ${info.cover === 'none' ? 'in the open' : `${info.cover} cover`}</b>` : `<span class="bad">${info.reason}</span>`) : '';
+    return `
+    <button class="trow ${info?.ok && !g?.radius && !g?.place ? 'targetable' : ''}" data-tile="${p.x},${p.y}">
+      <div class="trow-art"><div class="art-host" data-art="t${e.uid}" data-key="t${e.uid}-${e.defId}" data-def="${e.defId}" data-faction="${ENEMIES[e.defId].faction}"></div></div>
+      <div class="trow-body">
+        <div class="trow-head"><span class="trow-n">${i + 1}</span> ${esc(e.name)} <span class="trow-hp">${Math.ceil(e.core)}</span></div>
+        <div class="trow-lay">${layers}<span class="trow-intent">${intentText(e)}</span></div>
+        <div class="trow-meta">${target || `${cover === 'none' ? 'In the open' : `Behind ${cover} cover`} · ${theirShot}`}</div>
+      </div>
+    </button>`;
+}
+function gearButtons(s) {
+    return s.c.slots.map((slot, i) => {
+        const p = programOf(slot);
+        const g = gearOf(s, i);
+        const cooling = slot.cooldown > 0;
+        const can = s.phase === 'player' && !busy && !cooling && s.c.ram >= p.cost;
+        const type = p.kind === 'attack' ? p.layer ?? 'pierce' : p.kind;
+        const reach = g ? (g.place ? `throw ${g.range}` : g.radius ? `throw ${g.range} · blast` : g.range === 1 ? 'melee' : `range ${g.range}`) : 'self';
+        return `
+      <button class="tgear ${typeClass(p)} ${selected === i ? 'sel' : ''} ${cooling ? 'cooling' : ''}" data-slot="${i}" ${can ? '' : 'disabled'} title="${esc(p.text)}">
+        <span class="tg-key">${i + 1}</span>
+        <span class="tg-icon">${KIND_ICON[type] ?? '•'}</span>
+        <span class="tg-name">${esc(p.name)}</span>
+        <span class="tg-meta">${p.cost} AP · ${reach}${cooling ? ` · ↻${slot.cooldown}` : ''}</span>
+        <span class="tg-text">${esc(p.text)}</span>
+      </button>`;
+    }).join('');
+}
+function renderPicker() {
+    const done = cleared();
+    const areas = TACTICAL_AREAS.map((a) => {
+        const rooms = roomsIn(a.id).map((r) => {
+            const foes = r.enemies.map((id) => ENEMIES[id].name);
+            const counts = [...new Set(foes)].map((n) => `${foes.filter((f) => f === n).length > 1 ? `${foes.filter((f) => f === n).length}× ` : ''}${n}`).join(', ');
+            return `
+        <button class="troom ${r.boss ? 'boss' : ''} ${done.has(r.id) ? 'done' : ''}" data-room="${r.id}">
+          <span class="troom-name">${esc(r.name)}${r.boss ? ' <em>BOSS</em>' : ''}${done.has(r.id) ? ' <i>✓</i>' : ''}</span>
+          <span class="troom-foes">${esc(counts)}</span>
+          <span class="troom-blurb">${esc(r.blurb)}</span>
+        </button>`;
+        }).join('');
+        return `
+      <section class="tarea tarea-${a.id}">
+        <header><h3>${esc(a.name)}</h3><span>${a.id === 'tenement' ? 'Starter gear' : 'Mid-game gear'}</span></header>
+        <p>${esc(a.blurb)}</p>
+        <div class="troom-grid">${rooms}</div>
+      </section>`;
+    }).join('');
+    return `
+    <div class="tactics tpicker">
+      <header class="t-top">
+        <button class="link t-quit" data-action="t-quit">← Title</button>
+        <div class="t-title"><b>STREET TACTICS</b><span>Prototype. You fight with your current street kit and body. Nothing is won or lost.</span></div>
+      </header>
+      <div class="tpicker-body">${areas}</div>
+    </div>`;
+}
+const nextRoom = (id) => {
+    const r = TACTICAL_ROOMS[id];
+    const list = roomsIn(r.area);
+    return list[list.indexOf(r) + 1] ?? null;
+};
+function renderTactics() {
+    if (picking || !ts)
+        return renderPicker();
+    const s = ts;
+    const room = TACTICAL_ROOMS[s.roomId];
+    const hpPct = Math.max(0, (s.c.integrity / s.c.integrityMax) * 100);
+    const pips = Array.from({ length: Math.max(s.c.ramPerTurn, s.c.ram) }, (_, i) => `<span class="ap-pip ${i < s.c.ram ? 'on' : ''}"></span>`).join('');
+    const moveNote = s.moveLeft ? ` · ${s.moveLeft} free step${s.moveLeft > 1 ? 's' : ''}` : '';
+    const help = selected === null
+        ? 'Click a lit tile to move (number = AP). Pick gear, then a target.'
+        : gearOf(s, selected)?.radius || gearOf(s, selected)?.place ? 'Click a lit tile to throw. Esc to cancel.' : 'Click an enemy in range. Esc to cancel.';
+    const end = s.phase === 'won' || s.phase === 'lost' ? `
+    <div class="t-end ${s.phase}">
+      <div class="t-end-card">
+        <h2>${s.phase === 'won' ? 'ROOM CLEAR' : 'FLATLINED'}</h2>
+        <p>${s.phase === 'won' ? `Cleared in ${s.round} rounds with ${s.c.integrity}/${s.c.integrityMax} HP left.` : `Down in round ${s.round}. Cover cuts their hit chance hard: crates −${TACTICS.halfCover}%, walls and pillars −${TACTICS.fullCover}%.`}</p>
+        ${s.phase === 'won' && nextRoom(s.roomId) ? `<button class="primary" data-action="t-next">NEXT: ${esc(nextRoom(s.roomId).name.toUpperCase())}</button><button class="secondary small" data-action="t-again">Fight again</button>` : `<button class="primary" data-action="t-again">FIGHT AGAIN</button>`}
+        <button class="link" data-action="t-rooms">All rooms</button>
+      </div>
+    </div>` : '';
+    return `
+    <div class="tactics">
+      <header class="t-top">
+        <button class="link t-quit" data-action="t-rooms">← Rooms</button>
+        <div class="t-title"><b>${esc(room.name)}</b><span>${esc(room.blurb)}</span></div>
+        <div class="t-round">ROUND ${s.round}${s.phase === 'enemy' ? ' · ENEMY TURN' : ''}</div>
+      </header>
+      <div class="t-main">
+        <div class="t-map">${gridSvg(s)}</div>
+        <aside class="t-side">
+          <div class="t-me">
+            <div class="t-hp"><span>HP</span><div class="bar"><i style="width:${hpPct}%"></i></div><b>${s.c.integrity}/${s.c.integrityMax}</b>${s.c.block ? `<em>⛨ ${s.c.block}</em>` : ''}</div>
+            <div class="t-ap"><span>AP</span>${pips}<small>${s.c.ram} left${moveNote}</small></div>
+            <p class="t-help" id="t-help">${help}</p>
+          </div>
+          <div class="player t-gear">${gearButtons(s)}</div>
+          <button class="primary t-endturn" data-action="end" ${s.phase === 'player' && !busy ? '' : 'disabled'}>END TURN <kbd>⏎</kbd></button>
+          <h4 class="t-h">HOSTILES</h4>
+          <div class="t-enemies">${living(s).map((e) => enemyRow(s, e, s.c.enemies.indexOf(e))).join('')}</div>
+          <div class="t-log">${s.log.slice(-5).reverse().map((l) => `<div>${esc(l)}</div>`).join('')}</div>
+        </aside>
+      </div>
+      ${end}
+    </div>`;
+}
+// ---------- Hover preview (desktop) ----------
+function preview(k) {
+    const s = ts;
+    const host = document.getElementById('t-preview');
+    const help = document.getElementById('t-help');
+    if (!s || !host || busy || s.phase !== 'player')
+        return;
+    host.innerHTML = '';
+    if (!k)
+        return;
+    const p = at(k);
+    if (selected === null) {
+        const r = reachable(s).get(k);
+        if (!r)
+            return;
+        const path = pathTo(s, p);
+        const pts = [s.player, ...path].map((q) => `${q.x * TILE + TILE / 2},${q.y * TILE + TILE / 2}`).join(' ');
+        const shooters = living(s).filter((e) => {
+            const ep = s.pos[e.uid];
+            const rr = enemyReach(e.defId);
+            return rr.range > 1 && dist(ep, p) <= rr.range && lineOfSight(s, ep, p);
+        });
+        const covered = shooters.filter((e) => coverAt(s, p, s.pos[e.uid]) !== 'none').length;
+        host.innerHTML = `<polyline class="t-path" points="${pts}"/>`;
+        if (help)
+            help.textContent = `Move ${r.steps} tile${r.steps > 1 ? 's' : ''} · ${r.ap} AP · ${shooters.length ? `${shooters.length} can see you there, ${covered} through cover` : 'out of sight'}`;
+        return;
+    }
+    const g = gearOf(s, selected);
+    if (g && (g.radius || g.place)) {
+        const info = attackInfo(s, selected, p);
+        if (!info.ok)
+            return;
+        host.innerHTML = `<rect class="t-blast" x="${(p.x - (g.radius ?? 1)) * TILE}" y="${(p.y - (g.radius ?? 1)) * TILE}" width="${((g.radius ?? 1) * 2 + 1) * TILE}" height="${((g.radius ?? 1) * 2 + 1) * TILE}" rx="8"/>`;
+        const caught = living(s).filter((e) => dist(s.pos[e.uid], p) <= (g.radius ?? 1)).length;
+        if (help)
+            help.textContent = g.place ? 'Smoke blocks sight through it for 2 enemy turns.' : `Catches ${caught} enem${caught === 1 ? 'y' : 'ies'}.`;
+        return;
+    }
+    const e = living(s).find((x) => s.pos[x.uid].x === p.x && s.pos[x.uid].y === p.y);
+    if (!e)
+        return;
+    const info = attackInfo(s, selected, p);
+    host.innerHTML = `<line class="t-aimline ${info.ok ? '' : 'bad'}" x1="${s.player.x * TILE + TILE / 2}" y1="${s.player.y * TILE + TILE / 2}" x2="${p.x * TILE + TILE / 2}" y2="${p.y * TILE + TILE / 2}"/>`;
+    if (help)
+        help.textContent = info.ok ? `${info.hit}% to hit ${e.name} · ${info.distance} tiles · ${info.cover === 'none' ? 'no cover' : `${info.cover} cover`}` : `${e.name}: ${info.reason}`;
+}
+// ---------- Actions ----------
+async function onTile(k) {
+    const s = ts;
+    if (!s || busy || s.phase !== 'player')
+        return;
+    const p = at(k);
+    if (selected === null) {
+        const { state, path } = moveTo(s, p);
+        if (!path.length)
+            return;
+        busy = true;
+        // Walk it tile by tile.
+        let walk = structuredClone(s);
+        for (const step of path) {
+            walk.player = step;
+            ts = walk;
+            sfx.tap();
+            rerender();
+            await sleep(70);
+            walk = structuredClone(walk);
+        }
+        ts = state;
+        busy = false;
+        rerender();
+        return;
+    }
+    const slot = selected;
+    const g = gearOf(s, slot);
+    const info = attackInfo(s, slot, p);
+    if (!g || !info.ok)
+        return;
+    const enemy = living(s).find((e) => s.pos[e.uid].x === p.x && s.pos[e.uid].y === p.y);
+    if (!g.radius && !g.place && !enemy)
+        return;
+    busy = true;
+    selected = null;
+    let timing = 'good';
+    const prog = programOf(s.c.slots[slot]);
+    if (!g.radius && !g.place && !autoTiming()) {
+        const def = ENEMIES[enemy.defId];
+        rerender();
+        timing = await runExploit({ window: def.window, sweepMs: def.sweepMs, title: `${prog.name} → ${enemy.name} (${info.hit}%)`, hint: 'AIM: perfect = sure hit and extra damage · miss = harder shot' });
+    }
+    const r = useGear(s, slot, p, timing);
+    if (g.place)
+        blast(p, g.radius ?? 1, true);
+    else if (g.radius)
+        blast(p, g.radius);
+    else if (g.range === 1)
+        slash(p);
+    else
+        shot(s.player, p, r.hit !== false);
+    if (r.hit === false) {
+        sfx.miss();
+        float(p, 'MISS', 'f-miss');
+    }
+    else if (timing === 'perfect')
+        sfx.perfect();
+    else
+        sfx.hit();
+    diffFloats(s, r.state);
+    ts = r.state;
+    busy = false;
+    if (ts.phase === 'won') {
+        sfx.win();
+        markCleared(ts.roomId);
+    }
+    rerender();
+}
+async function onSlot(i) {
+    const s = ts;
+    if (!s || busy || s.phase !== 'player')
+        return;
+    const g = gearOf(s, i);
+    if (!g) {
+        // Self-use gear fires straight away.
+        const r = useGear(s, i, null, 'good');
+        if (r.state === s)
+            return;
+        sfx.shield();
+        diffFloats(s, r.state);
+        ts = r.state;
+        selected = null;
+        rerender();
+        return;
+    }
+    selected = selected === i ? null : i;
+    sfx.tap();
+    rerender();
+}
+async function enemyPhase() {
+    if (!ts || busy || ts.phase !== 'player')
+        return;
+    busy = true;
+    selected = null;
+    ts = endTurn(ts);
+    rerender();
+    await sleep(250);
+    for (const e of living(ts)) {
+        if (ts.phase !== 'enemy')
+            break;
+        const before = ts;
+        const r = enemyAct(ts, e.uid);
+        // Animate the walk.
+        if (r.path.length) {
+            let walk = structuredClone(before);
+            for (const step of r.path) {
+                walk = structuredClone(walk);
+                walk.pos[e.uid] = step;
+                ts = walk;
+                rerender();
+                await sleep(85);
+            }
+        }
+        ts = r.state;
+        rerender();
+        if (ts.pending) {
+            const landed = ts.pending.hits.filter(Boolean).length;
+            const timings = [];
+            const def = ENEMIES[e.defId];
+            for (let h = 0; h < landed; h++) {
+                timings.push(autoTiming() ? 'good' : await runBlock({ packetMs: def.packetMs * (h > 0 ? 0.85 : 1), title: `${e.name} ${enemyReach(e.defId).range === 1 ? 'swings' : 'fires'}${landed > 1 ? ` (${h + 1}/${landed})` : ''}`, hint: 'DODGE: tap as the shot reaches the ring' }));
+            }
+            const melee = enemyReach(e.defId).range === 1;
+            for (const h of ts.pending.hits) {
+                if (melee)
+                    slash(ts.player, '#ff8a9c');
+                else
+                    shot(ts.pos[e.uid], ts.player, h, '#ff9a7a');
+                rerender();
+                await sleep(110);
+            }
+            const prev = ts;
+            const res = resolveAttack(ts, timings);
+            if (!landed) {
+                float(ts.player, 'MISS', 'f-miss');
+                sfx.good();
+            }
+            else
+                sfx.hit();
+            diffFloats(prev, res.state);
+            ts = res.state;
+            rerender();
+            await sleep(350);
+        }
+        else
+            await sleep(200);
+    }
+    if (ts.phase === 'enemy') {
+        const prev = ts;
+        ts = beginPlayerTurn(ts).state;
+        diffFloats(prev, ts);
+    }
+    busy = false;
+    if (ts.phase === 'lost')
+        sfx.lose();
+    if (ts.phase === 'won') {
+        sfx.win();
+        markCleared(ts.roomId);
+    }
+    rerender();
+}
+/** Click handling for the tactics screen. Returns true if it handled the click. */
+function tacticsClick(target, quit) {
+    if (!ts && !picking)
+        return false;
+    const el = target.closest('[data-slot],[data-tile],[data-action],[data-room]');
+    if (picking || !ts) {
+        const d = el?.dataset;
+        if (d?.room) {
+            sfx.tap();
+            startRoom(d.room);
+            rerender();
+        }
+        else if (d?.action === 't-quit') {
+            leaveTactics();
+            quit();
+        }
+        return true;
+    }
+    if (!el) {
+        if (selected !== null) {
+            selected = null;
+            rerender();
+        }
+        return true;
+    }
+    const d = el.dataset;
+    if (d.action === 't-quit') {
+        leaveTactics();
+        quit();
+        return true;
+    }
+    if (d.action === 't-again') {
+        restart();
+        rerender();
+        return true;
+    }
+    if (d.action === 't-next') {
+        const n = nextRoom(ts.roomId);
+        if (n)
+            startRoom(n.id);
+        rerender();
+        return true;
+    }
+    if (d.action === 't-rooms') {
+        ts = null;
+        picking = true;
+        rerender();
+        return true;
+    }
+    if (d.action === 'end') {
+        void enemyPhase();
+        return true;
+    }
+    if (d.slot !== undefined) {
+        void onSlot(Number(d.slot));
+        return true;
+    }
+    if (d.tile) {
+        void onTile(d.tile);
+        return true;
+    }
+    return false;
+}
+function tacticsHover(target) {
+    if (!ts)
+        return;
+    const el = target?.closest('[data-tile]');
+    preview(el ? el.dataset.tile ?? null : null);
+}
+/** Esc cancels gear selection. */
+function tacticsEscape() {
+    if (!ts || selected === null)
+        return false;
+    selected = null;
+    rerender();
+    return true;
+}
+
+__m["ui/tactics"] = { tacticsActive, startTactics, leaveTactics, renderTactics, tacticsClick, tacticsHover, tacticsEscape };
 })();
 // ---- ui/main ----
 (() => {
@@ -6633,7 +8942,7 @@ const { canPlay, effectiveness, endTurn, living, needsExploit, needsTarget, pend
 const { ENEMIES, MODS, PROGRAMS, SECTORS } = __m["engine/content"];
 const { programDef } = __m["engine/programs"];
 const { MIDDLE_ROWS } = __m["engine/map"];
-const { buy, chooseEvent, closeLoadout, currentNode, dismissNotice, equip, finishFight, goDeeper, hackTerminal, jackOut, leaveShop, moveTo, newRun, openLoadout, rest, skipTerminal, startFight, stay, takeLoot, unequip } = __m["engine/run"];
+const { buy, chooseEvent, closeLoadout, currentNode, dismissNotice, equip, finishFight, goDeeper, hackTerminal, jackOut, leaveShop, moveTo, newRun, diveLevel, openLoadout, rest, skipTerminal, startFight, stay, takeLoot, unequip } = __m["engine/run"];
 const { AI_SHAPES, ICE, RUNNERS, STREET, rainFigure } = __m["ui/art"];
 const { STREET_FACES } = __m["ui/streetfaces"];
 const { installKeys } = __m["ui/keys"];
@@ -6642,8 +8951,9 @@ const { buzz, installAudioUnlock, onAudioReady, setSound, sfx, unlockAudio } = _
 const { renderSong, setMusicEnabled, update: updateMusic } = __m["ui/music"];
 const { runBlock, runExploit } = __m["ui/timing"];
 const { renderEnd, renderEvent, renderJackout, renderMap, renderNotice, renderRest, renderSectorClear, renderShop, renderTerminal, runHud } = __m["ui/screens"];
-const { renderArms, renderDealer, renderDeck, renderFence, renderFixer, renderGear, renderHub, renderJobs, renderMarket, renderReport, renderRipperdoc, renderSkills } = __m["ui/safehouse"];
-const { applyOutcome, exportSave, importSave, levelInfo, buyGear, buyRig, useRig, kitAdd, kitRemove, sellIntel, buyCyberware, buyArmor, buyComponent, toggleComponent, upgradeGear, wearArmor, buyDeck, buyProgram, deckAdd, deckRemove, learnSkill, migrate, runSetup, sellData, toggleCyberware, upgradeProgram, useDeck } = __m["engine/profile"];
+const { renderArms, renderDive, renderDealer, renderDeck, renderFence, renderFixer, renderGear, renderHub, renderJobs, renderMarket, renderReport, renderRipperdoc, renderSkills } = __m["ui/safehouse"];
+const { applyOutcome, diveSetup, exportSave, importSave, levelInfo, buyGear, buyRig, useRig, kitAdd, kitRemove, sellIntel, buyCyberware, buyArmor, buyComponent, toggleComponent, upgradeGear, wearArmor, buyDeck, buyProgram, deckAdd, deckRemove, learnSkill, migrate, runSetup, sellData, toggleCyberware, upgradeProgram, useDeck } = __m["engine/profile"];
+const { renderTactics, startTactics, tacticsClick, tacticsHover } = __m["ui/tactics"];
 const { EFF_LABEL, esc, LAYER_ICON, modHtml, moduleHtml, setWorld, show, T } = __m["ui/view"];
 const app = document.getElementById('app');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -6841,7 +9151,7 @@ function renderCombat(s) {
         <span class="val">${s.trace}%</span>
       </div>
       <div class="meta">
-        <span>${run.hacking ? 'TERMINAL HACK' : `${T().sector.toUpperCase()} ${run.sector + 1}/${run.sectorIds.length} · ${currentNode(run).type.toUpperCase()}`} · TURN ${s.turn}</span>
+        <span>${run.hacking ? 'TERMINAL HACK' : `${run.dive ? `OLD NET · LEVEL ${diveLevel(run)}` : `${T().sector.toUpperCase()} ${run.sector + 1}/${run.sectorIds.length}`} · ${currentNode(run).type.toUpperCase()}`} · TURN ${s.turn}</span>
         <button class="icon-btn" data-action="help" aria-label="How to play">?</button>
       </div>
     </header>
@@ -6871,7 +9181,7 @@ function renderTitle() {
     <div class="title-screen">
       <div class="title-art">
         <h1 class="logo" data-text="NETRUNNER">NETRUNNER</h1>
-        <div class="tagline">prototype · v0.17.2</div>
+        <div class="tagline">prototype · v0.21</div>
       </div>
       <p class="pitch">Jack in. Crack the ICE. Get out before they trace you.</p>
       ${profile.runs ? `<p class="stash-line">¤ ${profile.credits} · ▤ ${profile.data} · ${profile.contractsDone} contracts done</p>` : ''}
@@ -6887,6 +9197,7 @@ function renderTitle() {
         <button class="link" data-action="help">How to play</button>
         <button class="link" data-action="save-code">Save code</button>
       </div>
+      <button class="secondary small t-proto" data-action="tactics">STREET TACTICS <span>prototype</span></button>
     </div>`;
 }
 function renderSavePanel() {
@@ -7021,6 +9332,8 @@ function renderSafehouse() {
         return renderFence(profile);
     if (safeView === 'arms')
         return renderArms(profile);
+    if (safeView === 'dive')
+        return renderDive(profile);
     if (safeView === 'gear')
         return renderGear(profile);
     if (safeView === 'dealer')
@@ -7041,10 +9354,10 @@ function renderSafehouse() {
 }
 function render() {
     // Street runs use street words and look; terminal hacks inside them switch back to the net.
-    const world = screen === 'run' ? (combat?.world ?? run.world ?? 'net') : 'net';
+    const world = screen === 'tactics' ? 'street' : screen === 'run' ? (combat?.world ?? run.world ?? 'net') : 'net';
     setWorld(world);
     document.body.classList.toggle('street', world === 'street');
-    const html = screen === 'title' ? renderTitle() : screen === 'safehouse' ? renderSafehouse() : renderRun();
+    const html = screen === 'title' ? renderTitle() : screen === 'tactics' ? renderTactics() : screen === 'safehouse' ? renderSafehouse() : renderRun();
     const cls = `screen-${screen === 'run' ? run.phase : screen}`;
     const changed = app.className.split(' ')[0] !== cls;
     app.className = cls;
@@ -7245,8 +9558,8 @@ function go(nodeId) {
     else
         render();
 }
-function startRun(contractId) {
-    const setup = runSetup(profile, contractId);
+function startRun(contractId, diveStart = 1) {
+    const setup = contractId === 'dive' ? diveSetup(profile, diveStart) : runSetup(profile, contractId);
     if (!setup)
         return;
     run = newRun(Date.now() % 2 ** 31, setup);
@@ -7263,8 +9576,12 @@ function startRun(contractId) {
         n.encounter = ['corruptor'];
     }
     screen = 'run';
-    banner(`${run.world === 'street' ? 'SITE' : 'SECTOR'} ${run.sector + 1}`, SECTORS[run.sectorIds[run.sector]].name);
+    banner(levelLabel(), SECTORS[run.sectorIds[run.sector]].name);
     render();
+}
+/** "SECTOR 2", "SITE 1", or "LEVEL 7" on a dive. */
+function levelLabel() {
+    return run.dive ? `LEVEL ${diveLevel(run)}` : `${run.world === 'street' ? 'SITE' : 'SECTOR'} ${run.sector + 1}`;
 }
 async function afterAction() {
     if (!combat || (combat.phase !== 'won' && combat.phase !== 'lost'))
@@ -7371,7 +9688,12 @@ function onEnemy(uid) {
 }
 app.addEventListener('click', (ev) => {
     const t = ev.target;
-    const el = t.closest('[data-slot],[data-enemy],[data-action],[data-loot],[data-equip],[data-unequip],[data-node],[data-choice],[data-rest],[data-buy],[data-sh],[data-contract],[data-sell],[data-dealer],[data-ware],[data-buyware],[data-deckin],[data-deckout],[data-buydeck],[data-usedeck],[data-upgrade],[data-learn],[data-sellintel],[data-arms],[data-kitin],[data-kitout],[data-buycomp],[data-comp],[data-buyarmor],[data-armor],[data-gearup],[data-buyrig],[data-userig]');
+    if (screen === 'tactics') {
+        unlockAudio();
+        tacticsClick(t, () => { screen = 'title'; render(); });
+        return;
+    }
+    const el = t.closest('[data-slot],[data-enemy],[data-action],[data-loot],[data-equip],[data-unequip],[data-node],[data-choice],[data-rest],[data-buy],[data-sh],[data-contract],[data-sell],[data-dealer],[data-ware],[data-buyware],[data-deckin],[data-deckout],[data-buydeck],[data-usedeck],[data-upgrade],[data-learn],[data-sellintel],[data-arms],[data-kitin],[data-kitout],[data-buycomp],[data-comp],[data-buyarmor],[data-armor],[data-gearup],[data-buyrig],[data-userig],[data-dive]');
     if (!el) {
         if (selected !== null) {
             selected = null;
@@ -7423,6 +9745,10 @@ app.addEventListener('click', (ev) => {
     if (d.contract) {
         sfx.win();
         return startRun(d.contract);
+    }
+    if (d.dive) {
+        sfx.win();
+        return startRun('dive', Number(d.dive));
     }
     if (d.sell) {
         const before = profile.credits;
@@ -7614,7 +9940,7 @@ app.addEventListener('click', (ev) => {
         case 'deeper':
             sfx.win();
             run = goDeeper(run);
-            banner(`${run.world === 'street' ? 'SITE' : 'SECTOR'} ${run.sector + 1}`, SECTORS[run.sectorIds[run.sector]].name);
+            banner(levelLabel(), SECTORS[run.sectorIds[run.sector]].name);
             return render();
         case 'jackout':
             sfx.win();
@@ -7623,6 +9949,11 @@ app.addEventListener('click', (ev) => {
             return render();
         case 'title':
             screen = 'title';
+            return render();
+        case 'tactics':
+            sfx.tap();
+            startTactics(profile, { render, autoTiming: () => settings.autoTiming });
+            screen = 'tactics';
             return render();
         case 'help':
             showHelp = true;
@@ -7668,6 +9999,10 @@ onAudioReady(syncMusic);
 const rain = document.getElementById('rain');
 startRain(rain, () => (rogueFight() ? 1 : screen === 'run' ? (combat ? combat.trace : run.trace) / 100 : 0));
 render();
+app.addEventListener('mouseover', (ev) => { if (screen === 'tactics')
+    tacticsHover(ev.target); });
+app.addEventListener('mouseleave', () => { if (screen === 'tactics')
+    tacticsHover(null); });
 
 __m["ui/main"] = {  };
 })();
