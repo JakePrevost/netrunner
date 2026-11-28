@@ -722,10 +722,27 @@ body.street .timing-overlay, body.street .banner { --green: #ffb13b; }
   #app.screen-combat > .enemies { grid-area: enemies; padding: 20px 0; }
   #app.screen-combat > .log { grid-area: log; font-size: 13px; min-height: 90px; }
   #app.screen-combat > .player { grid-area: player; margin: -16px -28px -16px 0; padding: 24px; border-top: 0; border-left: 1px solid var(--line); justify-content: flex-end; overflow: auto; }
+  /* Bigger enemy art when there's room: fewer enemies, taller art. */
+  .enemies .glyph { height: 150px; }
+  .enemies.count-1 .glyph { height: 240px; }
+  .enemies.count-2 .glyph { height: 190px; }
   .enemies.count-1 { grid-template-columns: minmax(0, 300px); }
   .enemies.count-2 { grid-template-columns: repeat(2, minmax(0, 300px)); justify-content: center; }
   .enemies.count-3 { grid-template-columns: repeat(3, minmax(0, 280px)); justify-content: center; }
-  .timing-card { transform: scale(1.15); }
+}
+
+/* ---------- Big screens: scale the whole interface up ----------
+   Phones and small laptops never match these, so mobile is untouched. The
+   app is zoomed and its height divided by the same amount so it still fits. */
+:root { --ui: 1; }
+@media (min-width: 1400px) and (min-height: 760px) { :root { --ui: 1.2; } }
+@media (min-width: 1800px) and (min-height: 860px) { :root { --ui: 1.35; } }
+@media (min-width: 2400px) and (min-height: 1250px) { :root { --ui: 1.7; } }
+@supports (zoom: 1) {
+  @media (min-width: 1400px) and (min-height: 760px) {
+    #app { zoom: var(--ui); height: calc(100dvh / var(--ui)); }
+    .timing-card, .banner-title, .banner-sub, .float { zoom: var(--ui); }
+  }
 }
 
 </style>
@@ -2651,7 +2668,7 @@ function contractMods(contract) {
     return combineMods(base, contract.modifiers.map((id) => MODIFIERS[id].effects));
 }
 /** Integrity (net) / Health (street) every run starts with, before perks. */
-const START_INTEGRITY = 30;
+const START_INTEGRITY = 20;
 const REPAIR_AFTER_FIGHT = 3;
 /** Heat removed by cracking a security terminal. */
 const HACK_HEAT_DROP = 25;
@@ -2672,7 +2689,7 @@ function newRun(seed, setup = DEFAULT_SETUP()) {
     // Your deck for terminal hacks on street jobs: net implants and components apply, net skills don't.
     const netPerks = setup.net && netDeck ? perksFrom('net', { cyberware: setup.cyberware, deck: netDeck.id, components: setup.net.components }) : null;
     const mods = contractMods(setup.contract);
-    const integrityMax = Math.max(15, START_INTEGRITY + perks.maxIntegrity + mods.maxIntegrity);
+    const integrityMax = Math.max(10, START_INTEGRITY + perks.maxIntegrity + mods.maxIntegrity);
     const secret = setup.contract.secret && SECRET_MODIFIERS.length ? new Rng({ rng: seed ^ 0x5ec2e7 }).pick(SECRET_MODIFIERS) : null;
     const body = world === 'street' ? rig : { name: deck.name, slots: deck.slots, ramPerTurn: deck.ramPerTurn, ramMax: deck.ramMax };
     const loadout = {
@@ -6843,7 +6860,7 @@ function renderTitle() {
     <div class="title-screen">
       <div class="title-art">
         <h1 class="logo" data-text="NETRUNNER">NETRUNNER</h1>
-        <div class="tagline">prototype · v0.17</div>
+        <div class="tagline">prototype · v0.17.1</div>
       </div>
       <p class="pitch">Jack in. Crack the ICE. Get out before they trace you.</p>
       ${profile.runs ? `<p class="stash-line">¤ ${profile.credits} · ▤ ${profile.data} · ${profile.contractsDone} contracts done</p>` : ''}
@@ -7087,8 +7104,11 @@ function floatText(target, text, cls) {
     const el = document.createElement('div');
     el.className = `float ${cls}`;
     el.textContent = text;
-    el.style.left = `${r.left + r.width / 2}px`;
-    el.style.top = `${r.top + r.height * 0.4 - n * 24}px`;
+    // Big screens zoom the float text (see --ui in style.css); positions are divided back so it lands on target.
+    const z = Number(getComputedStyle(document.documentElement).getPropertyValue('--ui')) || 1;
+    const zoomed = CSS.supports('zoom', '1') && z !== 1;
+    el.style.left = `${(r.left + r.width / 2) / (zoomed ? z : 1)}px`;
+    el.style.top = `${(r.top + r.height * 0.4 - n * 24) / (zoomed ? z : 1)}px`;
     el.style.animationDelay = `${n * 220}ms`;
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 900);
